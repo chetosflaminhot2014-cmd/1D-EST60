@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1°D | Escuela Secundaria Técnica 60</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="header">
+    <div class="header-content">
+
+```
+    <a href="#inicio" class="brand">
+        <img src="logo.png" alt="Logo de la Escuela Secundaria Técnica 60">
+        <div>
+            <strong>1°D</strong>
+            <span>EST No. 60</span>
+        </div>
+    </a>
+
+    <nav class="nav" id="nav">
+        <a href="#inicio">Inicio</a>
+        <a href="#avisos">Avisos</a>
+        <a href="#tareas">Tareas</a>
+        <a href="#horario">Horario</a>
+        <a href="#calendario">Calendario</a>
+        <a href="#recursos">Recursos</a>
+    </nav>
+
+    <button class="menu-button" id="menuButton">☰</button>
+
+</div>
+```
+
+</header>
+
+<main>
+
+```
+<!-- INICIO -->
+<section id="inicio" class="hero">
+    <div class="hero-content">
+
+        <span class="hero-label">PÁGINA ACTIVA</span>
+
+        <h1>
+            Bienvenidos a
+            <span>1°D</span>
+        </h1>
+
+        <p>
+            Espacio de comunicación y organización para los alumnos
+            de primer grado, grupo D, de la Escuela Secundaria Técnica No. 60.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="#avisos" class="btn btn-primary">Ver avisos</a>
+            <a href="#tareas" class="btn btn-secondary">Ver tareas</a>
+        </div>
+
+        <div class="last-update">
+            Última actualización:
+            <strong id="lastUpdate">Cargando...</strong>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- AVISOS -->
+<section id="avisos" class="section">
+    <div class="section-number">01</div>
+
+    <div class="section-heading">
+        <span>COMUNICACIÓN</span>
+        <h2>Avisos</h2>
+        <p>Información importante para el grupo.</p>
+    </div>
+
+    <div class="notice-card">
+
+        <div class="notice-icon">!</div>
+
+        <div class="notice-content">
+            <span class="notice-tag">AVISO GENERAL</span>
+
+            <h3>Información del grupo</h3>
+
+            <p>
+                En este apartado se publicarán avisos importantes,
+                cambios de actividades, información escolar y comunicados
+                para el grupo 1°D.
+            </p>
+        </div>
+
+        <span class="notice-date">01</span>
+
+    </div>
+</section>
+
+
+<!-- TAREAS -->
+<section id="tareas" class="section dark-section">
+    <div class="section-number">02</div>
+
+    <div class="section-heading light">
+        <span>ORGANIZACIÓN</span>
+        <h2>Tareas</h2>
+        <p>Actividades pendientes y próximas entregas.</p>
+    </div>
+
+    <div class="task-card">
+
+        <div class="task-status">
+            <span class="status-dot"></span>
+            <span>ACTUALMENTE</span>
+        </div>
+
+        <h3>Ninguna por el momento</h3>
+
+        <p>
+            Cuando exista una tarea pendiente se mostrará aquí
+            junto con su materia y fecha de entrega.
+        </p>
+
+    </div>
+</section>
+
+
+<!-- HORARIO -->
+<section id="horario" class="section">
+    <div class="section-number">03</div>
+
+    <div class="section-heading">
+        <span>ORGANIZACIÓN ESCOLAR</span>
+        <h2>Horario</h2>
+        <p>Horario de clases correspondiente al grupo 1°D.</p>
+    </div>
+
+    <div class="schedule-container">
+
+        <div class="schedule-info">
+            <span>GRUPO</span>
+            <strong>1°D</strong>
+
+            <span>ESCUELA</span>
+            <strong>EST No. 60</strong>
+
+            <span>JORNADA</span>
+            <strong>7:00 A.M. — 1:10 P.M.</strong>
+        </div>
+
+
+        <div class="schedule-table-wrapper">
+
+            <table class="schedule-table">
+
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Lunes</th>
+                        <th>Martes</th>
+                        <th>Miércoles</th>
+                        <th>Jueves</th>
+                        <th>Viernes</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>7:00 — 7:45</td>
+
+                        <td>
+                            <span class="subject-dot blue-dot"></span>
+                            Educación Física
+                        </td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Español
+                        </td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Inglés
+                        </td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Español
+                        </td>
+
+                        <td>
+                            <span class="subject-dot red-dot"></span>
+                            Tecnología
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td>7:45 — 8:30</td>
+
+                        <td>
+                            <span class="subject-dot purple-dot"></span>
+                            Geografía
+                        </td>
+
+                        <td>
+                            <span class="subject-dot purple-dot"></span>
+                            Geografía
+                        </td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Español
+                        </td>
+
+                        <td>
+                            <span class="subject-dot cyan-dot"></span>
+                            Ciencias
+                        </td>
+
+                        <td>
+                            <span class="subject-dot red-dot"></span>
+                            Tecnología
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td>8:30 — 9:15</td>
+
+                        <td>
+                            <span class="subject-dot purple-dot"></span>
+                            Geografía
+                        </td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Inglés
+                        </td>
+
+                        <td>
+                            <span class="subject-dot blue-dot"></span>
+                            Educación Física
+                        </td>
+
+                        <td>
+                            <span class="subject-dot red-dot"></span>
+                            Tecnología
+                        </td>
+
+                        <td>
+                            <span class="subject-dot purple-dot"></span>
+                            Geografía
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td>9:15 — 10:00</td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Español
+                        </td>
+
+                        <td>
+                            <span class="subject-dot pink-dot"></span>
+                            Artes
+                        </td>
+
+                        <td>
+                            <span class="subject-dot math-dot"></span>
+                            Matemáticas
+                        </td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Español
+                        </td>
+
+                        <td>
+                            <span class="subject-dot brown-dot"></span>
+                            Historia
+                        </td>
+                    </tr>
+
+
+                    <tr class="break-row">
+                        <td>10:00 — 10:20</td>
+
+                        <td>RECESO</td>
+                        <td>RECESO</td>
+                        <td>RECESO</td>
+                        <td>RECESO</td>
+                        <td>RECESO</td>
+                    </tr>
+
+
+                    <tr>
+                        <td>10:20 — 11:05</td>
+
+                        <td>
+                            <span class="subject-dot math-dot"></span>
+                            Matemáticas
+                        </td>
+
+                        <td>
+                            <span class="subject-dot red-dot"></span>
+                            Tecnología
+                        </td>
+
+                        <td>
+                            <span class="subject-dot cyan-dot"></span>
+                            Ciencias
+                        </td>
+
+                        <td>
+                            <span class="subject-dot pink-dot"></span>
+                            Artes
+                        </td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Español
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td>11:05 — 11:50</td>
+
+                        <td>
+                            <span class="subject-dot cyan-dot"></span>
+                            Ciencias (Biología)
+                        </td>
+
+                        <td>
+                            <span class="subject-dot red-dot"></span>
+                            Tecnología
+                        </td>
+
+                        <td>
+                            <span class="subject-dot cyan-dot"></span>
+                            Ciencias
+                        </td>
+
+                        <td>
+                            <span class="subject-dot math-dot"></span>
+                            Matemáticas
+                        </td>
+
+                        <td>
+                            <span class="subject-dot civica-dot"></span>
+                            Formación Cívica y Ética
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td>11:50 — 12:35</td>
+
+                        <td>
+                            <span class="subject-dot red-dot"></span>
+                            Tecnología
+                        </td>
+
+                        <td>
+                            <span class="subject-dot brown-dot"></span>
+                            Historia
+                        </td>
+
+                        <td>
+                            <span class="subject-dot gray-dot"></span>
+                            Tutoría
+                        </td>
+
+                        <td>
+                            <span class="subject-dot civica-dot"></span>
+                            Formación Cívica y Ética
+                        </td>
+
+                        <td>
+                            <span class="subject-dot green-dot"></span>
+                            Inglés
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td>12:35 — 1:10</td>
+
+                        <td>
+                            <span class="subject-dot red-dot"></span>
+                            Tecnología
+                        </td>
+
+                        <td>
+                            <span class="subject-dot math-dot"></span>
+                            Matemáticas
+                        </td>
+
+                        <td>
+                            <span class="subject-dot pink-dot"></span>
+                            Artes
+                        </td>
+
+                        <td>
+                            <span class="subject-dot orange-dot"></span>
+                            Integración Curricular
+                        </td>
+
+                        <td>
+                            <span class="subject-dot math-dot"></span>
+                            Matemáticas
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- CALENDARIO -->
+<section id="calendario" class="section dark-section">
+    <div class="section-number">04</div>
+
+    <div class="section-heading light">
+        <span>FECHAS IMPORTANTES</span>
+        <h2>Calendario</h2>
+        <p>Consulta eventos y fechas relevantes del grupo.</p>
+    </div>
+
+    <div class="calendar-grid">
+
+        <div class="calendar-card">
+            <span>01</span>
+            <strong>Próximamente</strong>
+            <p>Las fechas importantes aparecerán aquí.</p>
+        </div>
+
+        <div class="calendar-card">
+            <span>02</span>
+            <strong>Actividades</strong>
+            <p>Eventos y actividades escolares.</p>
+        </div>
+
+        <div class="calendar-card">
+            <span>03</span>
+            <strong>Entregas</strong>
+            <p>Fechas de entrega de trabajos.</p>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- RECURSOS -->
+<section id="recursos" class="section">
+    <div class="section-number">05</div>
+
+    <div class="section-heading">
+        <span>MATERIAL ESCOLAR</span>
+        <h2>Recursos</h2>
+        <p>Material útil para apoyar las actividades del grupo.</p>
+    </div>
+
+    <div class="resources-grid">
+
+        <a href="#" class="resource-card">
+            <div class="resource-number">01</div>
+            <div>
+                <strong>Classroom</strong>
+                <p>Acceso a las actividades digitales.</p>
+            </div>
+            <span>→</span>
+        </a>
+
+        <a href="#" class="resource-card">
+            <div class="resource-number">02</div>
+            <div>
+                <strong>Materiales</strong>
+                <p>Documentos y recursos para estudiar.</p>
+            </div>
+            <span>→</span>
+        </a>
+
+        <a href="#" class="resource-card">
+            <div class="resource-number">03</div>
+            <div>
+                <strong>Enlaces</strong>
+                <p>Enlaces importantes para el grupo.</p>
+            </div>
+            <span>→</span>
+        </a>
+
+    </div>
+</section>
+
+
+<!-- INFORMACIÓN -->
+<section class="info-section">
+
+    <div class="info-box">
+
+        <div>
+            <span>GRUPO</span>
+            <strong>1°D</strong>
+        </div>
+
+        <div>
+            <span>ESCUELA</span>
+            <strong>Escuela Secundaria Técnica No. 60</strong>
+        </div>
+
+        <div>
+            <span>DOCENTE</span>
+            <strong>Mtra. Nayelth Rodriguez</strong>
+        </div>
+
+    </div>
+
+</section>
+```
+
+</main>
+
+<footer class="footer">
+
+```
+<div class="footer-content">
+
+    <div>
+        <strong>1°D</strong>
+        <span>Escuela Secundaria Técnica No. 60</span>
+    </div>
+
+    <p>
+        Página de comunicación y organización del grupo.
+    </p>
+
+</div>
+
+<div class="copyright">
+    © 2026 1°D | EST No. 60
+</div>
+
+</footer>
+
+<button id="backToTop" class="back-to-top">↑</button>
+
+<script src="script.js"></script>
+
+</body>
+</html>
