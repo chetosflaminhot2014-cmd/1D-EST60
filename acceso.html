@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Acceso limitado | 1°D</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="access-page">
+
+    <main class="programmer-login">
+
+        <div class="login-left">
+
+            <div class="lock-container">
+
+                <div class="lock-shackle"></div>
+
+                <div class="lock-body">
+                    <div class="lock-hole"></div>
+                </div>
+
+                <div class="lock-password">
+                    <span>*****</span>
+                    <span class="cursor">|</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="login-right">
+
+            <div class="login-content">
+
+                <h1>Menú de programador</h1>
+
+                <p>
+                    Introduce la contraseña para acceder a la página
+                </p>
+
+
+                <form id="programmerLogin">
+
+                    <input
+                        type="password"
+                        id="programmerPassword"
+                        placeholder="Introduce la contraseña"
+                        autocomplete="off"
+                        required
+                    >
+
+                    <button type="submit" class="login-button">
+                        Introducir
+                    </button>
+
+                </form>
+
+
+                <p id="loginError" class="login-error"></p>
+
+
+                <a href="index.html" class="back-home">
+                    Volver a <span>Inicio</span>
+                </a>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
