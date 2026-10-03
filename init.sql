@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS avisos (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(150) NOT NULL,
+    contenido TEXT NOT NULL,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS tareas (
+    id SERIAL PRIMARY KEY,
+    materia VARCHAR(100) NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    fecha_entrega DATE NOT NULL,
+    creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS eventos (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    fecha DATE NOT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,233 +1,1465 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Menú de programador | 1°D</title>
+    <title>Programador | 1°D Escuela Secundaria Técnica 60</title>
 
     <link rel="stylesheet" href="style.css">
-
 </head>
 
+<body>
 
-<body class="developer-page">
+    <!-- =========================
+         ENCABEZADO
+    ========================== -->
 
-
-<header class="header">
-
-    <div class="header-content">
-
-        <a href="index.html" class="brand">
-
-            <img
-                src="logo.png"
-                alt="Logo de la Escuela Secundaria Técnica 60"
-            >
+    <header class="header">
+        <div class="header-content">
 
             <div>
+                <span class="badge">PANEL DE DESARROLLO</span>
 
-                <strong>1°D</strong>
-
-                <span>EST No. 60</span>
-
-            </div>
-
-        </a>
-
-
-        <a
-            href="index.html"
-            class="developer-back"
-        >
-            Volver al sitio
-        </a>
-
-    </div>
-
-</header>
-
-
-
-<main class="developer-main">
-
-
-    <div class="developer-header">
-
-        <span>ACCESO AUTORIZADO</span>
-
-        <h1>
-            Menú de programador
-        </h1>
-
-        <p>
-            Herramientas de administración y desarrollo
-            de la página de 1°D.
-        </p>
-
-    </div>
-
-
-
-    <section class="developer-grid">
-
-
-        <div class="developer-card">
-
-            <div class="developer-card-number">
-                01
-            </div>
-
-            <div>
-
-                <h2>Avisos</h2>
+                <h1>
+                    Programador
+                </h1>
 
                 <p>
-                    Administrar los avisos publicados
-                    para el grupo.
+                    Administración de la web de 1°D
+                </p>
+            </div>
+
+            <a href="index.html" class="back-button">
+                ← Volver al inicio
+            </a>
+
+        </div>
+    </header>
+
+
+    <!-- =========================
+         CONTENIDO PRINCIPAL
+    ========================== -->
+
+    <main class="container">
+
+        <!-- MENÚ -->
+
+        <section class="admin-menu">
+
+            <button class="menu-button active" data-section="avisos">
+                📢
+                <span>
+                    <strong>Avisos</strong>
+                    <small>Administrar avisos</small>
+                </span>
+            </button>
+
+            <button class="menu-button" data-section="tareas">
+                📝
+                <span>
+                    <strong>Tareas</strong>
+                    <small>Administrar tareas</small>
+                </span>
+            </button>
+
+            <button class="menu-button" data-section="calendario">
+                📅
+                <span>
+                    <strong>Calendario</strong>
+                    <small>Eventos y fechas</small>
+                </span>
+            </button>
+
+            <button class="menu-button" data-section="recursos">
+                📚
+                <span>
+                    <strong>Recursos</strong>
+                    <small>Materiales de apoyo</small>
+                </span>
+            </button>
+
+            <button class="menu-button" data-section="sistema">
+                ⚙️
+                <span>
+                    <strong>Sistema</strong>
+                    <small>Estado de la plataforma</small>
+                </span>
+            </button>
+
+            <button class="menu-button" data-section="desarrollo">
+                💻
+                <span>
+                    <strong>Desarrollo</strong>
+                    <small>Información técnica</small>
+                </span>
+            </button>
+
+        </section>
+
+
+        <!-- =========================
+             AVISOS
+        ========================== -->
+
+        <section id="avisos" class="admin-section active">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="section-label">COMUNICACIÓN</span>
+
+                    <h2>
+                        Avisos
+                    </h2>
+
+                    <p>
+                        Crea y administra los avisos que aparecerán
+                        en la página principal.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <h3>
+                    Crear nuevo aviso
+                </h3>
+
+                <form id="avisoForm">
+
+                    <div class="form-group">
+
+                        <label for="avisoTitulo">
+                            Título
+                        </label>
+
+                        <input
+                            type="text"
+                            id="avisoTitulo"
+                            placeholder="Ej. Suspensión de clases"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="avisoContenido">
+                            Contenido
+                        </label>
+
+                        <textarea
+                            id="avisoContenido"
+                            placeholder="Escribe el contenido del aviso..."
+                            rows="5"
+                            required
+                        ></textarea>
+
+                    </div>
+
+
+                    <button type="submit" class="primary-button">
+                        Publicar aviso
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div class="card-title-row">
+
+                    <h3>
+                        Avisos publicados
+                    </h3>
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        onclick="cargarAvisos()"
+                    >
+                        Actualizar
+                    </button>
+
+                </div>
+
+
+                <div id="listaAvisos" class="items-list">
+
+                    <p class="loading">
+                        Cargando avisos...
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             TAREAS
+        ========================== -->
+
+        <section id="tareas" class="admin-section">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="section-label">ESCOLAR</span>
+
+                    <h2>
+                        Tareas
+                    </h2>
+
+                    <p>
+                        Agrega las tareas que aparecerán para el grupo.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <h3>
+                    Crear nueva tarea
+                </h3>
+
+                <form id="tareaForm">
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="tareaMateria">
+                                Materia
+                            </label>
+
+                            <input
+                                type="text"
+                                id="tareaMateria"
+                                placeholder="Ej. Geografía"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="tareaFecha">
+                                Fecha de entrega
+                            </label>
+
+                            <input
+                                type="date"
+                                id="tareaFecha"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="tareaTitulo">
+                            Título
+                        </label>
+
+                        <input
+                            type="text"
+                            id="tareaTitulo"
+                            placeholder="Ej. Actividad 4"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="tareaDescripcion">
+                            Descripción
+                        </label>
+
+                        <textarea
+                            id="tareaDescripcion"
+                            placeholder="Describe la tarea..."
+                            rows="5"
+                        ></textarea>
+
+                    </div>
+
+
+                    <button type="submit" class="primary-button">
+                        Crear tarea
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div class="card-title-row">
+
+                    <h3>
+                        Tareas registradas
+                    </h3>
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        onclick="cargarTareas()"
+                    >
+                        Actualizar
+                    </button>
+
+                </div>
+
+
+                <div id="listaTareas" class="items-list">
+
+                    <p class="loading">
+                        Cargando tareas...
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CALENDARIO
+        ========================== -->
+
+        <section id="calendario" class="admin-section">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="section-label">ORGANIZACIÓN</span>
+
+                    <h2>
+                        Calendario
+                    </h2>
+
+                    <p>
+                        Registra fechas y eventos importantes del grupo.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <h3>
+                    Crear evento
+                </h3>
+
+                <form id="eventoForm">
+
+                    <div class="form-group">
+
+                        <label for="eventoTitulo">
+                            Título
+                        </label>
+
+                        <input
+                            type="text"
+                            id="eventoTitulo"
+                            placeholder="Ej. Examen de Ciencias"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="eventoFecha">
+                            Fecha
+                        </label>
+
+                        <input
+                            type="date"
+                            id="eventoFecha"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="eventoDescripcion">
+                            Descripción
+                        </label>
+
+                        <textarea
+                            id="eventoDescripcion"
+                            placeholder="Información adicional..."
+                            rows="4"
+                        ></textarea>
+
+                    </div>
+
+
+                    <button type="submit" class="primary-button">
+                        Agregar evento
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div class="card-title-row">
+
+                    <h3>
+                        Eventos registrados
+                    </h3>
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        onclick="cargarEventos()"
+                    >
+                        Actualizar
+                    </button>
+
+                </div>
+
+
+                <div id="listaEventos" class="items-list">
+
+                    <p class="loading">
+                        Cargando eventos...
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             RECURSOS
+        ========================== -->
+
+        <section id="recursos" class="admin-section">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="section-label">MATERIALES</span>
+
+                    <h2>
+                        Recursos
+                    </h2>
+
+                    <p>
+                        Espacio destinado a materiales y enlaces
+                        útiles para el grupo.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        📚
+                    </div>
+
+                    <h3>
+                        Recursos próximamente
+                    </h3>
+
+                    <p>
+                        Esta sección está preparada para integrar
+                        documentos, enlaces y materiales de estudio.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             SISTEMA
+        ========================== -->
+
+        <section id="sistema" class="admin-section">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="section-label">ESTADO</span>
+
+                    <h2>
+                        Sistema
+                    </h2>
+
+                    <p>
+                        Comprueba el estado de la API y la base de datos.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="system-status">
+
+                <div class="status-card">
+
+                    <div class="status-icon">
+                        🌐
+                    </div>
+
+                    <div>
+                        <span>
+                            API
+                        </span>
+
+                        <strong id="apiStatus">
+                            Comprobando...
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="status-card">
+
+                    <div class="status-icon">
+                        🗄️
+                    </div>
+
+                    <div>
+                        <span>
+                            Base de datos
+                        </span>
+
+                        <strong id="databaseStatus">
+                            Comprobando...
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <h3>
+                    Información del sistema
+                </h3>
+
+                <div class="info-grid">
+
+                    <div>
+                        <span>Proyecto</span>
+                        <strong>1°D Escuela Secundaria Técnica 60</strong>
+                    </div>
+
+                    <div>
+                        <span>Frontend</span>
+                        <strong>HTML / CSS / JavaScript</strong>
+                    </div>
+
+                    <div>
+                        <span>Backend</span>
+                        <strong>Node.js / Express</strong>
+                    </div>
+
+                    <div>
+                        <span>Base de datos</span>
+                        <strong>PostgreSQL</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             DESARROLLO
+        ========================== -->
+
+        <section id="desarrollo" class="admin-section">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="section-label">DESARROLLO</span>
+
+                    <h2>
+                        Desarrollo
+                    </h2>
+
+                    <p>
+                        Información técnica del proyecto.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <h3>
+                    1°D Escuela Secundaria Técnica 60
+                </h3>
+
+                <p>
+                    Plataforma de comunicación para el grupo 1°D.
+                    El sistema permite administrar avisos, tareas
+                    y eventos mediante una API conectada a una
+                    base de datos.
                 </p>
 
             </div>
 
-        </div>
 
+            <div class="admin-card">
 
+                <h3>
+                    Tecnologías
+                </h3>
 
-        <div class="developer-card">
+                <div class="tech-list">
 
-            <div class="developer-card-number">
-                02
-            </div>
+                    <div class="tech-item">
+                        <strong>HTML5</strong>
+                        <span>Estructura de las páginas</span>
+                    </div>
 
-            <div>
+                    <div class="tech-item">
+                        <strong>CSS3</strong>
+                        <span>Diseño e interfaz</span>
+                    </div>
 
-                <h2>Tareas</h2>
+                    <div class="tech-item">
+                        <strong>JavaScript</strong>
+                        <span>Interactividad</span>
+                    </div>
 
-                <p>
-                    Administrar las tareas y actividades
-                    pendientes.
-                </p>
+                    <div class="tech-item">
+                        <strong>Node.js</strong>
+                        <span>Servidor</span>
+                    </div>
 
-            </div>
+                    <div class="tech-item">
+                        <strong>Express</strong>
+                        <span>API</span>
+                    </div>
 
-        </div>
+                    <div class="tech-item">
+                        <strong>PostgreSQL</strong>
+                        <span>Base de datos</span>
+                    </div>
 
-
-
-        <div class="developer-card">
-
-            <div class="developer-card-number">
-                03
-            </div>
-
-            <div>
-
-                <h2>Calendario</h2>
-
-                <p>
-                    Administrar fechas y eventos
-                    importantes.
-                </p>
-
-            </div>
-
-        </div>
-
-
-
-        <div class="developer-card">
-
-            <div class="developer-card-number">
-                04
-            </div>
-
-            <div>
-
-                <h2>Recursos</h2>
-
-                <p>
-                    Administrar materiales y enlaces
-                    del grupo.
-                </p>
+                </div>
 
             </div>
 
-        </div>
+        </section>
+
+    </main>
 
 
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
 
-        <div class="developer-card">
+    <script>
 
-            <div class="developer-card-number">
-                05
-            </div>
+        // ==========================================
+        // NAVEGACIÓN DEL PANEL
+        // ==========================================
 
-            <div>
+        const menuButtons =
+            document.querySelectorAll(".menu-button");
 
-                <h2>Sistema</h2>
-
-                <p>
-                    Información técnica de la página.
-                </p>
-
-            </div>
-
-        </div>
+        const sections =
+            document.querySelectorAll(".admin-section");
 
 
+        menuButtons.forEach(button => {
 
-        <div class="developer-card">
+            button.addEventListener("click", () => {
 
-            <div class="developer-card-number">
-                06
-            </div>
-
-            <div>
-
-                <h2>Desarrollo</h2>
-
-                <p>
-                    Herramientas para futuras funciones
-                    de la página.
-                </p>
-
-            </div>
-
-        </div>
+                const sectionId =
+                    button.dataset.section;
 
 
-    </section>
+                menuButtons.forEach(item => {
+                    item.classList.remove("active");
+                });
 
 
-
-    <div class="developer-footer">
-
-        <a href="index.html">
-            ← Volver a la página principal
-        </a>
-
-    </div>
+                sections.forEach(section => {
+                    section.classList.remove("active");
+                });
 
 
-</main>
+                button.classList.add("active");
 
 
+                const section =
+                    document.getElementById(sectionId);
 
-<footer class="footer">
 
-    <div class="copyright">
-        © 2026 1°D | EST No. 60
-    </div>
+                if (section) {
+                    section.classList.add("active");
+                }
 
-</footer>
 
+                if (sectionId === "avisos") {
+                    cargarAvisos();
+                }
+
+                if (sectionId === "tareas") {
+                    cargarTareas();
+                }
+
+                if (sectionId === "calendario") {
+                    cargarEventos();
+                }
+
+                if (sectionId === "sistema") {
+                    comprobarSistema();
+                }
+
+            });
+
+        });
+
+
+        // ==========================================
+        // AVISOS
+        // ==========================================
+
+        async function cargarAvisos() {
+
+            const lista =
+                document.getElementById("listaAvisos");
+
+            lista.innerHTML =
+                '<p class="loading">Cargando avisos...</p>';
+
+            try {
+
+                const response =
+                    await fetch("/api/avisos");
+
+
+                if (!response.ok) {
+                    throw new Error("Error HTTP");
+                }
+
+
+                const avisos =
+                    await response.json();
+
+
+                if (avisos.length === 0) {
+
+                    lista.innerHTML =
+                        '<p class="empty-message">No hay avisos publicados.</p>';
+
+                    return;
+                }
+
+
+                lista.innerHTML = "";
+
+
+                avisos.forEach(aviso => {
+
+                    const elemento =
+                        document.createElement("div");
+
+                    elemento.className =
+                        "item";
+
+
+                    const fecha =
+                        new Date(aviso.fecha);
+
+
+                    elemento.innerHTML = `
+
+                        <div class="item-content">
+
+                            <span class="item-date">
+                                ${fecha.toLocaleDateString("es-MX")}
+                            </span>
+
+                            <h4>
+                                ${escapeHTML(aviso.titulo)}
+                            </h4>
+
+                            <p>
+                                ${escapeHTML(aviso.contenido)}
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="delete-button"
+                            onclick="eliminarAviso(${aviso.id})"
+                        >
+                            Eliminar
+                        </button>
+
+                    `;
+
+
+                    lista.appendChild(elemento);
+
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                lista.innerHTML =
+                    '<p class="error-message">No se pudieron cargar los avisos.</p>';
+
+            }
+
+        }
+
+
+        document
+            .getElementById("avisoForm")
+            .addEventListener("submit", async event => {
+
+                event.preventDefault();
+
+
+                const titulo =
+                    document.getElementById("avisoTitulo").value.trim();
+
+                const contenido =
+                    document.getElementById("avisoContenido").value.trim();
+
+
+                try {
+
+                    const response =
+                        await fetch("/api/avisos", {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                titulo,
+                                contenido
+                            })
+
+                        });
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error");
+                    }
+
+
+                    event.target.reset();
+
+                    cargarAvisos();
+
+                    alert("Aviso publicado correctamente.");
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "No se pudo publicar el aviso."
+                    );
+
+                }
+
+            });
+
+
+        async function eliminarAviso(id) {
+
+            if (!confirm("¿Eliminar este aviso?")) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(`/api/avisos/${id}`, {
+                        method: "DELETE"
+                    });
+
+
+                if (!response.ok) {
+                    throw new Error();
+                }
+
+
+                cargarAvisos();
+
+            } catch {
+
+                alert(
+                    "No se pudo eliminar el aviso."
+                );
+
+            }
+
+        }
+
+
+        // ==========================================
+        // TAREAS
+        // ==========================================
+
+        async function cargarTareas() {
+
+            const lista =
+                document.getElementById("listaTareas");
+
+
+            lista.innerHTML =
+                '<p class="loading">Cargando tareas...</p>';
+
+
+            try {
+
+                const response =
+                    await fetch("/api/tareas");
+
+
+                if (!response.ok) {
+                    throw new Error();
+                }
+
+
+                const tareas =
+                    await response.json();
+
+
+                if (tareas.length === 0) {
+
+                    lista.innerHTML =
+                        '<p class="empty-message">No hay tareas registradas.</p>';
+
+                    return;
+
+                }
+
+
+                lista.innerHTML = "";
+
+
+                tareas.forEach(tarea => {
+
+                    const elemento =
+                        document.createElement("div");
+
+
+                    elemento.className =
+                        "item";
+
+
+                    elemento.innerHTML = `
+
+                        <div class="item-content">
+
+                            <span class="item-tag">
+                                ${escapeHTML(tarea.materia)}
+                            </span>
+
+                            <h4>
+                                ${escapeHTML(tarea.titulo)}
+                            </h4>
+
+                            <p>
+                                ${escapeHTML(tarea.descripcion || "")}
+                            </p>
+
+                            <span class="item-date">
+                                Entrega:
+                                ${formatearFecha(tarea.fecha_entrega)}
+                            </span>
+
+                        </div>
+
+                        <button
+                            class="delete-button"
+                            onclick="eliminarTarea(${tarea.id})"
+                        >
+                            Eliminar
+                        </button>
+
+                    `;
+
+
+                    lista.appendChild(elemento);
+
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                lista.innerHTML =
+                    '<p class="error-message">No se pudieron cargar las tareas.</p>';
+
+            }
+
+        }
+
+
+        document
+            .getElementById("tareaForm")
+            .addEventListener("submit", async event => {
+
+                event.preventDefault();
+
+
+                const materia =
+                    document.getElementById("tareaMateria").value.trim();
+
+                const titulo =
+                    document.getElementById("tareaTitulo").value.trim();
+
+                const descripcion =
+                    document.getElementById("tareaDescripcion").value.trim();
+
+                const fecha_entrega =
+                    document.getElementById("tareaFecha").value;
+
+
+                try {
+
+                    const response =
+                        await fetch("/api/tareas", {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                materia,
+                                titulo,
+                                descripcion,
+                                fecha_entrega
+                            })
+
+                        });
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error");
+                    }
+
+
+                    event.target.reset();
+
+                    cargarTareas();
+
+                    alert("Tarea creada correctamente.");
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "No se pudo crear la tarea."
+                    );
+
+                }
+
+            });
+
+
+        async function eliminarTarea(id) {
+
+            if (!confirm("¿Eliminar esta tarea?")) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(`/api/tareas/${id}`, {
+                        method: "DELETE"
+                    });
+
+
+                if (!response.ok) {
+                    throw new Error();
+                }
+
+
+                cargarTareas();
+
+            } catch {
+
+                alert(
+                    "No se pudo eliminar la tarea."
+                );
+
+            }
+
+        }
+
+
+        // ==========================================
+        // EVENTOS
+        // ==========================================
+
+        async function cargarEventos() {
+
+            const lista =
+                document.getElementById("listaEventos");
+
+
+            lista.innerHTML =
+                '<p class="loading">Cargando eventos...</p>';
+
+
+            try {
+
+                const response =
+                    await fetch("/api/eventos");
+
+
+                if (!response.ok) {
+                    throw new Error();
+                }
+
+
+                const eventos =
+                    await response.json();
+
+
+                if (eventos.length === 0) {
+
+                    lista.innerHTML =
+                        '<p class="empty-message">No hay eventos registrados.</p>';
+
+                    return;
+
+                }
+
+
+                lista.innerHTML = "";
+
+
+                eventos.forEach(evento => {
+
+                    const elemento =
+                        document.createElement("div");
+
+
+                    elemento.className =
+                        "item";
+
+
+                    elemento.innerHTML = `
+
+                        <div class="item-content">
+
+                            <span class="item-date">
+                                ${formatearFecha(evento.fecha)}
+                            </span>
+
+                            <h4>
+                                ${escapeHTML(evento.titulo)}
+                            </h4>
+
+                            <p>
+                                ${escapeHTML(evento.descripcion || "")}
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="delete-button"
+                            onclick="eliminarEvento(${evento.id})"
+                        >
+                            Eliminar
+                        </button>
+
+                    `;
+
+
+                    lista.appendChild(elemento);
+
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                lista.innerHTML =
+                    '<p class="error-message">No se pudieron cargar los eventos.</p>';
+
+            }
+
+        }
+
+
+        document
+            .getElementById("eventoForm")
+            .addEventListener("submit", async event => {
+
+                event.preventDefault();
+
+
+                const titulo =
+                    document.getElementById("eventoTitulo").value.trim();
+
+                const descripcion =
+                    document.getElementById("eventoDescripcion").value.trim();
+
+                const fecha =
+                    document.getElementById("eventoFecha").value;
+
+
+                try {
+
+                    const response =
+                        await fetch("/api/eventos", {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                titulo,
+                                descripcion,
+                                fecha
+                            })
+
+                        });
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error");
+                    }
+
+
+                    event.target.reset();
+
+                    cargarEventos();
+
+                    alert("Evento creado correctamente.");
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "No se pudo crear el evento."
+                    );
+
+                }
+
+            });
+
+
+        async function eliminarEvento(id) {
+
+            if (!confirm("¿Eliminar este evento?")) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(`/api/eventos/${id}`, {
+                        method: "DELETE"
+                    });
+
+
+                if (!response.ok) {
+                    throw new Error();
+                }
+
+
+                cargarEventos();
+
+            } catch {
+
+                alert(
+                    "No se pudo eliminar el evento."
+                );
+
+            }
+
+        }
+
+
+        // ==========================================
+        // SISTEMA
+        // ==========================================
+
+        async function comprobarSistema() {
+
+            const apiStatus =
+                document.getElementById("apiStatus");
+
+            const databaseStatus =
+                document.getElementById("databaseStatus");
+
+
+            apiStatus.textContent =
+                "Comprobando...";
+
+            databaseStatus.textContent =
+                "Comprobando...";
+
+
+            try {
+
+                const response =
+                    await fetch("/api/health");
+
+
+                const data =
+                    await response.json();
+
+
+                if (response.ok) {
+
+                    apiStatus.textContent =
+                        "Online";
+
+                    databaseStatus.textContent =
+                        data.database === "connected"
+                            ? "Conectada"
+                            : "Desconectada";
+
+                } else {
+
+                    apiStatus.textContent =
+                        "Error";
+
+                    databaseStatus.textContent =
+                        "Error";
+
+                }
+
+            } catch {
+
+                apiStatus.textContent =
+                    "Offline";
+
+                databaseStatus.textContent =
+                    "Sin conexión";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // UTILIDADES
+        // ==========================================
+
+        function formatearFecha(fecha) {
+
+            if (!fecha) {
+                return "Sin fecha";
+            }
+
+
+            const partes =
+                fecha.toString().split("T")[0].split("-");
+
+
+            if (partes.length !== 3) {
+                return fecha;
+            }
+
+
+            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+        }
+
+
+        function escapeHTML(texto) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                texto ?? "";
+
+            return div.innerHTML;
+
+        }
+
+
+        // ==========================================
+        // CARGA INICIAL
+        // ==========================================
+
+        cargarAvisos();
+
+    </script>
 
 </body>
-
 </html>
