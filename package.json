@@ -1,0 +1,13 @@
+{
+  "name": "oned-est60",
+  "version": "1.0.0",
+  "description": "Web de comunicación 1°D Escuela Secundaria Técnica 60",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
+  }
+}
