@@ -1,36 +1,28 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Página de comunicación del grupo 1°D de la Escuela Secundaria Técnica No. 60.">
     <title>1°D | Escuela Secundaria Técnica 60</title>
 
-<link rel="icon" href="logo.png">
-<link rel="stylesheet" href="style.css">
-
+    <link rel="icon" href="logo.png">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header class="site-header">
-    <div class="header-inner">
+<header class="header">
+    <div class="header-content">
 
         <a href="#inicio" class="brand">
-            <img src="logo.png" alt="Logo de la Escuela Secundaria Técnica No. 60">
-
-            <div class="brand-text">
+            <img src="logo.png" alt="Logo de la Escuela Secundaria Técnica 60">
+            <div>
                 <strong>1°D</strong>
                 <span>EST No. 60</span>
             </div>
         </a>
 
-        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
-            ☰
-        </button>
-
-        <nav class="main-nav" id="mainNav">
+        <nav class="nav" id="nav">
             <a href="#inicio">Inicio</a>
             <a href="#avisos">Avisos</a>
             <a href="#tareas">Tareas</a>
@@ -38,6 +30,8 @@
             <a href="#calendario">Calendario</a>
             <a href="#recursos">Recursos</a>
         </nav>
+
+        <button class="menu-button" id="menuButton">☰</button>
 
     </div>
 </header>
@@ -74,7 +68,6 @@
         </div>
     </section>
 
-
     <section class="section" id="avisos">
         <div class="section-number">01</div>
 
@@ -85,7 +78,9 @@
             </div>
 
             <p>
-                Información importante para el grupo 1°D.
+                En este apartado se publicarán avisos importantes,
+                cambios de actividades, información escolar y comunicados
+                para el grupo 1°D.
             </p>
         </div>
 
@@ -93,9 +88,7 @@
             <div class="notice-icon">!</div>
 
             <div class="notice-content">
-                <span class="notice-label">Aviso general</span>
-
-                <h3>Bienvenidos al espacio de comunicación</h3>
+                <h3>Información del grupo</h3>
 
                 <p>
                     Aquí se publicarán avisos importantes,
@@ -104,7 +97,6 @@
             </div>
         </div>
     </section>
-
 
     <section class="section dark-section" id="tareas">
         <div class="section-number">02</div>
@@ -126,14 +118,13 @@
                 Pendiente
             </div>
 
-            <h3>Español, Geografía</h3>
+            <h3>Pendiente: Español, Geografía</h3>
 
             <p>
                 Tareas pendientes de las materias indicadas.
             </p>
         </div>
     </section>
-
 
     <section class="section" id="horario">
         <div class="section-number">03</div>
@@ -150,8 +141,14 @@
         </div>
 
         <div class="schedule-info">
-            <span>Grupo 1°D</span>
-            <span>Horario escolar</span>
+            <span>GRUPO</span>
+            <strong>1°D</strong>
+
+            <span>ESCUELA</span>
+            <strong>EST No. 60</strong>
+
+            <span>JORNADA</span>
+            <strong>7:00 A.M. — 1:10 P.M.</strong>
         </div>
 
         <div class="schedule-wrapper">
@@ -207,8 +204,12 @@
                     </tr>
 
                     <tr class="break-row">
-                        <th>10:00–10:20</th>
-                        <td colspan="5">RECESO</td>
+                        <td>10:00–10:20</td>
+                        <td>RECESO</td>
+                        <td>RECESO</td>
+                        <td>RECESO</td>
+                        <td>RECESO</td>
+                        <td>RECESO</td>
                     </tr>
 
                     <tr>
@@ -251,7 +252,6 @@
             </table>
         </div>
     </section>
-
 
     <section class="section" id="calendario">
         <div class="section-number">04</div>
@@ -310,19 +310,15 @@
             <div class="resource-icon">↗</div>
 
             <div>
-                <span class="notice-label">Próximamente</span>
-
-                <h3>Recursos del grupo</h3>
-
+                <h3>Recursos escolares</h3>
                 <p>
-                    Aquí podremos agregar documentos, enlaces,
-                    materiales de estudio y otros recursos.
+                    Materiales y enlaces útiles para las actividades
+                    del grupo 1°D.
                 </p>
             </div>
 
         </div>
     </section>
-
 
     <section class="section info-section">
 
@@ -335,20 +331,20 @@
             </div>
         </div>
 
-        <div class="info-grid">
+        <div class="info-box">
 
-            <div class="info-item">
-                <span>Grupo</span>
+            <div>
+                <span>GRUPO</span>
                 <strong>1°D</strong>
             </div>
 
-            <div class="info-item">
-                <span>Escuela</span>
+            <div>
+                <span>ESCUELA</span>
                 <strong>Escuela Secundaria Técnica No. 60</strong>
             </div>
 
-            <div class="info-item">
-                <span>Docente</span>
+            <div>
+                <span>DOCENTE</span>
                 <strong>Mtra. Nayelth Rodriguez</strong>
             </div>
 
@@ -358,20 +354,26 @@
 
 </main>
 
-
 <footer class="site-footer">
 
-    <div>
-        <strong>1°D</strong>
-        <span>Escuela Secundaria Técnica No. 60</span>
+    <div class="footer-content">
+
+        <div>
+            <strong>1°D</strong>
+            <span>Escuela Secundaria Técnica No. 60</span>
+        </div>
+
+        <p>
+            Página de comunicación y organización del grupo.
+        </p>
+
     </div>
 
-    <p>
-        Página de comunicación del grupo.
-    </p>
+    <div class="copyright">
+        © 2026 1°D | EST No. 60
+    </div>
 
 </footer>
-
 
 <button
     class="back-to-top"
@@ -381,9 +383,7 @@
     ↑
 </button>
 
-
 <script src="script.js"></script>
 
 </body>
 </html>
-
