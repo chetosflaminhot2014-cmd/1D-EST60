@@ -305,7 +305,13 @@ function iniciarHorarioInteligente() {
 
         if (!coincidencia) return null;
 
-        return Number(coincidencia[1]) * 60 + Number(coincidencia[2]);
+        let horas = Number(coincidencia[1]);
+        const minutos = Number(coincidencia[2]);
+
+        // En esta tabla, 1:10 corresponde a la 1:10 p. m.
+        if (horas === 1) horas = 13;
+
+        return horas * 60 + minutos;
     }
 
     const periodos = filas.map(fila => {
