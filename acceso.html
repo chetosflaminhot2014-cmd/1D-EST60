@@ -76,7 +76,35 @@
     </main>
 
 
-    <script src="script.js"></script>
+    <script>
+        const API_BASE = "https://oned-est60-server.onrender.com";
+        const loginForm = document.getElementById("programmerLogin");
+        const passwordInput = document.getElementById("programmerPassword");
+        const loginError = document.getElementById("loginError");
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            loginError.textContent = "Verificando acceso...";
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: passwordInput.value })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "No se pudo verificar el acceso.");
+                }
+
+                sessionStorage.setItem("est60_admin_key", passwordInput.value);
+                window.location.href = "programador.html";
+            } catch (error) {
+                loginError.textContent = error.message || "No se pudo conectar con el servidor.";
+            }
+        });
+    </script>
 
 </body>
 
