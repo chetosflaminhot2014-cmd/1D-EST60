@@ -1,3 +1,5 @@
+const API_BASE = "https://oned-est60-server.onrender.com";
+
 
 /* ==========================================
    MENÚ MÓVIL
@@ -69,7 +71,7 @@ async function cargarAvisosPublicos() {
     if (!contenedor) return;
 
     try {
-        const response = await fetch("/api/avisos");
+        const response = await fetch(`${API_BASE}/api/avisos`);
 
         if (!response.ok) throw new Error("Error HTTP");
 
@@ -141,7 +143,7 @@ async function cargarTareasPublicas() {
     if (!contenedor) return;
 
     try {
-        const response = await fetch("/api/tareas");
+        const response = await fetch(`${API_BASE}/api/tareas`);
 
         if (!response.ok) throw new Error("Error HTTP");
 
@@ -205,7 +207,7 @@ async function cargarEventosPublicos() {
     if (!contenedor) return;
 
     try {
-        const response = await fetch("/api/eventos");
+        const response = await fetch(`${API_BASE}/api/eventos`);
 
         if (!response.ok) throw new Error("Error HTTP");
 
