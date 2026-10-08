@@ -700,6 +700,9 @@
 
     <script>
 
+        const API_BASE = "https://oned-est60-server.onrender.com";
+        const ADMIN_KEY = sessionStorage.getItem("est60_admin_key") || "";
+
         // ==========================================
         // NAVEGACIÓN DEL PANEL
         // ==========================================
@@ -777,7 +780,7 @@
             try {
 
                 const response =
-                    await fetch("/api/avisos");
+                    await fetch(`${API_BASE}/api/avisos`);
 
 
                 if (!response.ok) {
@@ -876,12 +879,13 @@
                 try {
 
                     const response =
-                        await fetch("/api/avisos", {
+                        await fetch(`${API_BASE}/api/avisos`, {
 
                             method: "POST",
 
                             headers: {
-                                "Content-Type": "application/json"
+                                "Content-Type": "application/json",
+                                "x-admin-key": ADMIN_KEY
                             },
 
                             body: JSON.stringify({
@@ -930,8 +934,9 @@
             try {
 
                 const response =
-                    await fetch(`/api/avisos/${id}`, {
-                        method: "DELETE"
+                    await fetch(`${API_BASE}/api/avisos/${id}`, {
+                        method: "DELETE",
+                        headers: { "x-admin-key": ADMIN_KEY }
                     });
 
 
@@ -970,7 +975,7 @@
             try {
 
                 const response =
-                    await fetch("/api/tareas");
+                    await fetch(`${API_BASE}/api/tareas`);
 
 
                 if (!response.ok) {
@@ -1078,12 +1083,13 @@
                 try {
 
                     const response =
-                        await fetch("/api/tareas", {
+                        await fetch(`${API_BASE}/api/tareas`, {
 
                             method: "POST",
 
                             headers: {
-                                "Content-Type": "application/json"
+                                "Content-Type": "application/json",
+                                "x-admin-key": ADMIN_KEY
                             },
 
                             body: JSON.stringify({
@@ -1134,8 +1140,9 @@
             try {
 
                 const response =
-                    await fetch(`/api/tareas/${id}`, {
-                        method: "DELETE"
+                    await fetch(`${API_BASE}/api/tareas/${id}`, {
+                        method: "DELETE",
+                        headers: { "x-admin-key": ADMIN_KEY }
                     });
 
 
@@ -1174,7 +1181,7 @@
             try {
 
                 const response =
-                    await fetch("/api/eventos");
+                    await fetch(`${API_BASE}/api/eventos`);
 
 
                 if (!response.ok) {
@@ -1274,12 +1281,13 @@
                 try {
 
                     const response =
-                        await fetch("/api/eventos", {
+                        await fetch(`${API_BASE}/api/eventos`, {
 
                             method: "POST",
 
                             headers: {
-                                "Content-Type": "application/json"
+                                "Content-Type": "application/json",
+                                "x-admin-key": ADMIN_KEY
                             },
 
                             body: JSON.stringify({
@@ -1329,8 +1337,9 @@
             try {
 
                 const response =
-                    await fetch(`/api/eventos/${id}`, {
-                        method: "DELETE"
+                    await fetch(`${API_BASE}/api/eventos/${id}`, {
+                        method: "DELETE",
+                        headers: { "x-admin-key": ADMIN_KEY }
                     });
 
 
@@ -1375,7 +1384,7 @@
             try {
 
                 const response =
-                    await fetch("/api/health");
+                    await fetch(`${API_BASE}/api/health`);
 
 
                 const data =
