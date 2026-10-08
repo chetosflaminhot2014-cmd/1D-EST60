@@ -400,6 +400,153 @@ function iniciarHorarioInteligente() {
             `${Math.max(0, Math.min(100, progreso))}%`;
     }
 
+
+    // Vista consultable por día y resumen calculado desde la tabla original.
+    const dias = [
+        { nombre: "Lunes", indice: 0 },
+        { nombre: "Martes", indice: 1 },
+        { nombre: "Miércoles", indice: 2 },
+        { nombre: "Jueves", indice: 3 },
+        { nombre: "Viernes", indice: 4 }
+    ];
+
+    const estilosVistaDia = document.createElement("style");
+    estilosVistaDia.textContent = "
+        .smart-day-tools{margin-top:20px;padding:18px;border:1px solid rgba(148,163,184,.22);border-radius:12px;background:rgba(3,10,20,.22)}
+        .smart-day-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+        .smart-day-toolbar label{display:block;color:#cbd5e1;font-size:12px;font-weight:700;margin-bottom:5px}
+        .smart-day-toolbar select{min-width:190px;max-width:100%;padding:10px 12px;color:#f8fafc;background:#102035;border:1px solid #334155;border-radius:8px;font:inherit}
+        .smart-day-save{color:#93c5fd;font-size:11px}
+        .smart-day-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+        .smart-day-stat{padding:12px;background:rgba(15,23,42,.55);border:1px solid rgba(148,163,184,.16);border-radius:9px}
+        .smart-day-stat span{display:block;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.7px}
+        .smart-day-stat strong{display:block;margin-top:4px;color:#f8fafc;font-size:19px}
+        .smart-day-agenda{display:grid;gap:7px}
+        .smart-day-row{display:grid;grid-template-columns:105px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;background:rgba(15,23,42,.4);border:1px solid rgba(148,163,184,.13);border-radius:8px}
+        .smart-day-row-time{color:#93c5fd;font-size:11px;font-weight:700}
+        .smart-day-row-subject{color:#f8fafc;font-size:13px;font-weight:700}
+        .smart-day-row-duration{color:#94a3b8;font-size:11px;white-space:nowrap}
+        .smart-day-row.is-break{background:rgba(146,64,14,.15)}
+        .smart-day-row.is-break .smart-day-row-subject{color:#fcd34d}
+        @media(max-width:600px){.smart-day-stats{grid-template-columns:1fr}.smart-day-row{grid-template-columns:1fr auto;gap:4px 10px}.smart-day-row-time{grid-column:1/-1}.smart-day-row-subject{font-size:12px}}
+    ";
+    document.head.appendChild(estilosVistaDia);
+
+    const herramientasDia = document.createElement("div");
+    herramientasDia.className = "smart-day-tools";
+    herramientasDia.innerHTML =
+        '<div class="smart-day-toolbar">' +
+            '<div><label for="smartDaySelect">Consultar horario por día</label>' +
+            '<select id="smartDaySelect" aria-label="Seleccionar día del horario">' +
+                '<option value="auto">Hoy (automático)</option>' +
+                dias.map(function(dia) {
+                    return '<option value="' + dia.indice + '">' + dia.nombre + '</option>';
+                }).join("") +
+            '</select></div>' +
+            '<span class="smart-day-save" id="smartDaySaved">La selección se guarda en este dispositivo.</span>' +
+        '</div>' +
+        '<div class="smart-day-stats" id="smartDayStats"></div>' +
+        '<div class="smart-day-agenda" id="smartDayAgenda"></div>';
+
+    const avisoHorario = panel.querySelector(".smart-disclaimer");
+    if (avisoHorario) {
+        avisoHorario.insertAdjacentElement("afterend", herramientasDia);
+    } else {
+        panel.appendChild(herramientasDia);
+    }
+
+    const selectorDia = herramientasDia.querySelector("#smartDaySelect");
+    const resumenDia = herramientasDia.querySelector("#smartDayStats");
+    const agendaDia = herramientasDia.querySelector("#smartDayAgenda");
+    const mensajeGuardado = herramientasDia.querySelector("#smartDaySaved");
+    const claveGuardado = "est60_horario_dia_consultado";
+    let diaSeleccionado = "auto";
+
+    try {
+        const guardado = localStorage.getItem(claveGuardado);
+        if (guardado === "auto" || dias.some(function(dia) {
+            return String(dia.indice) === guardado;
+        })) {
+            diaSeleccionado = guardado;
+        }
+    } catch (error) {
+        console.warn("No se pudo leer la preferencia guardada del horario.", error);
+    }
+
+    selectorDia.value = diaSeleccionado;
+
+    function mostrarAgendaDia(indiceDia) {
+        const agenda = periodos.map(function(periodo) {
+            return {
+                inicio: periodo.inicio,
+                fin: periodo.fin,
+                horaInicio: periodo.horaInicio,
+                horaFin: periodo.horaFin,
+                receso: periodo.receso,
+                materia: periodo.receso
+                    ? "Receso"
+                    : (periodo.materias[indiceDia] || "Materia no identificada")
+            };
+        });
+
+        const clases = agenda.filter(function(periodo) {
+            return !periodo.receso;
+        });
+        const minutosClase = clases.reduce(function(total, periodo) {
+            return total + (periodo.fin - periodo.inicio);
+        }, 0);
+        const totalMinutosJornada = agenda.length
+            ? agenda[agenda.length - 1].fin - agenda[0].inicio
+            : 0;
+
+        resumenDia.innerHTML =
+            '<div class="smart-day-stat"><span>Clases del día</span><strong>' +
+                clases.length + '</strong></div>' +
+            '<div class="smart-day-stat"><span>Tiempo en clase</span><strong>' +
+                Math.floor(minutosClase / 60) + ' h ' + (minutosClase % 60) + ' min</strong></div>' +
+            '<div class="smart-day-stat"><span>Jornada total</span><strong>' +
+                Math.floor(totalMinutosJornada / 60) + ' h ' + (totalMinutosJornada % 60) + ' min</strong></div>';
+
+        agendaDia.innerHTML = agenda.map(function(periodo) {
+            const duracion = periodo.fin - periodo.inicio;
+            return '<div class="smart-day-row ' + (periodo.receso ? 'is-break' : '') + '">' +
+                '<span class="smart-day-row-time">' +
+                    escapeHTML(periodo.horaInicio) + ' — ' + escapeHTML(periodo.horaFin) +
+                '</span>' +
+                '<span class="smart-day-row-subject">' + escapeHTML(periodo.materia) + '</span>' +
+                '<span class="smart-day-row-duration">' + duracion + ' min</span>' +
+            '</div>';
+        }).join("");
+    }
+
+    function actualizarVistaDia() {
+        const ahora = new Date();
+        const indiceDia = diaSeleccionado === "auto"
+            ? (ahora.getDay() >= 1 && ahora.getDay() <= 5 ? ahora.getDay() - 1 : 0)
+            : Number(diaSeleccionado);
+
+        mostrarAgendaDia(indiceDia);
+
+        if (diaSeleccionado === "auto") {
+            mensajeGuardado.textContent = "Vista automática: muestra el día actual; el fin de semana muestra el lunes.";
+        } else {
+            mensajeGuardado.textContent = "Preferencia guardada: " + dias[indiceDia].nombre + ". Solo se guarda en este dispositivo.";
+        }
+    }
+
+    selectorDia.addEventListener("change", function() {
+        diaSeleccionado = selectorDia.value;
+        try {
+            localStorage.setItem(claveGuardado, diaSeleccionado);
+        } catch (error) {
+            console.warn("No se pudo guardar la preferencia del horario.", error);
+            mensajeGuardado.textContent = "No se pudo guardar; la selección funciona mientras la página esté abierta.";
+        }
+        actualizarVistaDia();
+    });
+
+    actualizarVistaDia();
+
     function actualizar() {
         const ahora = new Date();
         const dia = ahora.getDay();
@@ -453,7 +600,7 @@ function iniciarHorarioInteligente() {
                     materia: "Receso",
                     mensaje: `El descanso termina a las ${horaLegible(actual.fin)}.`,
                     siguiente: siguiente
-                        ? actual.materias[indiceDia] || encabezados[indiceDia]
+                        ? siguiente.materias[indiceDia] || encabezados[indiceDia]
                         : "Fin de jornada",
                     horaSiguiente: siguiente
                         ? `Comienza a las ${horaLegible(siguiente.inicio)}`
