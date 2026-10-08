@@ -109,6 +109,41 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+// La clave de administración debe configurarse como variable ADMIN_KEY en Render.
+function requireAdmin(req, res, next) {
+    const configuredKey = process.env.ADMIN_KEY;
+    const providedKey = req.get("x-admin-key");
+
+    if (!configuredKey) {
+        return res.status(503).json({
+            error: "Falta configurar ADMIN_KEY en las variables de entorno de Render."
+        });
+    }
+
+    if (!providedKey || providedKey !== configuredKey) {
+        return res.status(401).json({ error: "Acceso de administrador no autorizado." });
+    }
+
+    next();
+}
+
+app.post("/api/admin/login", (req, res) => {
+    const configuredKey = process.env.ADMIN_KEY;
+    const providedKey = req.body && req.body.password;
+
+    if (!configuredKey) {
+        return res.status(503).json({
+            error: "El administrador aún no ha configurado la clave en Render."
+        });
+    }
+
+    if (typeof providedKey !== "string" || providedKey !== configuredKey) {
+        return res.status(401).json({ error: "Contraseña incorrecta." });
+    }
+
+    res.json({ success: true });
+});
+
 app.use(express.static(path.join(__dirname)));
 
 // ========================================
@@ -136,7 +171,7 @@ app.get("/api/avisos", async (req, res) => {
 });
 
 // Crear aviso
-app.post("/api/avisos", async (req, res) => {
+app.post("/api/avisos", requireAdmin, async (req, res) => {
     try {
 
         const {
@@ -175,7 +210,7 @@ app.post("/api/avisos", async (req, res) => {
 });
 
 // Eliminar aviso
-app.delete("/api/avisos/:id", async (req, res) => {
+app.delete("/api/avisos/:id", requireAdmin, async (req, res) => {
     try {
 
         await pool.query(
@@ -224,7 +259,7 @@ app.get("/api/tareas", async (req, res) => {
 });
 
 // Crear tarea
-app.post("/api/tareas", async (req, res) => {
+app.post("/api/tareas", requireAdmin, async (req, res) => {
     try {
 
         const {
@@ -267,7 +302,7 @@ app.post("/api/tareas", async (req, res) => {
 });
 
 // Eliminar tarea
-app.delete("/api/tareas/:id", async (req, res) => {
+app.delete("/api/tareas/:id", requireAdmin, async (req, res) => {
     try {
 
         await pool.query(
@@ -316,7 +351,7 @@ app.get("/api/eventos", async (req, res) => {
 });
 
 // Crear evento
-app.post("/api/eventos", async (req, res) => {
+app.post("/api/eventos", requireAdmin, async (req, res) => {
     try {
 
         const {
@@ -357,7 +392,7 @@ app.post("/api/eventos", async (req, res) => {
 });
 
 // Eliminar evento
-app.delete("/api/eventos/:id", async (req, res) => {
+app.delete("/api/eventos/:id", requireAdmin, async (req, res) => {
     try {
 
         await pool.query(
