@@ -411,25 +411,25 @@ function iniciarHorarioInteligente() {
     ];
 
     const estilosVistaDia = document.createElement("style");
-    estilosVistaDia.textContent = "
-        .smart-day-tools{margin-top:20px;padding:18px;border:1px solid rgba(148,163,184,.22);border-radius:12px;background:rgba(3,10,20,.22)}
-        .smart-day-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
-        .smart-day-toolbar label{display:block;color:#cbd5e1;font-size:12px;font-weight:700;margin-bottom:5px}
-        .smart-day-toolbar select{min-width:190px;max-width:100%;padding:10px 12px;color:#f8fafc;background:#102035;border:1px solid #334155;border-radius:8px;font:inherit}
-        .smart-day-save{color:#93c5fd;font-size:11px}
-        .smart-day-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
-        .smart-day-stat{padding:12px;background:rgba(15,23,42,.55);border:1px solid rgba(148,163,184,.16);border-radius:9px}
-        .smart-day-stat span{display:block;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.7px}
-        .smart-day-stat strong{display:block;margin-top:4px;color:#f8fafc;font-size:19px}
-        .smart-day-agenda{display:grid;gap:7px}
-        .smart-day-row{display:grid;grid-template-columns:105px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;background:rgba(15,23,42,.4);border:1px solid rgba(148,163,184,.13);border-radius:8px}
-        .smart-day-row-time{color:#93c5fd;font-size:11px;font-weight:700}
-        .smart-day-row-subject{color:#f8fafc;font-size:13px;font-weight:700}
-        .smart-day-row-duration{color:#94a3b8;font-size:11px;white-space:nowrap}
-        .smart-day-row.is-break{background:rgba(146,64,14,.15)}
-        .smart-day-row.is-break .smart-day-row-subject{color:#fcd34d}
-        @media(max-width:600px){.smart-day-stats{grid-template-columns:1fr}.smart-day-row{grid-template-columns:1fr auto;gap:4px 10px}.smart-day-row-time{grid-column:1/-1}.smart-day-row-subject{font-size:12px}}
-    ";
+    estilosVistaDia.textContent = [
+        ".smart-day-tools{margin-top:20px;padding:18px;border:1px solid rgba(148,163,184,.22);border-radius:12px;background:rgba(3,10,20,.22)}",
+        ".smart-day-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}",
+        ".smart-day-toolbar label{display:block;color:#cbd5e1;font-size:12px;font-weight:700;margin-bottom:5px}",
+        ".smart-day-toolbar select{min-width:190px;max-width:100%;padding:10px 12px;color:#f8fafc;background:#102035;border:1px solid #334155;border-radius:8px;font:inherit}",
+        ".smart-day-save{color:#93c5fd;font-size:11px}",
+        ".smart-day-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}",
+        ".smart-day-stat{padding:12px;background:rgba(15,23,42,.55);border:1px solid rgba(148,163,184,.16);border-radius:9px}",
+        ".smart-day-stat span{display:block;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.7px}",
+        ".smart-day-stat strong{display:block;margin-top:4px;color:#f8fafc;font-size:19px}",
+        ".smart-day-agenda{display:grid;gap:7px}",
+        ".smart-day-row{display:grid;grid-template-columns:105px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;background:rgba(15,23,42,.4);border:1px solid rgba(148,163,184,.13);border-radius:8px}",
+        ".smart-day-row-time{color:#93c5fd;font-size:11px;font-weight:700}",
+        ".smart-day-row-subject{color:#f8fafc;font-size:13px;font-weight:700}",
+        ".smart-day-row-duration{color:#94a3b8;font-size:11px;white-space:nowrap}",
+        ".smart-day-row.is-break{background:rgba(146,64,14,.15)}",
+        ".smart-day-row.is-break .smart-day-row-subject{color:#fcd34d}",
+        "@media(max-width:600px){.smart-day-stats{grid-template-columns:1fr}.smart-day-row{grid-template-columns:1fr auto;gap:4px 10px}.smart-day-row-time{grid-column:1/-1}.smart-day-row-subject{font-size:12px}}"
+    ].join("\n");
     document.head.appendChild(estilosVistaDia);
 
     const herramientasDia = document.createElement("div");
