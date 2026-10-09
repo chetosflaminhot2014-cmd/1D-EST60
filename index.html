@@ -11,6 +11,9 @@
 
     <title>1°D | Escuela Secundaria Técnica 60</title>
 
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon-192.svg">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -92,7 +95,13 @@
                     🔒 Acceso limitado
                 </a>
 
+                <button id="installAppButton" class="btn btn-secondary install-app-button" type="button">
+                    Instalar app
+                </button>
+
             </div>
+
+            <p id="installAppHelp" class="install-app-help" hidden></p>
 
             <div class="last-update">
                 Última actualización:
