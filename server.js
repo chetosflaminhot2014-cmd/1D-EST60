@@ -1,6 +1,54 @@
 const express = require("express");
 const path = require("path");
 const { Pool } = require("pg");
+const admin = require("firebase-admin");
+
+// Firebase Admin solo se activa cuando la clave de servicio está configurada
+// como variable privada FIREBASE_SERVICE_ACCOUNT_JSON en el servidor.
+let firebaseMessaging = null;
+try {
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    if (serviceAccountJson) {
+        const serviceAccount = JSON.parse(serviceAccountJson);
+        if (!admin.apps.length) {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount)
+            });
+        }
+        firebaseMessaging = admin.messaging();
+        console.log("Firebase Cloud Messaging: CONFIGURADO");
+    } else {
+        console.log("Firebase Cloud Messaging: pendiente de configurar FIREBASE_SERVICE_ACCOUNT_JSON");
+    }
+} catch (error) {
+    console.error("ERROR AL CONFIGURAR FIREBASE CLOUD MESSAGING:", error.message);
+}
+
+async function enviarNotificacionPush(titulo, contenido) {
+    if (!firebaseMessaging) return false;
+
+    const safeTitle = String(titulo || "Aviso de 1°D EST60").slice(0, 200);
+    const safeBody = String(contenido || "Hay una nueva actualización escolar.").slice(0, 1000);
+
+    try {
+        const messageId = await firebaseMessaging.send({
+            topic: "1d-est60-all",
+            notification: {
+                title: safeTitle,
+                body: safeBody
+            },
+            data: {
+                title: safeTitle,
+                body: safeBody
+            }
+        });
+        console.log("Notificación push enviada:", messageId);
+        return true;
+    } catch (error) {
+        console.error("ERROR AL ENVIAR NOTIFICACIÓN PUSH:", error.message);
+        return false;
+    }
+}
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -228,6 +276,7 @@ app.post("/api/avisos", requireAdmin, async (req, res) => {
         );
 
         await registrarCambio("CREACIÓN", "Aviso", result.rows[0], null, result.rows[0]);
+        await enviarNotificacionPush(result.rows[0].titulo, result.rows[0].contenido);
         res.status(201).json(result.rows[0]);
 
     } catch (error) {
@@ -388,6 +437,10 @@ app.post("/api/tareas", requireAdmin, async (req, res) => {
         );
 
         await registrarCambio("CREACIÓN", "Tarea", result.rows[0], null, result.rows[0]);
+        await enviarNotificacionPush(
+            `Nueva tarea: ${result.rows[0].materia}`,
+            `${result.rows[0].titulo} — Entrega: ${result.rows[0].fecha_entrega}`
+        );
         res.status(201).json(result.rows[0]);
 
     } catch (error) {
@@ -501,6 +554,10 @@ app.post("/api/eventos", requireAdmin, async (req, res) => {
         );
 
         await registrarCambio("CREACIÓN", "Evento", result.rows[0], null, result.rows[0]);
+        await enviarNotificacionPush(
+            `Nuevo evento: ${result.rows[0].titulo}`,
+            result.rows[0].descripcion || `Fecha: ${result.rows[0].fecha}`
+        );
         res.status(201).json(result.rows[0]);
 
     } catch (error) {
