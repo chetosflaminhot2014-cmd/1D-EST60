@@ -1,0 +1,70 @@
+name: Crear APK de 1D EST60
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "android/**"
+      - "index.html"
+      - "style.css"
+      - "script.js"
+      - "logo.png"
+      - "icon-192.svg"
+      - "icon-512.svg"
+      - "manifest.json"
+      - ".github/workflows/build-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar SDK de Android
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Preparar archivos web locales
+        shell: bash
+        run: |
+          mkdir -p android/app/src/main/assets/www
+          cp index.html style.css script.js logo.png manifest.json icon-192.svg icon-512.svg android/app/src/main/assets/www/
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/assets/www/index.html")
+          html = p.read_text(encoding="utf-8")
+          marker = '<script src="script.js"></script>'
+          inject = '<script src="offline-mode.js"></script>\n    ' + marker
+          if marker not in html:
+              raise SystemExit("No se encontró la etiqueta script.js en index.html")
+          html = html.replace(marker, inject, 1)
+          p.write_text(html, encoding="utf-8")
+          Path("android/app/src/main/assets/www/offline-mode.js").write_text(
+              Path("android/offline-mode.js").read_text(encoding="utf-8"),
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Compilar APK
+        working-directory: android
+        run: gradle --no-daemon assembleDebug
+
+      - name: Publicar APK descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1D-EST60-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
