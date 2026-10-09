@@ -80,7 +80,8 @@ pool.on("error", (error) => {
 // ========================================
 
 const allowedOrigins = [
-    "https://oned-est60.onrender.com"
+    "https://oned-est60.onrender.com",
+    "https://localhost"
 ];
 
 app.use((req, res, next) => {
