@@ -630,6 +630,29 @@ app.get("/api/admin/historial", requireAdmin, async (req, res) => {
     }
 });
 
+// Gemini API: la clave se guarda solo como variable privada en Render.
+app.post("/api/gemini", async (req, res) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    const message = typeof req.body?.message === "string" ? req.body.message.trim() : "";
+    const task = typeof req.body?.taskContext === "string" ? req.body.taskContext.slice(0, 1000) : "";
+    if (!apiKey) return res.status(503).json({ error: "Gemini no está configurado todavía. Falta GEMINI_API_KEY en Render." });
+    if (!message || message.length > 1200) return res.status(400).json({ error: "Escribe una pregunta de hasta 1200 caracteres." });
+    try {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(apiKey), {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                system_instruction: { parts: [{ text: "Eres un asistente educativo para alumnos de secundaria de México. Responde en español claro, explica paso a paso y ayuda a aprender. No pidas datos personales ni inventes instrucciones escolares." }] },
+                contents: [{ role: "user", parts: [{ text: (task ? "Contexto de la tarea:\n" + task + "\n\n" : "") + message }] }],
+                generationConfig: { temperature: 0.6, maxOutputTokens: 700 }
+            })
+        });
+        const data = await response.json();
+        if (!response.ok) { console.error("Gemini API error:", response.status); return res.status(502).json({ error: "Gemini no pudo responder. Inténtalo más tarde." }); }
+        const answer = (data.candidates?.[0]?.content?.parts || []).map(part => part.text || "").join("\n").trim();
+        if (!answer) return res.status(502).json({ error: "Gemini no devolvió una respuesta." });
+        res.json({ answer });
+    } catch (error) { console.error("Error de Gemini:", error.message); res.status(500).json({ error: "No se pudo conectar con Gemini." }); }
+});
 // ========================================
 // ESTADO DEL SISTEMA
 // ========================================
