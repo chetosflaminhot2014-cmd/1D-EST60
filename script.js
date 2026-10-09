@@ -583,7 +583,7 @@ function iniciarHorarioInteligente() {
         );
 
         const siguientes = periodos.filter(periodo =>
-            periodo.inicio > minutos && !periodo.receso
+            periodo.inicio > minutos
         );
 
         const siguiente = siguientes[0];
