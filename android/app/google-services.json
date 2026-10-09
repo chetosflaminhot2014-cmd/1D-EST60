@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1094481207224",
+    "project_id": "d-est60",
+    "storage_bucket": "d-est60.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1094481207224:android:da96d9e796d317681ef94d",
+        "android_client_info": {
+          "package_name": "mx.est60.grupo1d"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaIMmX8qXtGyIASvnapkrgdTrbh9dNMSM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
