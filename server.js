@@ -290,9 +290,54 @@ app.delete("/api/avisos/:id", requireAdmin, async (req, res) => {
 // TAREAS
 // ========================================
 
+// Elimina tareas cuya fecha de entrega fue hace dos días o más.
+// Se usa la fecha local de México y se conserva el registro en el historial.
+let limpiezaTareasEnCurso = false;
+
+async function eliminarTareasVencidas() {
+    if (limpiezaTareasEnCurso) return;
+    limpiezaTareasEnCurso = true;
+
+    try {
+        const result = await pool.query(
+            `DELETE FROM tareas
+             WHERE fecha_entrega <=
+                 (CURRENT_TIMESTAMP AT TIME ZONE 'America/Mexico_City')::date - 2
+             RETURNING *`
+        );
+
+        for (const tarea of result.rows) {
+            await registrarCambio(
+                "ELIMINACIÓN AUTOMÁTICA",
+                "Tarea",
+                tarea,
+                tarea,
+                null
+            );
+        }
+
+        if (result.rowCount > 0) {
+            console.log(`Limpieza automática: se eliminaron ${result.rowCount} tarea(s) vencida(s).`);
+        }
+    } catch (error) {
+        console.error("ERROR AL ELIMINAR TAREAS VENCIDAS:", error);
+    } finally {
+        limpiezaTareasEnCurso = false;
+    }
+}
+
+// Ejecuta la limpieza al iniciar y después cada seis horas.
+// Si el servicio se duerme, también se limpia cuando alguien consulta las tareas.
+eliminarTareasVencidas();
+const intervaloLimpiezaTareas = setInterval(eliminarTareasVencidas, 6 * 60 * 60 * 1000);
+if (typeof intervaloLimpiezaTareas.unref === "function") {
+    intervaloLimpiezaTareas.unref();
+}
+
 // Obtener tareas
 app.get("/api/tareas", async (req, res) => {
     try {
+        await eliminarTareasVencidas();
 
         const result = await pool.query(
             "SELECT * FROM tareas ORDER BY fecha_entrega ASC, id ASC"
