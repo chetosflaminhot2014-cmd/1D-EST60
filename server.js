@@ -638,7 +638,7 @@ app.post("/api/gemini", async (req, res) => {
     if (!apiKey) return res.status(503).json({ error: "Gemini no está configurado todavía. Falta GEMINI_API_KEY en Render." });
     if (!message || message.length > 1200) return res.status(400).json({ error: "Escribe una pregunta de hasta 1200 caracteres." });
     try {
-        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(apiKey), {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=" + encodeURIComponent(apiKey), {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 system_instruction: { parts: [{ text: "Eres un asistente educativo para alumnos de secundaria de México. Responde en español claro, explica paso a paso y ayuda a aprender. No pidas datos personales ni inventes instrucciones escolares." }] },
