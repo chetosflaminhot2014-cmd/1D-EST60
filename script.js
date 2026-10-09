@@ -692,3 +692,69 @@ document.addEventListener("DOMContentLoaded", () => {
     actualizarFecha();
     iniciarHorarioInteligente();
 });
+
+
+/* ==========================================
+   SOPORTE PWA: INSTALACIÓN Y SERVICE WORKER
+========================================== */
+
+let eventoInstalacionPWA = null;
+
+const botonInstalarPWA = document.getElementById("installAppButton");
+const ayudaInstalacionPWA = document.getElementById("installAppHelp");
+
+function mostrarAyudaInstalacion(mensaje) {
+    if (!ayudaInstalacionPWA) return;
+    ayudaInstalacionPWA.textContent = mensaje;
+    ayudaInstalacionPWA.hidden = false;
+}
+
+window.addEventListener("beforeinstallprompt", evento => {
+    evento.preventDefault();
+    eventoInstalacionPWA = evento;
+    if (botonInstalarPWA) {
+        botonInstalarPWA.hidden = false;
+        botonInstalarPWA.textContent = "Instalar app";
+    }
+});
+
+window.addEventListener("appinstalled", () => {
+    eventoInstalacionPWA = null;
+    if (botonInstalarPWA) botonInstalarPWA.hidden = true;
+    if (ayudaInstalacionPWA) {
+        ayudaInstalacionPWA.hidden = false;
+        ayudaInstalacionPWA.textContent = "La app se instaló correctamente en este dispositivo.";
+    }
+});
+
+if (botonInstalarPWA) {
+    botonInstalarPWA.addEventListener("click", async () => {
+        if (eventoInstalacionPWA) {
+            eventoInstalacionPWA.prompt();
+            await eventoInstalacionPWA.userChoice;
+            eventoInstalacionPWA = null;
+            return;
+        }
+
+        const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        const estaInstalada = window.matchMedia("(display-mode: standalone)").matches
+            || window.navigator.standalone === true;
+
+        if (estaInstalada) {
+            mostrarAyudaInstalacion("La app ya está instalada en este dispositivo.");
+        } else if (esIOS) {
+            mostrarAyudaInstalacion('Para instalarla en iPhone o iPad: abre el menú Compartir de Safari y elige “Añadir a pantalla de inicio”.');
+        } else {
+            mostrarAyudaInstalacion('Si no aparece la ventana de instalación, abre el menú del navegador y elige “Instalar aplicación” o “Añadir a pantalla de inicio”.');
+        }
+    });
+}
+
+// Se registra únicamente en la página principal; el service worker no intercepta
+// la API externa ni guarda respuestas de tareas, avisos o datos administrativos.
+if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+            .catch(error => console.error("No se pudo registrar la app instalable:", error));
+    });
+}
