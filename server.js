@@ -647,7 +647,19 @@ app.post("/api/gemini", async (req, res) => {
             })
         });
         const data = await response.json();
-        if (!response.ok) { console.error("Gemini API error:", response.status); return res.status(502).json({ error: "Gemini no pudo responder. Inténtalo más tarde." }); }
+        if (!response.ok) {
+            const apiMessage = typeof data.error?.message === "string" ? data.error.message : "";
+            console.error("Gemini API error:", response.status, apiMessage.slice(0, 300));
+            let mensaje = "Gemini no pudo responder. Inténtalo más tarde.";
+            if (response.status === 400 || response.status === 403) {
+                mensaje = "La clave de Gemini parece inválida o no tiene permiso. Revisa GEMINI_API_KEY en Render.";
+            } else if (response.status === 429) {
+                mensaje = "Gemini alcanzó el límite de uso de la API. Espera un poco e inténtalo de nuevo.";
+            } else if (response.status === 404) {
+                mensaje = "El modelo de Gemini no está disponible para esta clave. Hay que revisar la configuración del modelo.";
+            }
+            return res.status(502).json({ error: mensaje });
+        }
         const answer = (data.candidates?.[0]?.content?.parts || []).map(part => part.text || "").join("\n").trim();
         if (!answer) return res.status(502).json({ error: "Gemini no devolvió una respuesta." });
         res.json({ answer });
