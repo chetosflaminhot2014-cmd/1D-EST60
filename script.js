@@ -177,6 +177,7 @@ async function cargarTareasPublicas() {
                 <h3>${escapeHTML(tarea.titulo)}</h3>
                 <p>${escapeHTML(tarea.descripcion || "")}</p>
                 <strong>Entrega: ${escapeHTML(formatearFecha(tarea.fecha_entrega))}</strong>
+                <button class="gemini-task-button" type="button" data-gemini-task data-materia="${escapeHTML(tarea.materia)}" data-titulo="${escapeHTML(tarea.titulo)}" data-descripcion="${escapeHTML(tarea.descripcion || "")}" data-entrega="${escapeHTML(formatearFecha(tarea.fecha_entrega))}">✦ Pedir ayuda a Gemini</button>
             `;
 
             contenedor.appendChild(elemento);
@@ -758,3 +759,42 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
             .catch(error => console.error("No se pudo registrar la app instalable:", error));
     });
 }
+
+/* ASISTENTE ESCOLAR GEMINI */
+(function iniciarGeminiEscolar() {
+    const tareas = document.getElementById("tareasPublicas");
+    if (!tareas) return;
+    const panel = document.createElement("section");
+    panel.id = "geminiPanel"; panel.className = "gemini-panel";
+    panel.innerHTML = '<div class="gemini-panel-header"><div class="gemini-brand-icon">✦</div><div class="gemini-heading"><span>ASISTENTE DE ESTUDIO</span><h3>Gemini para 1°D</h3><p>Resuelve dudas y aprende paso a paso.</p></div><button type="button" class="gemini-close" id="geminiClose" aria-label="Cerrar">×</button></div><div class="gemini-messages" id="geminiMessages"><div class="gemini-message gemini-message-bot">¡Hola! Soy Gemini. Puedo explicarte una tarea, darte ejemplos o ayudarte a estudiar. ¿Qué necesitas entender?</div></div><form class="gemini-form" id="geminiForm"><label class="sr-only" for="geminiInput">Escribe tu pregunta</label><textarea id="geminiInput" maxlength="1200" rows="2" placeholder="Escribe tu duda..." required></textarea><button id="geminiSend" type="submit">Enviar ↑</button></form><p class="gemini-note">La IA puede equivocarse. Verifica las respuestas con tus apuntes o tu profesor. No compartas datos personales.</p>';
+    tareas.insertAdjacentElement("afterend", panel);
+    const messages = panel.querySelector("#geminiMessages");
+    const form = panel.querySelector("#geminiForm");
+    const input = panel.querySelector("#geminiInput");
+    const send = panel.querySelector("#geminiSend");
+    let taskContext = '';
+    function addMessage(text, role) {
+        const item = document.createElement("div");
+        item.className = "gemini-message " + (role === "user" ? "gemini-message-user" : "gemini-message-bot");
+        item.textContent = text; messages.appendChild(item); messages.scrollTop = messages.scrollHeight; return item;
+    }
+    tareas.addEventListener("click", event => {
+        const button = event.target.closest("[data-gemini-task]"); if (!button) return;
+        taskContext = "Materia: " + button.dataset.materia + "\nTarea: " + button.dataset.titulo + "\nDescripción: " + (button.dataset.descripcion || "Sin descripción") + "\nEntrega: " + button.dataset.entrega;
+        panel.classList.add("gemini-panel-open"); panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        input.value = "Ayúdame a entender esta tarea y explícame cómo empezar."; input.focus({ preventScroll: true });
+    });
+    panel.querySelector("#geminiClose").addEventListener("click", () => panel.classList.remove("gemini-panel-open"));
+    form.addEventListener("submit", async event => {
+        event.preventDefault(); const question = input.value.trim(); if (!question || send.disabled) return;
+        addMessage(question, "user"); input.value = ""; send.disabled = true; send.textContent = "Pensando…";
+        const loading = addMessage("Gemini está preparando una respuesta…", "bot");
+        try {
+            const response = await fetch(API_BASE + "/api/gemini", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: question, taskContext }) });
+            const data = await response.json(); loading.remove();
+            if (!response.ok) throw new Error(data.error || "No se pudo obtener una respuesta.");
+            addMessage(data.answer, "bot");
+        } catch (error) { loading.remove(); addMessage(error.message || 'No se pudo conectar con Gemini.', 'bot'); }
+        finally { send.disabled = false; send.textContent = "Enviar ↑"; input.focus(); }
+    });
+})();
