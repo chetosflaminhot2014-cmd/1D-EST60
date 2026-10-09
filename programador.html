@@ -96,6 +96,14 @@
                 </span>
             </button>
 
+            <button class="menu-button" data-section="historial">
+                🕘
+                <span>
+                    <strong>Historial</strong>
+                    <small>Registro de cambios</small>
+                </span>
+            </button>
+
         </section>
 
 
@@ -698,10 +706,31 @@
          JAVASCRIPT
     ========================== -->
 
+
+        <!-- HISTORIAL ADMINISTRATIVO -->
+        <section id="historial" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <span class="section-label">AUDITORÍA</span>
+                    <h2>Historial de cambios</h2>
+                    <p>Registro de publicaciones creadas, editadas y eliminadas.</p>
+                </div>
+                <button type="button" class="secondary-button" onclick="cargarHistorial()">Actualizar historial</button>
+            </div>
+            <div class="admin-card">
+                <div id="listaHistorial" class="history-list">
+                    <p class="loading">Selecciona Historial para consultar los cambios.</p>
+                </div>
+            </div>
+        </section>
+
     <script>
 
         const API_BASE = "https://oned-est60-server.onrender.com";
         const ADMIN_KEY = sessionStorage.getItem("est60_admin_key") || "";
+        let avisosActuales = [];
+        let tareasActuales = [];
+        let eventosActuales = [];
 
         // ==========================================
         // NAVEGACIÓN DEL PANEL
@@ -760,6 +789,10 @@
                     comprobarSistema();
                 }
 
+                if (sectionId === "historial") {
+                    cargarHistorial();
+                }
+
             });
 
         });
@@ -790,6 +823,7 @@
 
                 const avisos =
                     await response.json();
+                avisosActuales = avisos;
 
 
                 if (avisos.length === 0) {
@@ -835,12 +869,10 @@
 
                         </div>
 
-                        <button
-                            class="delete-button"
-                            onclick="eliminarAviso(${aviso.id})"
-                        >
-                            Eliminar
-                        </button>
+                        <div class="item-actions">
+                            <button class="edit-button" onclick="editarAviso(${aviso.id})">Editar</button>
+                            <button class="delete-button" onclick="eliminarAviso(${aviso.id})">Eliminar</button>
+                        </div>
 
                     `;
 
@@ -985,6 +1017,7 @@
 
                 const tareas =
                     await response.json();
+                tareasActuales = tareas;
 
 
                 if (tareas.length === 0) {
@@ -1033,12 +1066,10 @@
 
                         </div>
 
-                        <button
-                            class="delete-button"
-                            onclick="eliminarTarea(${tarea.id})"
-                        >
-                            Eliminar
-                        </button>
+                        <div class="item-actions">
+                            <button class="edit-button" onclick="editarTarea(${tarea.id})">Editar</button>
+                            <button class="delete-button" onclick="eliminarTarea(${tarea.id})">Eliminar</button>
+                        </div>
 
                     `;
 
@@ -1191,6 +1222,7 @@
 
                 const eventos =
                     await response.json();
+                eventosActuales = eventos;
 
 
                 if (eventos.length === 0) {
@@ -1234,12 +1266,10 @@
 
                         </div>
 
-                        <button
-                            class="delete-button"
-                            onclick="eliminarEvento(${evento.id})"
-                        >
-                            Eliminar
-                        </button>
+                        <div class="item-actions">
+                            <button class="edit-button" onclick="editarEvento(${evento.id})">Editar</button>
+                            <button class="delete-button" onclick="eliminarEvento(${evento.id})">Eliminar</button>
+                        </div>
 
                     `;
 
@@ -1360,6 +1390,100 @@
 
         }
 
+
+        // EDICIÓN DE PUBLICACIONES
+        async function guardarEdicion(url, datos, recargar) {
+            const response = await fetch(url, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+                body: JSON.stringify(datos)
+            });
+            const resultado = await response.json();
+            if (!response.ok) throw new Error(resultado.error || "No se pudo guardar.");
+            await recargar();
+            alert("Cambios guardados correctamente.");
+        }
+
+        async function editarAviso(id) {
+            const aviso = avisosActuales.find(item => Number(item.id) === Number(id));
+            if (!aviso) return alert("Actualiza la lista e inténtalo de nuevo.");
+            const titulo = prompt("Título del aviso:", aviso.titulo);
+            if (titulo === null) return;
+            const contenido = prompt("Contenido del aviso:", aviso.contenido);
+            if (contenido === null) return;
+            if (!titulo.trim() || !contenido.trim()) return alert("El título y el contenido no pueden quedar vacíos.");
+            try { await guardarEdicion(`${API_BASE}/api/avisos/${id}`, { titulo: titulo.trim(), contenido: contenido.trim() }, cargarAvisos); }
+            catch (error) { alert(error.message || "No se pudo editar el aviso."); }
+        }
+
+        async function editarTarea(id) {
+            const tarea = tareasActuales.find(item => Number(item.id) === Number(id));
+            if (!tarea) return alert("Actualiza la lista e inténtalo de nuevo.");
+            const materia = prompt("Materia:", tarea.materia);
+            if (materia === null) return;
+            const titulo = prompt("Título de la tarea:", tarea.titulo);
+            if (titulo === null) return;
+            const descripcion = prompt("Descripción:", tarea.descripcion || "");
+            if (descripcion === null) return;
+            const fecha_entrega = prompt("Fecha de entrega (AAAA-MM-DD):", String(tarea.fecha_entrega).slice(0, 10));
+            if (fecha_entrega === null) return;
+            if (!materia.trim() || !titulo.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(fecha_entrega)) return alert("Revisa la materia, el título y la fecha (AAAA-MM-DD).");
+            try { await guardarEdicion(`${API_BASE}/api/tareas/${id}`, { materia: materia.trim(), titulo: titulo.trim(), descripcion: descripcion.trim(), fecha_entrega }, cargarTareas); }
+            catch (error) { alert(error.message || "No se pudo editar la tarea."); }
+        }
+
+        async function editarEvento(id) {
+            const evento = eventosActuales.find(item => Number(item.id) === Number(id));
+            if (!evento) return alert("Actualiza la lista e inténtalo de nuevo.");
+            const titulo = prompt("Título del evento:", evento.titulo);
+            if (titulo === null) return;
+            const descripcion = prompt("Descripción:", evento.descripcion || "");
+            if (descripcion === null) return;
+            const fecha = prompt("Fecha del evento (AAAA-MM-DD):", String(evento.fecha).slice(0, 10));
+            if (fecha === null) return;
+            if (!titulo.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return alert("Revisa el título y la fecha (AAAA-MM-DD).");
+            try { await guardarEdicion(`${API_BASE}/api/eventos/${id}`, { titulo: titulo.trim(), descripcion: descripcion.trim(), fecha }, cargarEventos); }
+            catch (error) { alert(error.message || "No se pudo editar el evento."); }
+        }
+
+        // HISTORIAL DE CAMBIOS
+        async function cargarHistorial() {
+            const lista = document.getElementById("listaHistorial");
+            lista.innerHTML = '<p class="loading">Cargando historial...</p>';
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/historial`, { headers: { "x-admin-key": ADMIN_KEY } });
+                const cambios = await response.json();
+                if (!response.ok) throw new Error(cambios.error || "No se pudo cargar el historial.");
+                if (!cambios.length) {
+                    lista.innerHTML = '<p class="empty-message">Todavía no hay cambios registrados.</p>';
+                    return;
+                }
+                lista.innerHTML = "";
+                cambios.forEach(cambio => {
+                    const elemento = document.createElement("article");
+                    elemento.className = "history-item";
+                    const fecha = new Date(cambio.fecha).toLocaleString("es-MX");
+                    const anterior = cambio.datos_anteriores ? JSON.stringify(cambio.datos_anteriores, null, 2) : "Sin datos anteriores";
+                    const nuevo = cambio.datos_nuevos ? JSON.stringify(cambio.datos_nuevos, null, 2) : "Sin datos nuevos";
+                    elemento.innerHTML = `
+                        <div class="history-item-top">
+                            <span class="item-tag">${escapeHTML(cambio.entidad)}</span>
+                            <span class="item-date">${escapeHTML(fecha)}</span>
+                        </div>
+                        <h3>${escapeHTML(cambio.accion)} · ${escapeHTML(cambio.titulo)}</h3>
+                        <p>Registro #${escapeHTML(String(cambio.registro_id ?? "—"))}</p>
+                        <details class="history-details">
+                            <summary>Ver detalles del cambio</summary>
+                            <strong>Antes</strong><pre>${escapeHTML(anterior)}</pre>
+                            <strong>Después</strong><pre>${escapeHTML(nuevo)}</pre>
+                        </details>`;
+                    lista.appendChild(elemento);
+                });
+            } catch (error) {
+                console.error(error);
+                lista.innerHTML = `<p class="error-message">${escapeHTML(error.message || "No se pudo cargar el historial.")}</p>`;
+            }
+        }
 
         // ==========================================
         // SISTEMA
