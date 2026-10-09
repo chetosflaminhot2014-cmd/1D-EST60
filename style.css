@@ -2367,3 +2367,32 @@ a {
     .access-page .login-right { padding: 34px 22px 40px; }
     .access-page .login-kicker { font-size: 9px; letter-spacing: 1.2px; }
 }
+
+
+/* ESTILOS PWA */
+.install-app-button {
+    cursor: pointer;
+    font: inherit;
+    border: 1px solid rgba(147, 197, 253, .55);
+}
+.install-app-button[hidden],
+.install-app-help[hidden] {
+    display: none !important;
+}
+.install-app-help {
+    max-width: 620px;
+    margin: 14px 0 0;
+    padding: 12px 15px;
+    color: #dbeafe;
+    background: rgba(37, 99, 235, .14);
+    border: 1px solid rgba(147, 197, 253, .3);
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+@media (max-width: 600px) {
+    .hero-buttons .install-app-button {
+        width: 100%;
+        min-height: 46px;
+    }
+}
