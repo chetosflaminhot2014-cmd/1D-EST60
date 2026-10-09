@@ -227,8 +227,6 @@ app.post("/api/avisos", requireAdmin, async (req, res) => {
         );
 
         await registrarCambio("CREACIÓN", "Aviso", result.rows[0], null, result.rows[0]);
-        await registrarCambio("CREACIÓN", "Tarea", result.rows[0], null, result.rows[0]);
-        await registrarCambio("CREACIÓN", "Evento", result.rows[0], null, result.rows[0]);
         res.status(201).json(result.rows[0]);
 
     } catch (error) {
@@ -343,6 +341,7 @@ app.post("/api/tareas", requireAdmin, async (req, res) => {
             ]
         );
 
+        await registrarCambio("CREACIÓN", "Tarea", result.rows[0], null, result.rows[0]);
         res.status(201).json(result.rows[0]);
 
     } catch (error) {
@@ -455,6 +454,7 @@ app.post("/api/eventos", requireAdmin, async (req, res) => {
             ]
         );
 
+        await registrarCambio("CREACIÓN", "Evento", result.rows[0], null, result.rows[0]);
         res.status(201).json(result.rows[0]);
 
     } catch (error) {
