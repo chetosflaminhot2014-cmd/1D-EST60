@@ -1,0 +1,34 @@
+name: Verificar servidor 1D EST60
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "server.js"
+      - "package.json"
+      - ".github/workflows/check-backend.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Verificar sintaxis del servidor
+        run: node --check server.js
+
+      - name: Comprobar Firebase Admin
+        run: npm ls firebase-admin --depth=0
