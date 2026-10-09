@@ -47,7 +47,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p android/app/src/main/assets/www
-          cp index.html style.css script.js logo.png manifest.json icon-192.svg icon-512.svg android/app/src/main/assets/www/
+          cp index.html acceso.html programador.html style.css script.js logo.png manifest.json icon-192.svg icon-512.svg android/app/src/main/assets/www/
           python3 - <<'PY'
           from pathlib import Path
           p = Path("android/app/src/main/assets/www/index.html")
