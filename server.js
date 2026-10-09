@@ -93,7 +93,7 @@ app.use((req, res, next) => {
     res.setHeader("Vary", "Origin");
     res.setHeader(
         "Access-Control-Allow-Methods",
-        "GET, POST, DELETE, OPTIONS"
+        "GET, POST, PUT, DELETE, OPTIONS"
     );
     res.setHeader(
         "Access-Control-Allow-Headers",
@@ -108,6 +108,36 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+
+// Historial persistente de operaciones administrativas.
+pool.query(`
+    CREATE TABLE IF NOT EXISTS historial_admin (
+        id SERIAL PRIMARY KEY,
+        accion VARCHAR(30) NOT NULL,
+        entidad VARCHAR(30) NOT NULL,
+        registro_id INTEGER,
+        titulo TEXT NOT NULL DEFAULT '',
+        datos_anteriores JSONB,
+        datos_nuevos JSONB,
+        fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+`).catch(error => console.error("ERROR AL PREPARAR EL HISTORIAL:", error));
+
+async function registrarCambio(accion, entidad, registro, anterior = null, nuevo = null) {
+    try {
+        const titulo = (nuevo && (nuevo.titulo || nuevo.materia))
+            || (anterior && (anterior.titulo || anterior.materia))
+            || "Registro";
+        await pool.query(
+            `INSERT INTO historial_admin
+             (accion, entidad, registro_id, titulo, datos_anteriores, datos_nuevos)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [accion, entidad, registro ? registro.id : null, titulo, anterior, nuevo]
+        );
+    } catch (error) {
+        console.error("ERROR AL REGISTRAR CAMBIO:", error);
+    }
+}
 
 // La clave de administración debe configurarse como variable ADMIN_KEY en Render.
 function requireAdmin(req, res, next) {
@@ -196,6 +226,9 @@ app.post("/api/avisos", requireAdmin, async (req, res) => {
             ]
         );
 
+        await registrarCambio("CREACIÓN", "Aviso", result.rows[0], null, result.rows[0]);
+        await registrarCambio("CREACIÓN", "Tarea", result.rows[0], null, result.rows[0]);
+        await registrarCambio("CREACIÓN", "Evento", result.rows[0], null, result.rows[0]);
         res.status(201).json(result.rows[0]);
 
     } catch (error) {
@@ -209,18 +242,40 @@ app.post("/api/avisos", requireAdmin, async (req, res) => {
     }
 });
 
+// Editar aviso
+app.put("/api/avisos/:id", requireAdmin, async (req, res) => {
+    try {
+        const { titulo, contenido } = req.body;
+        if (typeof titulo !== "string" || !titulo.trim() || typeof contenido !== "string" || !contenido.trim()) {
+            return res.status(400).json({ error: "Título y contenido son obligatorios." });
+        }
+        const anterior = await pool.query("SELECT * FROM avisos WHERE id = $1", [req.params.id]);
+        if (!anterior.rows.length) return res.status(404).json({ error: "Aviso no encontrado." });
+        const result = await pool.query(
+            "UPDATE avisos SET titulo = $1, contenido = $2 WHERE id = $3 RETURNING *",
+            [titulo.trim(), contenido.trim(), req.params.id]
+        );
+        await registrarCambio("EDICIÓN", "Aviso", result.rows[0], anterior.rows[0], result.rows[0]);
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error("ERROR AL EDITAR AVISO:", error);
+        res.status(500).json({ error: "Error al editar el aviso." });
+    }
+});
+
 // Eliminar aviso
 app.delete("/api/avisos/:id", requireAdmin, async (req, res) => {
     try {
 
-        await pool.query(
-            "DELETE FROM avisos WHERE id = $1",
+        const result = await pool.query(
+            "DELETE FROM avisos WHERE id = $1 RETURNING *",
             [req.params.id]
         );
-
-        res.json({
-            success: true
-        });
+        if (!result.rows.length) {
+            return res.status(404).json({ error: "Aviso no encontrado." });
+        }
+        await registrarCambio("ELIMINACIÓN", "Aviso", result.rows[0], result.rows[0], null);
+        res.json({ success: true });
 
     } catch (error) {
 
@@ -301,18 +356,40 @@ app.post("/api/tareas", requireAdmin, async (req, res) => {
     }
 });
 
+// Editar tarea
+app.put("/api/tareas/:id", requireAdmin, async (req, res) => {
+    try {
+        const { materia, titulo, descripcion, fecha_entrega } = req.body;
+        if (typeof materia !== "string" || !materia.trim() || typeof titulo !== "string" || !titulo.trim() || typeof fecha_entrega !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(fecha_entrega)) {
+            return res.status(400).json({ error: "Materia, título y fecha válida son obligatorios." });
+        }
+        const anterior = await pool.query("SELECT * FROM tareas WHERE id = $1", [req.params.id]);
+        if (!anterior.rows.length) return res.status(404).json({ error: "Tarea no encontrada." });
+        const result = await pool.query(
+            "UPDATE tareas SET materia = $1, titulo = $2, descripcion = $3, fecha_entrega = $4 WHERE id = $5 RETURNING *",
+            [materia.trim(), titulo.trim(), typeof descripcion === "string" ? descripcion.trim() : "", fecha_entrega, req.params.id]
+        );
+        await registrarCambio("EDICIÓN", "Tarea", result.rows[0], anterior.rows[0], result.rows[0]);
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error("ERROR AL EDITAR TAREA:", error);
+        res.status(500).json({ error: "Error al editar la tarea." });
+    }
+});
+
 // Eliminar tarea
 app.delete("/api/tareas/:id", requireAdmin, async (req, res) => {
     try {
 
-        await pool.query(
-            "DELETE FROM tareas WHERE id = $1",
+        const result = await pool.query(
+            "DELETE FROM tareas WHERE id = $1 RETURNING *",
             [req.params.id]
         );
-
-        res.json({
-            success: true
-        });
+        if (!result.rows.length) {
+            return res.status(404).json({ error: "Tarea no encontrada." });
+        }
+        await registrarCambio("ELIMINACIÓN", "Tarea", result.rows[0], result.rows[0], null);
+        res.json({ success: true });
 
     } catch (error) {
 
@@ -391,18 +468,40 @@ app.post("/api/eventos", requireAdmin, async (req, res) => {
     }
 });
 
+// Editar evento
+app.put("/api/eventos/:id", requireAdmin, async (req, res) => {
+    try {
+        const { titulo, descripcion, fecha } = req.body;
+        if (typeof titulo !== "string" || !titulo.trim() || typeof fecha !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+            return res.status(400).json({ error: "Título y fecha válida son obligatorios." });
+        }
+        const anterior = await pool.query("SELECT * FROM eventos WHERE id = $1", [req.params.id]);
+        if (!anterior.rows.length) return res.status(404).json({ error: "Evento no encontrado." });
+        const result = await pool.query(
+            "UPDATE eventos SET titulo = $1, descripcion = $2, fecha = $3 WHERE id = $4 RETURNING *",
+            [titulo.trim(), typeof descripcion === "string" ? descripcion.trim() : "", fecha, req.params.id]
+        );
+        await registrarCambio("EDICIÓN", "Evento", result.rows[0], anterior.rows[0], result.rows[0]);
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error("ERROR AL EDITAR EVENTO:", error);
+        res.status(500).json({ error: "Error al editar el evento." });
+    }
+});
+
 // Eliminar evento
 app.delete("/api/eventos/:id", requireAdmin, async (req, res) => {
     try {
 
-        await pool.query(
-            "DELETE FROM eventos WHERE id = $1",
+        const result = await pool.query(
+            "DELETE FROM eventos WHERE id = $1 RETURNING *",
             [req.params.id]
         );
-
-        res.json({
-            success: true
-        });
+        if (!result.rows.length) {
+            return res.status(404).json({ error: "Evento no encontrado." });
+        }
+        await registrarCambio("ELIMINACIÓN", "Evento", result.rows[0], result.rows[0], null);
+        res.json({ success: true });
 
     } catch (error) {
 
@@ -412,6 +511,19 @@ app.delete("/api/eventos/:id", requireAdmin, async (req, res) => {
             error: "Error al eliminar el evento",
             detalle: error.message
         });
+    }
+});
+
+// Consultar historial administrativo (solo administrador).
+app.get("/api/admin/historial", requireAdmin, async (req, res) => {
+    try {
+        const result = await pool.query(
+            "SELECT id, accion, entidad, registro_id, titulo, datos_anteriores, datos_nuevos, fecha FROM historial_admin ORDER BY fecha DESC, id DESC LIMIT 200"
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error("ERROR AL OBTENER HISTORIAL:", error);
+        res.status(500).json({ error: "No se pudo obtener el historial." });
     }
 });
 
