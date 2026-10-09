@@ -7,7 +7,7 @@
   var defaults = { name: '', theme: 'dark', favorites: ['Inglés', 'Tecnología'] };
   function read(key, fallback) { try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (_) { return fallback; } }
   function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (_) { return false; } }
-  function esc(value) { return String(value == null ? '' : value).replace(/[&<>\"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]); }); }
+  function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) { if (ch === '&') return '&amp;'; if (ch === '<') return '&lt;'; if (ch === '>') return '&gt;'; if (ch === '"') return '&quot;'; return '&#39;'; }); }
   function todayKey() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
   function dateLabel(value) { if (!value) return 'Sin fecha'; var d = new Date(value + (String(value).length === 10 ? 'T12:00:00' : '')); return isNaN(d.getTime()) ? value : d.toLocaleDateString('es-MX',{day:'numeric',month:'short'}); }
   var profile = Object.assign({}, defaults, read(KEY, {}));
