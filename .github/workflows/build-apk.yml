@@ -64,6 +64,31 @@ jobs:
           )
           PY
 
+      - name: Crear iconos Android usando el logo original
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          source = Image.open("logo.png").convert("RGBA")
+          sizes = {
+              "mipmap-mdpi": 48,
+              "mipmap-hdpi": 72,
+              "mipmap-xhdpi": 96,
+              "mipmap-xxhdpi": 144,
+              "mipmap-xxxhdpi": 192,
+          }
+          for folder, size in sizes.items():
+              target = Path("android/app/src/main/res") / folder
+              target.mkdir(parents=True, exist_ok=True)
+              canvas = Image.new("RGBA", (size, size), (13, 26, 42, 255))
+              image = source.copy()
+              image.thumbnail((int(size * 0.82), int(size * 0.82)), Image.Resampling.LANCZOS)
+              canvas.alpha_composite(image, ((size - image.width) // 2, (size - image.height) // 2))
+              canvas.convert("RGB").save(target / "ic_launcher.png", quality=95)
+          PY
+
       - name: Compilar APK
         working-directory: android
         run: gradle --no-daemon assembleDebug
