@@ -766,9 +766,10 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
     if (!tareas) return;
     const panel = document.createElement("section");
     panel.id = "geminiPanel"; panel.className = "gemini-panel";
-    panel.innerHTML = '<div class="gemini-panel-header"><div class="gemini-brand-icon">✦</div><div class="gemini-heading"><span>ASISTENTE DE ESTUDIO</span><h3>Gemini para 1°D</h3><p>Resuelve dudas y aprende paso a paso.</p></div><button type="button" class="gemini-close" id="geminiClose" aria-label="Cerrar">×</button></div><div class="gemini-messages" id="geminiMessages"><div class="gemini-message gemini-message-bot">¡Hola! Soy Gemini. Puedo explicarte una tarea, darte ejemplos o ayudarte a estudiar. ¿Qué necesitas entender?</div></div><form class="gemini-form" id="geminiForm"><label class="sr-only" for="geminiInput">Escribe tu pregunta</label><textarea id="geminiInput" maxlength="1200" rows="2" placeholder="Escribe tu duda..." required></textarea><button id="geminiSend" type="submit">Enviar ↑</button></form><p class="gemini-note">La IA puede equivocarse. Verifica las respuestas con tus apuntes o tu profesor. No compartas datos personales.</p>';
+    panel.innerHTML = '<div class="gemini-panel-header"><div class="gemini-brand-icon">✦</div><div class="gemini-heading"><span>ASISTENTE DE ESTUDIO</span><h3>Gemini para 1°D</h3><p>Resuelve dudas y aprende paso a paso.</p></div><button type="button" class="gemini-close" id="geminiClose" aria-label="Cerrar">×</button></div><div class="gemini-selected-task" id="geminiSelectedTask" hidden></div><div class="gemini-messages" id="geminiMessages"><div class="gemini-message gemini-message-bot">¡Hola! Soy Gemini. Puedo explicarte una tarea, darte ejemplos o ayudarte a estudiar. ¿Qué necesitas entender?</div></div><form class="gemini-form" id="geminiForm"><label class="sr-only" for="geminiInput">Escribe tu pregunta</label><textarea id="geminiInput" maxlength="1200" rows="2" placeholder="Escribe tu duda..." required></textarea><button id="geminiSend" type="submit">Enviar ↑</button></form><p class="gemini-note">La IA puede equivocarse. Verifica las respuestas con tus apuntes o tu profesor. No compartas datos personales.</p>';
     tareas.insertAdjacentElement("afterend", panel);
     const messages = panel.querySelector("#geminiMessages");
+    const selectedTask = panel.querySelector("#geminiSelectedTask");
     const form = panel.querySelector("#geminiForm");
     const input = panel.querySelector("#geminiInput");
     const send = panel.querySelector("#geminiSend");
@@ -781,6 +782,8 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
     tareas.addEventListener("click", event => {
         const button = event.target.closest("[data-gemini-task]"); if (!button) return;
         taskContext = "Materia: " + button.dataset.materia + "\nTarea: " + button.dataset.titulo + "\nDescripción: " + (button.dataset.descripcion || "Sin descripción") + "\nEntrega: " + button.dataset.entrega;
+        selectedTask.hidden = false;
+        selectedTask.textContent = "AYUDA CON ESTA TAREA · " + (button.dataset.materia || "Materia") + " — " + (button.dataset.titulo || "Tarea sin título") + " · Entrega: " + (button.dataset.entrega || "Sin fecha");
         panel.classList.add("gemini-panel-open"); panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
         input.value = "Ayúdame a entender esta tarea y explícame cómo empezar."; input.focus({ preventScroll: true });
     });
