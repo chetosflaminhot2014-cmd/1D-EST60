@@ -12,6 +12,8 @@ on:
       - "icon-192.svg"
       - "icon-512.svg"
       - "manifest.json"
+      - "android/app-extras.js"
+      - "android/app-extras.css"
       - ".github/workflows/build-apk.yml"
 
 permissions:
@@ -47,16 +49,20 @@ jobs:
         shell: bash
         run: |
           mkdir -p android/app/src/main/assets/www
-          cp index.html acceso.html programador.html style.css script.js logo.png manifest.json icon-192.svg icon-512.svg android/app/src/main/assets/www/
+          cp index.html acceso.html programador.html style.css script.js logo.png manifest.json icon-192.svg icon-512.svg android/app-extras.js android/app-extras.css android/app/src/main/assets/www/
           python3 - <<'PY'
           from pathlib import Path
           p = Path("android/app/src/main/assets/www/index.html")
           html = p.read_text(encoding="utf-8")
           marker = '<script src="script.js"></script>'
-          inject = '<script src="offline-mode.js"></script>\n    ' + marker
+          inject = '<script src="offline-mode.js"></script>\n    ' + marker + '\n    <script src="app-extras.js"></script>'
           if marker not in html:
               raise SystemExit("No se encontró la etiqueta script.js en index.html")
           html = html.replace(marker, inject, 1)
+          head_marker = '</head>'
+          if head_marker not in html:
+              raise SystemExit("No se encontró el cierre head en index.html")
+          html = html.replace(head_marker, '    <link rel="stylesheet" href="app-extras.css">\n' + head_marker, 1)
           p.write_text(html, encoding="utf-8")
           Path("android/app/src/main/assets/www/offline-mode.js").write_text(
               Path("android/offline-mode.js").read_text(encoding="utf-8"),
