@@ -2511,6 +2511,7 @@ a {
 .gemini-panel-open{display:block;animation:gemini-appear .22s ease-out}
 @keyframes gemini-appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .gemini-panel-header{display:flex;align-items:center;gap:13px;padding:20px;border-bottom:1px solid #203149;background:linear-gradient(120deg,#101f36,#101b30)}
+.gemini-selected-task{margin:14px 20px 0;padding:12px 14px;border:1px solid #31547a;border-left:3px solid #60a5fa;border-radius:9px;background:#10233a;color:#bfdbfe;font-size:12px;font-weight:700;line-height:1.6;overflow-wrap:anywhere}
 .gemini-brand-icon{display:grid;place-items:center;flex:0 0 45px;width:45px;height:45px;border:1px solid #5369e8;border-radius:13px;background:linear-gradient(145deg,#4338ca,#0891b2);color:#fff;font-size:25px}
 .gemini-heading{flex:1;min-width:0}.gemini-heading>span{color:#93c5fd;font-size:9px;font-weight:900;letter-spacing:1.3px}.gemini-heading h3{margin:4px 0;color:#fff;font-size:19px}.gemini-heading p{margin:0;color:#9aabc1;font-size:12px}
 .gemini-close{width:36px;height:36px;border:1px solid #34445c;border-radius:9px;background:#152238;color:#dbeafe;font-size:23px;cursor:pointer}
