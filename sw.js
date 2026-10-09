@@ -69,7 +69,7 @@ self.addEventListener("fetch", event => {
         }
         return response;
       });
-      return cached || networkRequest;
+      return cached || networkRequest.catch(() => cached);
     })
   );
 });
