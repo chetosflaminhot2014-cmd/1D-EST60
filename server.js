@@ -1015,6 +1015,34 @@ app.get("/api/admin/credentials", requireAdmin, async (req, res) => {
         res.status(500).json({ error: "No se pudieron cargar las solicitudes." });
     }
 });
+app.get("/api/admin/credentials/approved", requireAdmin, async (req, res) => {
+    try {
+        await chatTablesReady;
+        const result = await pool.query("SELECT id, correo, apodo, edad, revisada_en FROM credenciales_alumnos WHERE estado = 'aprobada' ORDER BY revisada_en DESC NULLS LAST");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("ERROR LEYENDO CREDENCIALES APROBADAS:", error.message);
+        res.status(500).json({ error: "No se pudieron cargar las credenciales aprobadas." });
+    }
+});
+app.post("/api/admin/credentials/:id/revoke", requireAdmin, async (req, res) => {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: "Credencial no válida." });
+    try {
+        await chatTablesReady;
+        const result = await pool.query(
+            "UPDATE credenciales_alumnos SET estado = 'rechazada', motivo = 'Acceso revocado por administración', foto = NULL, revisada_en = CURRENT_TIMESTAMP WHERE id = $1 AND estado = 'aprobada' RETURNING correo, apodo",
+            [id]
+        );
+        if (!result.rows.length) return res.status(404).json({ error: "La credencial no existe o ya no está aprobada." });
+        await pool.query("DELETE FROM chat_sesiones WHERE correo = $1", [result.rows[0].correo]);
+        await registrarCambio("REVOCACIÓN", "Credencial", { id, titulo: result.rows[0].apodo }, null, { estado: "rechazada" });
+        res.json({ success: true });
+    } catch (error) {
+        console.error("ERROR REVOCANDO CREDENCIAL:", error.message);
+        res.status(500).json({ error: "No se pudo revocar el acceso." });
+    }
+});
 app.post("/api/admin/credentials/:id/review", requireAdmin, async (req, res) => {
     const id = Number.parseInt(req.params.id, 10);
     const action = req.body?.action;
