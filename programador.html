@@ -773,6 +773,7 @@
         <section id="credenciales" class="admin-section">
             <div class="section-header"><div><span class="section-label">ACCESO AL CHAT</span><h2>Credenciales por aprobar</h2><p>Revisa las solicitudes manualmente. La foto se elimina al aprobar o rechazar.</p></div><button type="button" class="secondary-button" id="refreshCredentialsButton">Actualizar</button></div>
             <div class="admin-card"><p id="credentialsStatus" role="status" aria-live="polite">Solicitudes pendientes</p><div id="credentialsList" class="items-list"><p class="loading">Conectando con el servidor…</p></div></div>
+            <div class="admin-card"><div class="card-title-row"><h3>Credenciales aprobadas</h3><button type="button" class="secondary-button" id="refreshApprovedCredentialsButton">Actualizar</button></div><p id="approvedCredentialsStatus" role="status" aria-live="polite">Lista de credenciales aprobadas.</p><div id="approvedCredentialsList" class="items-list"></div></div>
             <div class="admin-card"><h3>Protección de datos</h3><p>Se usa un apodo, no un nombre legal. La solicitud requiere autorización de padre, madre o tutor. El sistema permanece deshabilitado hasta que un adulto responsable revise el proceso y se active CREDENTIALS_ENABLED=true en la configuración privada del servidor.</p></div>
         </section>
 
@@ -1057,10 +1058,37 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || "No se pudo guardar la decisión.");
                 await cargarCredenciales();
+                await cargarCredencialesAprobadas();
                 alert(action === "approve" ? "Credencial aprobada. El chat sigue deshabilitado hasta activar el sistema." : "Solicitud rechazada.");
             } catch (error) { alert(error.message || "Error al revisar la solicitud."); }
         }
         document.getElementById("refreshCredentialsButton")?.addEventListener("click", cargarCredenciales);
+
+        async function cargarCredencialesAprobadas() {
+            const list = document.getElementById("approvedCredentialsList");
+            const status = document.getElementById("approvedCredentialsStatus");
+            if (!list || !status) return;
+            try {
+                const response = await fetch(API_BASE + "/api/admin/credentials/approved", { headers: { "x-admin-key": ADMIN_KEY } });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudo cargar la lista.");
+                if (!data.length) { status.textContent = "No hay credenciales aprobadas."; list.replaceChildren(); return; }
+                status.textContent = data.length + " credencial(es) aprobada(s).";
+                list.innerHTML = data.map(item => '<article class="admin-card"><h3>' + escapeHTML(item.apodo) + ' · ' + Number(item.edad) + ' años</h3><p>Correo escolar: ' + escapeHTML(item.correo) + '</p><button type="button" class="secondary-button" data-revoke-credential="' + Number(item.id) + '">Revocar acceso al chat</button></article>').join("");
+                list.querySelectorAll("[data-revoke-credential]").forEach(button => button.addEventListener("click", async () => {
+                    if (!confirm("¿Revocar esta credencial y cerrar sus sesiones de chat?")) return;
+                    try {
+                        const response = await fetch(API_BASE + "/api/admin/credentials/" + encodeURIComponent(button.dataset.revokeCredential) + "/revoke", { method: "POST", headers: { "x-admin-key": ADMIN_KEY } });
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.error || "No se pudo revocar el acceso.");
+                        await cargarCredencialesAprobadas();
+                        alert("Acceso revocado.");
+                    } catch (error) { alert(error.message || "No se pudo revocar el acceso."); }
+                }));
+            } catch (error) { status.textContent = error.message || "No se pudo cargar la lista."; }
+        }
+        document.getElementById("refreshApprovedCredentialsButton")?.addEventListener("click", cargarCredencialesAprobadas);
+
 
         // ==========================================
         // AVISOS
