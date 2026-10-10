@@ -104,6 +104,7 @@ async function cargarAvisosPublicos() {
                 <div class="notice-icon">!</div>
                 <div class="notice-content">
                     <span class="notice-tag">AVISO GENERAL</span>
+                    ${aviso.imagen ? `<img class="publication-image notice-publication-image" src="${escapeHTML(aviso.imagen)}" alt="Imagen del aviso" loading="lazy">` : ""}
                     <h3>${escapeHTML(aviso.titulo)}</h3>
                     <p>${escapeHTML(aviso.contenido)}</p>
                     <small>Publicado: ${
@@ -174,6 +175,7 @@ async function cargarTareasPublicas() {
                     <span class="status-dot"></span>
                     <span>${escapeHTML(tarea.materia)}</span>
                 </div>
+                ${tarea.imagen ? `<img class="publication-image" src="${escapeHTML(tarea.imagen)}" alt="Imagen de la tarea" loading="lazy">` : ""}
                 <h3>${escapeHTML(tarea.titulo)}</h3>
                 <p>${escapeHTML(tarea.descripcion || "")}</p>
                 <strong>Entrega: ${escapeHTML(formatearFecha(tarea.fecha_entrega))}</strong>
@@ -233,6 +235,7 @@ async function cargarEventosPublicos() {
 
             elemento.innerHTML = `
                 <span>${String(index + 1).padStart(2, "0")}</span>
+                ${evento.imagen ? `<img class="publication-image" src="${escapeHTML(evento.imagen)}" alt="Imagen del evento" loading="lazy">` : ""}
                 <strong>${escapeHTML(evento.titulo)}</strong>
                 <p>${escapeHTML(evento.descripcion || "")}</p>
                 <small>${escapeHTML(formatearFecha(evento.fecha))}</small>
@@ -686,10 +689,30 @@ function iniciarHorarioInteligente() {
    INICIALIZACIÓN
 ========================================== */
 
+async function cargarImagenCalendarioPublica() {
+    const contenedor = document.getElementById("calendarioEscolarPublico");
+    if (!contenedor) return;
+    try {
+        const response = await fetch(`${API_BASE}/api/calendario/imagen`);
+        if (!response.ok) throw new Error("No se pudo cargar la imagen del calendario.");
+        const data = await response.json();
+        if (!data.imagen) {
+            contenedor.hidden = true;
+            contenedor.innerHTML = "";
+            return;
+        }
+        contenedor.innerHTML = `<img class="school-calendar-public-image" src="${escapeHTML(data.imagen)}" alt="Calendario escolar publicado por el administrador" loading="lazy"><p>Calendario escolar</p>`;
+        contenedor.hidden = false;
+    } catch (error) {
+        console.warn("No se pudo cargar la imagen del calendario escolar:", error);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     cargarAvisosPublicos();
     cargarTareasPublicas();
     cargarEventosPublicos();
+    cargarImagenCalendarioPublica();
     actualizarFecha();
     iniciarHorarioInteligente();
 });
