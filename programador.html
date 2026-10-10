@@ -1153,6 +1153,8 @@
 
 
                     event.target.reset();
+                    document.getElementById("avisoImagenPreview").hidden = true;
+                    document.getElementById("avisoImagenPreview").removeAttribute("src");
 
                     cargarAvisos();
 
@@ -1360,6 +1362,8 @@
 
 
                     event.target.reset();
+                    document.getElementById("tareaImagenPreview").hidden = true;
+                    document.getElementById("tareaImagenPreview").removeAttribute("src");
 
                     cargarTareas();
 
@@ -1558,6 +1562,8 @@
 
 
                     event.target.reset();
+                    document.getElementById("eventoImagenPreview").hidden = true;
+                    document.getElementById("eventoImagenPreview").removeAttribute("src");
 
                     cargarEventos();
 
