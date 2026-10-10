@@ -2730,3 +2730,19 @@ body.theme-dark .footer { border-top: 1px solid #1e293b; }
 .student-profile-form{display:grid;gap:9px;max-width:520px}.student-profile-form label{margin-top:5px;font-size:12px;font-weight:800;color:#334155}.student-profile-form input,.student-profile-form select{width:100%;min-height:45px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#f8fafc;color:#0f172a;font:inherit}.student-profile-form .btn{margin-top:7px;justify-self:start;border:0;cursor:pointer}.profile-status{min-height:18px;color:#166534;font-size:12px}
 .student-progress{padding-top:20px;border-top:1px solid #e5ebf3}.student-progress-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}.student-progress-heading h3{font-size:20px}.student-progress-heading>strong{font-size:25px;color:#2563eb}.student-progress-track{height:9px;margin-top:17px;overflow:hidden;border-radius:999px;background:#e2e8f0}.student-progress-bar{height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#7c3aed);transition:width .25s ease}.student-progress>p{margin-top:10px;color:#64748b;font-size:13px}.student-progress>small{display:block;margin-top:14px;color:#64748b;font-size:11px;line-height:1.5}.student-profile-task-list{display:grid;gap:8px;margin-top:15px}.student-profile-task{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid #e2e8f0;border-radius:10px;color:#1e293b;font-size:13px;cursor:pointer}.student-profile-task input{width:17px;height:17px;accent-color:#2563eb;flex:0 0 auto}.student-profile-task span{overflow-wrap:anywhere}.student-profile-task.is-complete span{text-decoration:line-through;color:#64748b}.profile-task-empty{padding:12px;border-radius:10px;background:#f8fafc;color:#64748b;font-size:12px}
 @media(min-width:760px){.student-profile-card{grid-template-columns:minmax(220px,.8fr) minmax(280px,1.2fr);align-items:start}.student-profile-summary{grid-column:1/-1}.student-progress{grid-column:1/-1}}
+
+
+/* El perfil web respeta el tema global seleccionado */
+body.theme-dark .student-profile-card{background:#0d1b2d;border-color:#24364d;color:#e5edf8;box-shadow:0 18px 45px rgba(0,0,0,.2)}
+body.theme-dark .student-profile-summary,body.theme-dark .student-progress{border-color:#26384e}
+body.theme-dark .student-profile-identity h3,body.theme-dark .student-progress-heading h3{color:#f1f5f9}
+body.theme-dark .student-profile-identity p,body.theme-dark .student-progress>p,body.theme-dark .student-progress>small{color:#a6b5c9}
+body.theme-dark .student-profile-form label{color:#dbe7f6}
+body.theme-dark .student-profile-form input,body.theme-dark .student-profile-form select{background:#091525;border-color:#33465f;color:#f1f5f9;color-scheme:dark}
+body.theme-dark .student-profile-form input::placeholder{color:#8193aa}
+body.theme-dark .student-profile-task{background:#101f33;border-color:#2a3c53;color:#e2e8f0}
+body.theme-dark .student-profile-task.is-complete span,body.theme-dark .profile-task-empty{color:#9aabc0}
+body.theme-dark .profile-task-empty{background:#101f33}
+body.theme-dark .student-progress-track{background:#26364b}
+body.theme-dark .student-profile-section .section-heading h2{color:#f1f5f9}
+body.theme-dark .student-profile-section .section-heading p{color:#a6b5c9}
