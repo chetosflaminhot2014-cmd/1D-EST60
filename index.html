@@ -41,6 +41,7 @@
             <a href="#horario">Horario</a>
             <a href="#calendario">Calendario</a>
             <a href="#recursos">Recursos</a>
+            <a href="#perfil">Mi perfil</a>
             <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Activar modo oscuro">🌙 Modo oscuro</button>
         </nav>
 
@@ -118,6 +119,45 @@
 
         </div>
 
+    </section>
+
+
+
+    <!-- PERFIL DEL ESTUDIANTE -->
+    <section id="perfil" class="section student-profile-section">
+        <div class="section-number">06</div>
+        <div class="section-heading">
+            <span>ESPACIO PERSONAL</span>
+            <h2>Mi perfil</h2>
+            <p>Personaliza tu apodo y organiza tu avance escolar en este dispositivo.</p>
+        </div>
+        <div class="student-profile-card">
+            <div class="student-profile-summary">
+                <div class="student-avatar" id="webProfileAvatar" aria-hidden="true">📘</div>
+                <div class="student-profile-identity">
+                    <span class="profile-eyebrow">ESTUDIANTE · 1°D</span>
+                    <h3 id="webProfileName">Alumno de 1°D</h3>
+                    <p>Perfil personal · no es una credencial oficial</p>
+                </div>
+            </div>
+            <form id="webProfileForm" class="student-profile-form">
+                <label for="webProfileNickname">Apodo visible</label>
+                <input id="webProfileNickname" maxlength="32" minlength="2" placeholder="Escribe cómo quieres que te llamen">
+                <label for="webProfileAvatarSelect">Avatar predeterminado</label>
+                <select id="webProfileAvatarSelect">
+                    <option value="📘">Libro</option><option value="🦊">Zorro</option><option value="🐼">Panda</option><option value="🐸">Rana</option><option value="🐯">Tigre</option><option value="🚀">Cohete</option><option value="🎧">Audífonos</option><option value="⚽">Balón</option><option value="🎮">Control</option><option value="🌟">Estrella</option>
+                </select>
+                <button class="btn btn-primary" type="submit">Guardar perfil</button>
+                <p id="webProfileStatus" class="profile-status" role="status" aria-live="polite"></p>
+            </form>
+            <div class="student-progress">
+                <div class="student-progress-heading"><div><span class="profile-eyebrow">ORGANIZACIÓN ACADÉMICA</span><h3>Mi avance de tareas</h3></div><strong id="webProfileProgressLabel">0%</strong></div>
+                <div class="student-progress-track"><div id="webProfileProgressBar" class="student-progress-bar" style="width:0%"></div></div>
+                <p id="webProfileProgressText">Marca las tareas que ya terminaste para llevar tu propio seguimiento.</p>
+                <div id="webProfileTaskList" class="student-profile-task-list"></div>
+                <small>Este seguimiento es personal y se guarda solo en este dispositivo. No representa calificaciones oficiales.</small>
+            </div>
+        </div>
     </section>
 
 
