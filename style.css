@@ -2746,3 +2746,83 @@ body.theme-dark .profile-task-empty{background:#101f33}
 body.theme-dark .student-progress-track{background:#26364b}
 body.theme-dark .student-profile-section .section-heading h2{color:#f1f5f9}
 body.theme-dark .student-profile-section .section-heading p{color:#a6b5c9}
+
+
+/* Corrección reforzada del tema oscuro en Mi perfil */
+body.theme-dark #perfil.student-profile-section,
+body.theme-dark #perfil.student-profile-section .section-heading,
+body.theme-dark #perfil.student-profile-section .student-profile-card,
+body.theme-dark #perfil.student-profile-section .student-progress {
+    background-color: #080f1a !important;
+    color: #e5edf7 !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-card {
+    background: linear-gradient(145deg, #101d30 0%, #0b1422 100%) !important;
+    border: 1px solid #2b405b !important;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .28) !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-summary,
+body.theme-dark #perfil.student-profile-section .student-progress {
+    background: transparent !important;
+    border-color: #2b405b !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-identity h3,
+body.theme-dark #perfil.student-profile-section .student-progress-heading h3 {
+    color: #f8fafc !important;
+}
+body.theme-dark #perfil.student-profile-section .profile-eyebrow {
+    color: #93c5fd !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-identity p,
+body.theme-dark #perfil.student-profile-section .student-progress > p,
+body.theme-dark #perfil.student-profile-section .student-progress > small {
+    color: #b6c4d8 !important;
+}
+body.theme-dark #perfil.student-profile-section .student-avatar {
+    background: linear-gradient(145deg, #1e3a5f, #312e61) !important;
+    border: 1px solid #405b83 !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-form label {
+    color: #e2e8f0 !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-form input,
+body.theme-dark #perfil.student-profile-section .student-profile-form select {
+    background-color: #070e19 !important;
+    color: #f8fafc !important;
+    border: 1px solid #40516b !important;
+    color-scheme: dark;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-form select option {
+    background: #101d30 !important;
+    color: #f8fafc !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-form input::placeholder {
+    color: #91a2ba !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-form .btn-primary {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #60a5fa !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-form .btn-primary:hover {
+    background: #1d4ed8 !important;
+}
+body.theme-dark #perfil.student-profile-section .profile-status {
+    color: #86efac !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-task {
+    background: #111f33 !important;
+    color: #e5edf7 !important;
+    border-color: #30445f !important;
+}
+body.theme-dark #perfil.student-profile-section .student-profile-task.is-complete span {
+    color: #a8b8ce !important;
+}
+body.theme-dark #perfil.student-profile-section .profile-task-empty {
+    background: #111f33 !important;
+    color: #b6c4d8 !important;
+    border: 1px solid #30445f !important;
+}
+body.theme-dark #perfil.student-profile-section .student-progress-track {
+    background: #26364b !important;
+}
