@@ -997,6 +997,7 @@ app.get("/api/credentials/status", async (req, res) => {
     if (!correoEscolarValido(correo)) return res.status(400).json({ error: "Correo escolar no válido." });
     if (!credencialesHabilitadas()) return res.status(503).json({ error: "El sistema de credenciales aún no está habilitado." });
     try {
+        await chatTablesReady;
         const result = await pool.query("SELECT estado, motivo FROM credenciales_alumnos WHERE correo = $1", [correo]);
         if (!result.rows.length) return res.json({ status: "sin_solicitud" });
         return res.json({ status: result.rows[0].estado, reason: result.rows[0].estado === "rechazada" ? result.rows[0].motivo : "" });
