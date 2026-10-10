@@ -152,7 +152,7 @@ app.use((req, res, next) => {
     );
     res.setHeader(
         "Access-Control-Allow-Headers",
-        "Content-Type, X-Admin-Key"
+        "Content-Type, X-Admin-Key, Authorization"
     );
 
     if (req.method === "OPTIONS") {
