@@ -3,12 +3,15 @@ package mx.est60.grupo1d
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.ValueCallback
 import android.webkit.WebSettings
 import android.view.ViewGroup
 import android.graphics.Color
@@ -28,6 +31,8 @@ import javax.crypto.spec.GCMParameterSpec
 
 class MainActivity : FragmentActivity() {
     private lateinit var webView: WebView
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private val fileChooserRequestCode = 1002
     private val prefs by lazy { getSharedPreferences("admin_biometric", MODE_PRIVATE) }
     private val keyAlias = "est60_admin_biometric_key"
 
@@ -60,7 +65,31 @@ class MainActivity : FragmentActivity() {
             allowUniversalAccessFromFileURLs = true
         }
         webView.addJavascriptInterface(AdminBiometricBridge(), "AndroidAdminBiometrics")
-        webView.webChromeClient = WebChromeClient()
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowFileChooser(
+                view: WebView,
+                filePathCallback: ValueCallback<Array<Uri>>,
+                fileChooserParams: FileChooserParams
+            ): Boolean {
+                this@MainActivity.filePathCallback?.onReceiveValue(null)
+                this@MainActivity.filePathCallback = filePathCallback
+                val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "image/*"
+                }
+                return try {
+                    startActivityForResult(
+                        Intent.createChooser(intent, "Selecciona tu foto de perfil"),
+                        fileChooserRequestCode
+                    )
+                    true
+                } catch (_: Exception) {
+                    this@MainActivity.filePathCallback?.onReceiveValue(null)
+                    this@MainActivity.filePathCallback = null
+                    false
+                }
+            }
+        }
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
@@ -258,6 +287,17 @@ class MainActivity : FragmentActivity() {
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == fileChooserRequestCode) {
+            val callback = filePathCallback ?: return
+            filePathCallback = null
+            val results = WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+            callback.onReceiveValue(results)
         }
     }
 
