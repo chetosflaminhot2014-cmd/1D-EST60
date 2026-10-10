@@ -18,6 +18,7 @@ import android.security.keystore.KeyProperties
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -25,7 +26,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-class MainActivity : Activity() {
+class MainActivity : FragmentActivity() {
     private lateinit var webView: WebView
     private val prefs by lazy { getSharedPreferences("admin_biometric", MODE_PRIVATE) }
     private val keyAlias = "est60_admin_biometric_key"
