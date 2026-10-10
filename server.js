@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require("path");
 const { Pool } = require("pg");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 const admin = require("firebase-admin");
 
 // Firebase Admin solo se activa cuando la clave de servicio está configurada
@@ -815,6 +817,124 @@ app.get("/api/health", async (req, res) => {
             error: error.message
         });
     }
+});
+
+// ========================================
+// CHAT GRUPAL CON CORREO INSTITUCIONAL
+// ========================================
+const chatTablesReady = Promise.all([
+    pool.query("CREATE TABLE IF NOT EXISTS chat_mensajes (id BIGSERIAL PRIMARY KEY, correo VARCHAR(254) NOT NULL, mensaje VARCHAR(1200) NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    pool.query("CREATE TABLE IF NOT EXISTS chat_sesiones (token_hash CHAR(64) PRIMARY KEY, correo VARCHAR(254) NOT NULL, expira_en TIMESTAMPTZ NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)")
+]).catch(error => {
+    console.error("ERROR PREPARANDO CHAT:", error.message);
+    throw error;
+});
+const chatCodes = new Map();
+const chatLastRequest = new Map();
+const chatDomain = "@chih.nuevaescuela.mx";
+function validInstitutionalEmail(email) {
+    return typeof email === "string" && email.length <= 254 && /^[^\s@]+@chih\.nuevaescuela\.mx$/i.test(email.trim());
+}
+function chatHash(value) {
+    return crypto.createHash("sha256").update(value).digest("hex");
+}
+function chatMailer() {
+    const env = process.env;
+    if (!env.SMTP_HOST || !env.SMTP_PORT || !env.SMTP_USER || !env.SMTP_PASS || !env.SMTP_FROM) return null;
+    return require("nodemailer").createTransport({
+        host: env.SMTP_HOST, port: Number(env.SMTP_PORT), secure: Number(env.SMTP_PORT) === 465,
+        auth: { user: env.SMTP_USER, pass: env.SMTP_PASS }
+    });
+}
+app.use((req, res, next) => {
+    if (req.path.startsWith("/api/chat/")) {
+        chatTablesReady.then(() => next()).catch(() => {
+            if (!res.headersSent) res.status(503).json({ error: "El chat no está disponible temporalmente." });
+        });
+    } else next();
+});
+app.post("/api/chat/auth/request-code", async (req, res) => {
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    if (!validInstitutionalEmail(email)) return res.status(400).json({ error: "Usa tu correo terminado en @chih.nuevaescuela.mx." });
+    const mailer = chatMailer();
+    if (!mailer) return res.status(503).json({ error: "El envío de códigos todavía no está configurado en el servidor." });
+    const now = Date.now();
+    if (now - (chatLastRequest.get(email) || 0) < 60000) return res.status(429).json({ error: "Espera un minuto antes de pedir otro código." });
+    const code = String(crypto.randomInt(0, 1000000)).padStart(6, "0");
+    chatCodes.set(email, { hash: chatHash(code), expires: now + 600000, attempts: 0 });
+    chatLastRequest.set(email, now);
+    try {
+        await mailer.sendMail({
+            from: process.env.SMTP_FROM, to: email, subject: "Código de acceso al chat de 1°D EST60",
+            text: "Tu código de verificación es: " + code + "\nCaduca en 10 minutos. No lo compartas con nadie.",
+            html: "<div style=\"font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px\"><h2>Chat de 1°D EST60</h2><p>Tu código de verificación es:</p><p style=\"font-size:32px;font-weight:bold;letter-spacing:8px\">" + code + "</p><p>Caduca en 10 minutos. No lo compartas con nadie.</p></div>"
+        });
+        res.json({ success: true, message: "Código enviado. Revisa tu correo institucional." });
+    } catch (error) {
+        chatCodes.delete(email);
+        console.error("ERROR ENVIANDO CÓDIGO DE CHAT:", error.message);
+        res.status(502).json({ error: "No se pudo enviar el correo. Inténtalo más tarde." });
+    }
+});
+app.post("/api/chat/auth/verify-code", async (req, res) => {
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const code = typeof req.body?.code === "string" ? req.body.code.trim() : "";
+    if (!validInstitutionalEmail(email) || !/^\d{6}$/.test(code)) return res.status(400).json({ error: "Correo o código no válido." });
+    const entry = chatCodes.get(email);
+    if (!entry || Date.now() > entry.expires) {
+        chatCodes.delete(email);
+        return res.status(400).json({ error: "El código venció o no existe. Solicita uno nuevo." });
+    }
+    entry.attempts++;
+    if (entry.attempts > 5) {
+        chatCodes.delete(email);
+        return res.status(429).json({ error: "Demasiados intentos. Solicita otro código." });
+    }
+    if (chatHash(code) !== entry.hash) return res.status(400).json({ error: "Código incorrecto." });
+    chatCodes.delete(email);
+    const token = crypto.randomBytes(32).toString("hex");
+    await pool.query("INSERT INTO chat_sesiones (token_hash, correo, expira_en) VALUES ($1, $2, NOW() + INTERVAL '30 days')", [chatHash(token), email]);
+    res.json({ success: true, token: token, email: email });
+});
+async function requireChatSession(req, res, next) {
+    const authorization = req.get("authorization") || "";
+    const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+    if (!token || token.length > 200) return res.status(401).json({ error: "Inicia sesión para usar el chat." });
+    try {
+        const result = await pool.query("SELECT correo FROM chat_sesiones WHERE token_hash = $1 AND expira_en > NOW()", [chatHash(token)]);
+        if (!result.rows.length) return res.status(401).json({ error: "Tu sesión venció. Verifica tu correo otra vez." });
+        req.chatEmail = result.rows[0].correo;
+        next();
+    } catch (error) {
+        console.error("ERROR VALIDANDO CHAT:", error.message);
+        res.status(500).json({ error: "No se pudo validar tu sesión." });
+    }
+}
+app.get("/api/chat/messages", requireChatSession, async (req, res) => {
+    try {
+        const after = Math.max(0, Number.parseInt(req.query.after, 10) || 0);
+        const result = await pool.query("SELECT id, correo, mensaje, creado_en FROM chat_mensajes WHERE id > $1 ORDER BY id ASC LIMIT 100", [after]);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("ERROR LEYENDO CHAT:", error.message);
+        res.status(500).json({ error: "No se pudieron cargar los mensajes." });
+    }
+});
+app.post("/api/chat/messages", requireChatSession, async (req, res) => {
+    const message = typeof req.body?.message === "string" ? req.body.message.trim() : "";
+    if (!message || message.length > 1200) return res.status(400).json({ error: "El mensaje debe tener entre 1 y 1200 caracteres." });
+    try {
+        const result = await pool.query("INSERT INTO chat_mensajes (correo, mensaje) VALUES ($1, $2) RETURNING id, correo, mensaje, creado_en", [req.chatEmail, message]);
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("ERROR PUBLICANDO CHAT:", error.message);
+        res.status(500).json({ error: "No se pudo publicar el mensaje." });
+    }
+});
+app.post("/api/chat/auth/logout", requireChatSession, async (req, res) => {
+    const token = (req.get("authorization") || "").slice(7).trim();
+    await pool.query("DELETE FROM chat_sesiones WHERE token_hash = $1", [chatHash(token)]);
+    res.json({ success: true });
 });
 
 // ========================================
