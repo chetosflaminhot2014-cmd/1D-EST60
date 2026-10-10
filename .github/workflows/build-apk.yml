@@ -57,7 +57,7 @@ jobs:
           # El botón para descargar el APK solo debe aparecer en la web, nunca dentro de la App.
           import re
           html, removed = re.subn(
-              r'\\s*<a\\b[^>]*\\bid=["\\']downloadAppButton["\\'][^>]*>.*?</a>',
+              r"\s*<a\b[^>]*\bid=['\"]downloadAppButton['\"][^>]*>.*?</a>",
               '',
               html,
               count=1,
