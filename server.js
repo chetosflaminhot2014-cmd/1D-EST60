@@ -636,25 +636,69 @@ app.get("/api/admin/historial", requireAdmin, async (req, res) => {
 });
 
 // Gemini API: la clave se guarda solo como variable privada en Render.
+// Si Gemini 3.8 Flash está saturado, se reintenta y luego se usa un modelo alternativo.
 app.post("/api/gemini", async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
     const message = typeof req.body?.message === "string" ? req.body.message.trim() : "";
     const task = typeof req.body?.taskContext === "string" ? req.body.taskContext.slice(0, 1000) : "";
-    if (!apiKey) return res.status(503).json({ error: "Gemini no está configurado todavía. Falta GEMINI_API_KEY en Render." });
-    if (!message || message.length > 1200) return res.status(400).json({ error: "Escribe una pregunta de hasta 1200 caracteres." });
+
+    if (!apiKey) {
+        return res.status(503).json({ error: "Gemini no está configurado todavía. Falta GEMINI_API_KEY en Render." });
+    }
+    if (!message || message.length > 1200) {
+        return res.status(400).json({ error: "Escribe una pregunta de hasta 1200 caracteres." });
+    }
+
+    const prompt = (task ? "Contexto de la tarea:\n" + task + "\n\n" : "") + message;
+    const requestBody = {
+        system_instruction: {
+            parts: [{
+                text: "Eres un asistente educativo para alumnos de secundaria de México. Responde en español claro, explica paso a paso y ayuda a aprender. No pidas datos personales ni inventes instrucciones escolares."
+            }]
+        },
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.6, maxOutputTokens: 700 }
+    };
+
+    async function pedirModelo(modelo) {
+        const response = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/models/" + modelo + ":generateContent?key=" + encodeURIComponent(apiKey),
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestBody)
+            }
+        );
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (_) {
+            data = {};
+        }
+        return { response, data };
+    }
+
     try {
-        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=" + encodeURIComponent(apiKey), {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                system_instruction: { parts: [{ text: "Eres un asistente educativo para alumnos de secundaria de México. Responde en español claro, explica paso a paso y ayuda a aprender. No pidas datos personales ni inventes instrucciones escolares." }] },
-                contents: [{ role: "user", parts: [{ text: (task ? "Contexto de la tarea:\n" + task + "\n\n" : "") + message }] }],
-                generationConfig: { temperature: 0.6, maxOutputTokens: 700 }
-            })
-        });
-        const data = await response.json();
+        let resultado = await pedirModelo("gemini-3.8-flash");
+
+        // 503 suele indicar saturación temporal. Reintenta una vez y, si persiste,
+        // cambia a Gemini 3.5 Flash-Lite como alternativa.
+        if (resultado.response.status === 503) {
+            console.warn("Gemini 3.8 Flash está saturado; reintentando una vez.");
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            resultado = await pedirModelo("gemini-3.8-flash");
+
+            if (resultado.response.status === 503) {
+                console.warn("Gemini 3.8 Flash sigue saturado; probando gemini-3.5-flash-lite.");
+                resultado = await pedirModelo("gemini-3.5-flash-lite");
+            }
+        }
+
+        const { response, data } = resultado;
         if (!response.ok) {
             const apiMessage = typeof data.error?.message === "string" ? data.error.message : "";
             console.error("Gemini API error:", response.status, apiMessage.slice(0, 300));
+
             let mensaje = "Gemini no pudo responder. Inténtalo más tarde.";
             if (response.status === 400 || response.status === 403) {
                 mensaje = "La clave de Gemini parece inválida o no tiene permiso. Revisa GEMINI_API_KEY en Render.";
@@ -662,14 +706,27 @@ app.post("/api/gemini", async (req, res) => {
                 mensaje = "Gemini alcanzó el límite de uso de la API. Espera un poco e inténtalo de nuevo.";
             } else if (response.status === 404) {
                 mensaje = "El modelo de Gemini no está disponible para esta clave. Hay que revisar la configuración del modelo.";
+            } else if (response.status === 503) {
+                mensaje = "Los modelos de Gemini están temporalmente saturados. Espera un momento e inténtalo de nuevo.";
             }
             return res.status(502).json({ error: mensaje });
         }
-        const answer = (data.candidates?.[0]?.content?.parts || []).map(part => part.text || "").join("\n").trim();
-        if (!answer) return res.status(502).json({ error: "Gemini no devolvió una respuesta." });
-        res.json({ answer });
-    } catch (error) { console.error("Error de Gemini:", error.message); res.status(500).json({ error: "No se pudo conectar con Gemini." }); }
+
+        const answer = (data.candidates?.[0]?.content?.parts || [])
+            .map(part => part.text || "")
+            .join("\n")
+            .trim();
+
+        if (!answer) {
+            return res.status(502).json({ error: "Gemini no devolvió una respuesta." });
+        }
+        return res.json({ answer });
+    } catch (error) {
+        console.error("Error de Gemini:", error.message);
+        return res.status(500).json({ error: "No se pudo conectar con Gemini." });
+    }
 });
+
 // ========================================
 // ESTADO DEL SISTEMA
 // ========================================
