@@ -653,11 +653,11 @@ app.post("/api/gemini", async (req, res) => {
     const requestBody = {
         system_instruction: {
             parts: [{
-                text: "Eres un asistente educativo para alumnos de secundaria de México. Responde en español claro, explica paso a paso y ayuda a aprender. No pidas datos personales ni inventes instrucciones escolares."
+                text: "Eres un asistente educativo para alumnos de secundaria de México. Responde en español claro y útil. Da una explicación completa pero concisa, con pasos claros y un ejemplo cuando ayude. Termina todas las frases y no cortes la respuesta a la mitad. No pidas datos personales ni inventes instrucciones escolares."
             }]
         },
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.6, maxOutputTokens: 700 }
+        generationConfig: { temperature: 0.5, maxOutputTokens: 1400 }
     };
 
     async function pedirModelo(modelo) {
