@@ -974,3 +974,33 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
         finally { send.disabled = false; send.textContent = "Enviar ↑"; input.focus(); }
     });
 })();
+
+
+/* ==========================================
+   MODO OSCURO / MODO CLARO
+========================================== */
+(() => {
+    const button = document.getElementById("themeToggle");
+    const storageKey = "est60_tema_web_v1";
+    if (!button) return;
+
+    function applyTheme(theme) {
+        const dark = theme === "dark";
+        document.body.classList.toggle("theme-dark", dark);
+        button.setAttribute("aria-pressed", String(dark));
+        button.setAttribute("aria-label", dark ? "Activar modo claro" : "Activar modo oscuro");
+        button.textContent = dark ? "☀️ Modo claro" : "🌙 Modo oscuro";
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute("content", dark ? "#080f1a" : "#0d1a2a");
+    }
+
+    let savedTheme = "light";
+    try { savedTheme = localStorage.getItem(storageKey) || "light"; } catch (_) {}
+    applyTheme(savedTheme === "dark" ? "dark" : "light");
+
+    button.addEventListener("click", () => {
+        const nextTheme = document.body.classList.contains("theme-dark") ? "light" : "dark";
+        applyTheme(nextTheme);
+        try { localStorage.setItem(storageKey, nextTheme); } catch (_) {}
+    });
+})();
