@@ -832,7 +832,7 @@ const chatTablesReady = Promise.all([
 });
 const credencialesHabilitadas = () => process.env.CREDENTIALS_ENABLED === "true";
 function correoEscolarValido(email) {
-    return typeof email === "string" && email.length <= 254 && /^[^\\s@]+@chih\\.nuevaescuela\\.mx$/i.test(email.trim());
+    return typeof email === "string" && email.length <= 254 && /^[^\s@]+@chih\.nuevaescuela\.mx$/i.test(email.trim());
 }
 const chatCodes = new Map();
 const chatLastRequest = new Map();
@@ -905,7 +905,7 @@ app.post("/api/chat/auth/verify-code", async (req, res) => {
     const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const code = typeof req.body?.code === "string" ? req.body.code.trim() : "";
     if (!credencialesHabilitadas()) return res.status(503).json({ error: "El acceso al chat por credencial todavía no está habilitado por el administrador responsable." });
-    if (!validInstitutionalEmail(email) || !/^\\d{6}$/.test(code)) return res.status(400).json({ error: "Correo o código no válido." });
+    if (!validInstitutionalEmail(email) || !/^\d{6}$/.test(code)) return res.status(400).json({ error: "Correo o código no válido." });
     const approved = await pool.query("SELECT estado FROM credenciales_alumnos WHERE correo = $1", [email]);
     if (!approved.rows.length || approved.rows[0].estado !== "aprobada") {
         chatCodes.delete(email);
@@ -972,7 +972,7 @@ app.post("/api/credentials", async (req, res) => {
     const foto = typeof req.body?.photo === "string" ? req.body.photo : "";
     const autorizacion = req.body?.guardianAuthorization === true;
     if (!correoEscolarValido(correo)) return res.status(400).json({ error: "Usa tu correo escolar institucional." });
-    if (!/^[\\p{L}0-9 _.-]{2,32}$/u.test(apodo)) return res.status(400).json({ error: "El apodo debe tener entre 2 y 32 caracteres." });
+    if (!/^[\p{L}0-9 _.-]{2,32}$/u.test(apodo)) return res.status(400).json({ error: "El apodo debe tener entre 2 y 32 caracteres." });
     if (!Number.isInteger(edad) || edad < 10 || edad > 15) return res.status(400).json({ error: "La edad permitida es de 10 a 15 años." });
     if (!autorizacion) return res.status(400).json({ error: "Un padre, madre o tutor debe autorizar la solicitud antes de enviarla." });
     if (!foto.startsWith("data:image/jpeg;base64,") || !imagenValida(foto)) return res.status(400).json({ error: "Sube una foto JPG válida y optimizada." });
