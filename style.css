@@ -2637,3 +2637,87 @@ a {
 .chat-guideline{margin:0;padding:0 16px 12px;color:#94a3b8;font-size:11px;line-height:1.5}
 .chat-room-panel[hidden],.chat-auth-form[hidden]{display:none!important}
 @media(max-width:600px){.chat-auth-panel{padding:28px 18px}.chat-messages{height:320px;padding:12px}.chat-room-header{padding:12px}.chat-message-form{padding:10px;gap:7px}.chat-message-form button{padding:0 12px}.chat-room-header .btn{font-size:11px;padding:8px}}
+
+
+/* ==========================================
+   TEMA OSCURO DE LA PÁGINA WEB
+   Mantiene los paneles legibles y reduce el brillo.
+========================================== */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid #334155;
+    border-radius: 9px;
+    background: #142237;
+    color: #e2e8f0;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+}
+.theme-toggle:hover { background: #203149; border-color: #60a5fa; }
+
+body.theme-dark {
+    background: #080f1a;
+    color: #e5edf7;
+    color-scheme: dark;
+}
+body.theme-dark .section:not(.dark-section) { color: #e5edf7; }
+body.theme-dark .section-number { color: #334155; }
+body.theme-dark .section-heading p { color: #a5b4c7; }
+body.theme-dark .notice-card,
+body.theme-dark .schedule-info,
+body.theme-dark .schedule-table,
+body.theme-dark .resource-card,
+body.theme-dark .info-box,
+body.theme-dark .back-to-top {
+    background: #111c2b;
+    color: #e5edf7;
+    border-color: #29384d;
+    box-shadow: 0 12px 30px rgba(0,0,0,.18);
+}
+body.theme-dark .notice-card { border-left-color: #334155; }
+body.theme-dark .notice-content h3,
+body.theme-dark .resource-card strong,
+body.theme-dark .info-box strong { color: #e5edf7; }
+body.theme-dark .notice-content p,
+body.theme-dark .notice-tag,
+body.theme-dark .resource-card p,
+body.theme-dark .section-heading p { color: #a5b4c7; }
+body.theme-dark .notice-icon,
+body.theme-dark .resource-number { background: #1e3350; color: #93c5fd; }
+body.theme-dark .notice-notifications { color: #e5edf7; border-color: #29384d; background: #111c2b; }
+body.theme-dark .notice-notifications.has-unread { background: #132744; border-color: #315a8b; }
+body.theme-dark .notice-read-all,
+body.theme-dark .notice-read-button { border-color: #475569; color: #e5edf7; }
+body.theme-dark .schedule-info { color: #e5edf7; }
+body.theme-dark .schedule-table-wrapper { border-color: #29384d; box-shadow: 0 12px 30px rgba(0,0,0,.2); }
+body.theme-dark .schedule-table td { background: #111c2b; color: #d6e0ee; border-color: #29384d; }
+body.theme-dark .schedule-table td:first-child { background: #172437; color: #a5b4c7; }
+body.theme-dark .schedule-table tbody tr:hover td,
+body.theme-dark .schedule-table tbody tr:hover td:first-child { background: #1b2b40; }
+body.theme-dark .break-row td { background: #3a2d16 !important; color: #fde68a !important; border-color: #5b4824 !important; }
+body.theme-dark .break-row td:first-child { background: #4a391b !important; color: #fde68a !important; }
+body.theme-dark .info-section { background: #080f1a; }
+body.theme-dark .info-box > div { border-color: #29384d; }
+body.theme-dark .back-to-top { color: #e5edf7; }
+body.theme-dark input,
+body.theme-dark textarea,
+body.theme-dark select { background-color: #111c2b; color: #e5edf7; border-color: #475569; }
+body.theme-dark .school-calendar-image { background: #111c2b; }
+body.theme-dark .school-calendar-public-image { background: #111c2b; }
+body.theme-dark .theme-toggle { background: #e2e8f0; color: #0f172a; border-color: #cbd5e1; }
+body.theme-dark .theme-toggle:hover { background: #cbd5e1; }
+body.theme-dark .footer { border-top: 1px solid #1e293b; }
+
+@media (max-width: 900px) {
+    .nav .theme-toggle { width: 100%; min-height: 42px; margin-top: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.theme-dark *, body.theme-dark *::before, body.theme-dark *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
