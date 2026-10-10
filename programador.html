@@ -96,6 +96,14 @@
                 </span>
             </button>
 
+            <button class="menu-button" data-section="seguridad">
+                🔐
+                <span>
+                    <strong>Seguridad</strong>
+                    <small>Configurar huella digital</small>
+                </span>
+            </button>
+
             <button class="menu-button" data-section="historial">
                 🕘
                 <span>
@@ -716,6 +724,23 @@
             </div>
         </section>
 
+        <section id="seguridad" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <span class="section-label">SEGURIDAD</span>
+                    <h2>Huella digital</h2>
+                    <p>Configura el acceso biométrico para entrar al menú de administrador desde esta aplicación Android.</p>
+                </div>
+            </div>
+            <div class="admin-card">
+                <h3>Acceso biométrico de administrador</h3>
+                <p>Primero debes haber entrado al panel con tu contraseña. Android gestiona tus datos biométricos; la aplicación no guarda la imagen de tu huella.</p>
+                <div id="biometricPlatformNotice" class="loading">Comprobando disponibilidad…</div>
+                <button id="configureAdminBiometricsButton" type="button" class="primary-button" style="margin-top:12px;">Configurar huella digital</button>
+                <p id="biometricConfigStatus" role="status" aria-live="polite" style="margin-top:12px;"></p>
+            </div>
+        </section>
+
     </main>
 
 
@@ -728,6 +753,37 @@
 
         const API_BASE = "https://oned-est60-server.onrender.com";
         const ADMIN_KEY = sessionStorage.getItem("est60_admin_key") || "";
+
+        const biometricNotice = document.getElementById("biometricPlatformNotice");
+        const biometricButton = document.getElementById("configureAdminBiometricsButton");
+        const biometricStatus = document.getElementById("biometricConfigStatus");
+        const isAndroidApp = Boolean(window.AndroidAdminBiometrics);
+
+        if (!isAndroidApp) {
+            biometricNotice.textContent = "Esta opción solo está disponible en la aplicación Android. En la web se sigue usando la contraseña.";
+            biometricButton.disabled = true;
+        } else if (!ADMIN_KEY) {
+            biometricNotice.textContent = "No se encontró una sesión de administrador. Inicia sesión nuevamente.";
+            biometricButton.disabled = true;
+        } else if (!window.AndroidAdminBiometrics.isBiometricAvailable()) {
+            biometricNotice.textContent = "Registra una huella en los ajustes de seguridad de Android y vuelve aquí.";
+            biometricButton.disabled = true;
+        } else {
+            biometricNotice.textContent = "Dispositivo compatible. Pulsa el botón y confirma tu identidad con la huella.";
+            window.onAdminBiometricResult = (status, message) => {
+                biometricButton.disabled = false;
+                biometricButton.textContent = "Configurar huella digital";
+                biometricStatus.textContent = message || "";
+                if (status === "success") biometricNotice.textContent = "Huella configurada en este dispositivo.";
+            };
+            biometricButton.addEventListener("click", () => {
+                biometricButton.disabled = true;
+                biometricButton.textContent = "Esperando verificación…";
+                biometricStatus.textContent = "";
+                window.AndroidAdminBiometrics.saveAdminPassword(ADMIN_KEY);
+                window.AndroidAdminBiometrics.authenticateAdmin();
+            });
+        }
         let avisosActuales = [];
         let tareasActuales = [];
         let eventosActuales = [];
