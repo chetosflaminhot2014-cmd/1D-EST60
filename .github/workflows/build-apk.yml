@@ -54,6 +54,17 @@ jobs:
           from pathlib import Path
           p = Path("android/app/src/main/assets/www/index.html")
           html = p.read_text(encoding="utf-8")
+          # El botón para descargar el APK solo debe aparecer en la web, nunca dentro de la App.
+          import re
+          html, removed = re.subn(
+              r'\\s*<a\\b[^>]*\\bid=["\\']downloadAppButton["\\'][^>]*>.*?</a>',
+              '',
+              html,
+              count=1,
+              flags=re.S
+          )
+          if removed != 1:
+              raise SystemExit("No se encontró el botón Descargar App para quitarlo de la aplicación")
           marker = '<script src="script.js"></script>'
           inject = '<script src="offline-mode.js"></script>\n    ' + marker + '\n    <script src="app-extras.js"></script>'
           if marker not in html:
