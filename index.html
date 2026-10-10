@@ -37,6 +37,7 @@
         <nav class="nav" id="nav">
             <a href="#inicio">Inicio</a>
             <a href="#avisos">Avisos</a>
+            <a href="#chat">Chat grupal</a>
             <a href="#tareas">Tareas</a>
             <a href="#horario">Horario</a>
             <a href="#calendario">Calendario</a>
@@ -162,6 +163,51 @@
 
     </section>
 
+
+    <!-- ==========================================
+         CHAT GRUPAL
+    =========================================== -->
+    <section id="chat" class="section chat-section">
+        <div class="section-number">02</div>
+        <div class="section-heading">
+            <span>COMUNICACIÓN DEL GRUPO</span>
+            <h2>Chat grupal</h2>
+            <p>Solo necesitas verificar tu correo institucional cuando quieras participar en el chat.</p>
+        </div>
+        <div class="chat-shell">
+            <div id="chatAuthPanel" class="chat-auth-panel">
+                <div class="chat-lock-icon" aria-hidden="true">✉</div>
+                <h3>Accede con tu correo institucional</h3>
+                <p>Usa una cuenta terminada en <strong>@chih.nuevaescuela.mx</strong>.</p>
+                <form id="chatRequestCodeForm" class="chat-auth-form">
+                    <label for="chatEmail">Correo institucional</label>
+                    <input id="chatEmail" type="email" autocomplete="email" placeholder="alumno@chih.nuevaescuela.mx" maxlength="254" required>
+                    <button type="submit" class="btn btn-primary" id="chatRequestCodeButton">Enviar código</button>
+                </form>
+                <form id="chatVerifyCodeForm" class="chat-auth-form" hidden>
+                    <label for="chatCode">Código de 6 dígitos</label>
+                    <input id="chatCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required>
+                    <button type="submit" class="btn btn-primary" id="chatVerifyCodeButton">Verificar y entrar</button>
+                    <button type="button" class="btn btn-secondary" id="chatChangeEmail">Cambiar correo</button>
+                </form>
+                <p id="chatAuthStatus" class="chat-status" role="status" aria-live="polite"></p>
+            </div>
+            <div id="chatRoomPanel" class="chat-room-panel" hidden>
+                <div class="chat-room-header">
+                    <div><span class="chat-online-dot"></span><strong>Chat de 1°D</strong><small id="chatSignedEmail"></small></div>
+                    <button type="button" class="btn btn-secondary" id="chatLogoutButton">Cerrar sesión</button>
+                </div>
+                <div id="chatMessages" class="chat-messages" aria-live="polite"><p class="chat-empty">Cargando mensajes...</p></div>
+                <form id="chatMessageForm" class="chat-message-form">
+                    <label class="sr-only" for="chatMessageInput">Tu mensaje</label>
+                    <textarea id="chatMessageInput" maxlength="1200" rows="2" placeholder="Escribe un mensaje respetuoso..." required></textarea>
+                    <button type="submit" id="chatSendButton">Enviar ↑</button>
+                </form>
+                <p class="chat-guideline">Respeta a tus compañeros. No compartas contraseñas, teléfonos ni información privada.</p>
+                <p id="chatRoomStatus" class="chat-status" role="status" aria-live="polite"></p>
+            </div>
+        </div>
+    </section>
 
     <!-- ==========================================
          TAREAS
