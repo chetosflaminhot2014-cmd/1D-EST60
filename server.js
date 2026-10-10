@@ -2,7 +2,6 @@ const express = require("express");
 const path = require("path");
 const { Pool } = require("pg");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
 const admin = require("firebase-admin");
 
 // Firebase Admin solo se activa cuando la clave de servicio está configurada
@@ -838,13 +837,11 @@ function validInstitutionalEmail(email) {
 function chatHash(value) {
     return crypto.createHash("sha256").update(value).digest("hex");
 }
-function chatMailer() {
-    const env = process.env;
-    if (!env.SMTP_HOST || !env.SMTP_PORT || !env.SMTP_USER || !env.SMTP_PASS || !env.SMTP_FROM) return null;
-    return require("nodemailer").createTransport({
-        host: env.SMTP_HOST, port: Number(env.SMTP_PORT), secure: Number(env.SMTP_PORT) === 465,
-        auth: { user: env.SMTP_USER, pass: env.SMTP_PASS }
-    });
+function chatResendConfig() {
+    const apiKey = process.env.RESEND_API_KEY;
+    const from = process.env.RESEND_FROM;
+    if (!apiKey || !from) return null;
+    return { apiKey, from };
 }
 app.use((req, res, next) => {
     if (req.path.startsWith("/api/chat/")) {
@@ -856,19 +853,33 @@ app.use((req, res, next) => {
 app.post("/api/chat/auth/request-code", async (req, res) => {
     const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
     if (!validInstitutionalEmail(email)) return res.status(400).json({ error: "Usa tu correo terminado en @chih.nuevaescuela.mx." });
-    const mailer = chatMailer();
-    if (!mailer) return res.status(503).json({ error: "El envío de códigos todavía no está configurado en el servidor." });
+    const resend = chatResendConfig();
+    if (!resend) return res.status(503).json({ error: "El envío de códigos todavía no está configurado. Revisa RESEND_API_KEY y RESEND_FROM en Render." });
     const now = Date.now();
     if (now - (chatLastRequest.get(email) || 0) < 60000) return res.status(429).json({ error: "Espera un minuto antes de pedir otro código." });
     const code = String(crypto.randomInt(0, 1000000)).padStart(6, "0");
     chatCodes.set(email, { hash: chatHash(code), expires: now + 600000, attempts: 0 });
     chatLastRequest.set(email, now);
     try {
-        await mailer.sendMail({
-            from: process.env.SMTP_FROM, to: email, subject: "Código de acceso al chat de 1°D EST60",
-            text: "Tu código de verificación es: " + code + "\nCaduca en 10 minutos. No lo compartas con nadie.",
-            html: "<div style=\"font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px\"><h2>Chat de 1°D EST60</h2><p>Tu código de verificación es:</p><p style=\"font-size:32px;font-weight:bold;letter-spacing:8px\">" + code + "</p><p>Caduca en 10 minutos. No lo compartas con nadie.</p></div>"
+        const emailResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + resend.apiKey,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                from: resend.from,
+                to: [email],
+                subject: "Código de acceso al chat de 1°D EST60",
+                text: "Tu código de verificación es: " + code + "\nCaduca en 10 minutos. No lo compartas con nadie.",
+                html: "<div style=\\"font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px\\"><h2>Chat de 1°D EST60</h2><p>Tu código de verificación es:</p><p style=\\"font-size:32px;font-weight:bold;letter-spacing:8px\\">" + code + "</p><p>Caduca en 10 minutos. No lo compartas con nadie.</p></div>"
+            })
         });
+        const emailResult = await emailResponse.json().catch(() => ({}));
+        if (!emailResponse.ok) {
+            const detail = typeof emailResult.message === "string" ? emailResult.message : "Error HTTP " + emailResponse.status;
+            throw new Error("Resend rechazó el envío: " + detail);
+        }
         res.json({ success: true, message: "Código enviado. Revisa tu correo institucional." });
     } catch (error) {
         chatCodes.delete(email);
