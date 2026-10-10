@@ -872,7 +872,7 @@ app.post("/api/chat/auth/request-code", async (req, res) => {
                 to: [email],
                 subject: "Código de acceso al chat de 1°D EST60",
                 text: "Tu código de verificación es: " + code + "\nCaduca en 10 minutos. No lo compartas con nadie.",
-                html: "<div style=\\"font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px\\"><h2>Chat de 1°D EST60</h2><p>Tu código de verificación es:</p><p style=\\"font-size:32px;font-weight:bold;letter-spacing:8px\\">" + code + "</p><p>Caduca en 10 minutos. No lo compartas con nadie.</p></div>"
+                html: '<div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px"><h2>Chat de 1°D EST60</h2><p>Tu código de verificación es:</p><p style="font-size:32px;font-weight:bold;letter-spacing:8px">' + code + '</p><p>Caduca en 10 minutos. No lo compartas con nadie.</p></div>'
             })
         });
         const emailResult = await emailResponse.json().catch(() => ({}));
