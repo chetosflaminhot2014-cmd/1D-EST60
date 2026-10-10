@@ -17,7 +17,7 @@ on:
       - ".github/workflows/build-apk.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -106,3 +106,15 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publicar APK como descarga de la última versión
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
+          if gh release view latest >/dev/null 2>&1; then
+            echo "La publicación latest ya existe; se actualizará el APK."
+          else
+            gh release create latest --title "1°D EST60 - Última versión" --notes "Descarga siempre la versión más reciente de la aplicación Android de 1°D EST60."
+          fi
+          gh release upload latest "$APK_PATH#1D-EST60.apk" --clobber
