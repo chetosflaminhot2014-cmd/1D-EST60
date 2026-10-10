@@ -708,6 +708,118 @@ async function cargarImagenCalendarioPublica() {
     }
 }
 
+
+/* CHAT GRUPAL: VERIFICACIÓN INSTITUCIONAL */
+(() => {
+    const authPanel = document.getElementById("chatAuthPanel");
+    const roomPanel = document.getElementById("chatRoomPanel");
+    if (!authPanel || !roomPanel) return;
+    const emailInput = document.getElementById("chatEmail");
+    const codeInput = document.getElementById("chatCode");
+    const requestForm = document.getElementById("chatRequestCodeForm");
+    const verifyForm = document.getElementById("chatVerifyCodeForm");
+    const authStatus = document.getElementById("chatAuthStatus");
+    const messagesBox = document.getElementById("chatMessages");
+    const messageForm = document.getElementById("chatMessageForm");
+    const messageInput = document.getElementById("chatMessageInput");
+    const roomStatus = document.getElementById("chatRoomStatus");
+    const tokenKey = "est60_chat_token";
+    const emailKey = "est60_chat_email";
+    let lastId = 0, pollTimer = null, loading = false;
+    const token = () => { try { return sessionStorage.getItem(tokenKey) || ""; } catch (_) { return ""; } };
+    function status(el, text, error) { el.textContent = text; el.classList.toggle("is-error", !!error); }
+    async function api(path, options) {
+        options = options || {};
+        const headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
+        if (token()) headers.Authorization = "Bearer " + token();
+        const response = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "No se pudo completar la solicitud.");
+        return data;
+    }
+    function enterRoom(email) {
+        authPanel.hidden = true; roomPanel.hidden = false;
+        document.getElementById("chatSignedEmail").textContent = email;
+        loadMessages();
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(loadMessages, 5000);
+    }
+    function enterAuth() {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = null; roomPanel.hidden = true; authPanel.hidden = false;
+    }
+    requestForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        const email = emailInput.value.trim().toLowerCase();
+        if (!/^[^\s@]+@chih\.nuevaescuela\.mx$/i.test(email)) return status(authStatus, "Usa tu correo terminado en @chih.nuevaescuela.mx.", true);
+        const button = document.getElementById("chatRequestCodeButton");
+        button.disabled = true; button.textContent = "Enviando...";
+        try {
+            const data = await api("/api/chat/auth/request-code", { method: "POST", body: JSON.stringify({ email }) });
+            verifyForm.hidden = false; status(authStatus, data.message || "Revisa tu correo institucional.");
+            codeInput.focus();
+        } catch (error) { status(authStatus, error.message, true); }
+        finally { button.disabled = false; button.textContent = "Enviar código"; }
+    });
+    verifyForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        const button = document.getElementById("chatVerifyCodeButton");
+        button.disabled = true; button.textContent = "Verificando...";
+        try {
+            const data = await api("/api/chat/auth/verify-code", { method: "POST", body: JSON.stringify({ email: emailInput.value.trim().toLowerCase(), code: codeInput.value.trim() }) });
+            sessionStorage.setItem(tokenKey, data.token); sessionStorage.setItem(emailKey, data.email);
+            status(authStatus, ""); enterRoom(data.email);
+        } catch (error) { status(authStatus, error.message, true); }
+        finally { button.disabled = false; button.textContent = "Verificar y entrar"; }
+    });
+    document.getElementById("chatChangeEmail").addEventListener("click", () => {
+        verifyForm.hidden = true; codeInput.value = ""; status(authStatus, "Introduce el correo y solicita un código nuevo.");
+    });
+    function renderMessage(message) {
+        const article = document.createElement("article"); article.className = "chat-message";
+        const meta = document.createElement("div"); meta.className = "chat-message-meta";
+        const email = document.createElement("strong"); email.textContent = message.correo;
+        const time = document.createElement("time"); const date = new Date(message.creado_en);
+        time.textContent = Number.isNaN(date.getTime()) ? "" : date.toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" });
+        meta.append(email, time);
+        const body = document.createElement("p"); body.textContent = message.mensaje;
+        article.append(meta, body); messagesBox.appendChild(article);
+    }
+    async function loadMessages() {
+        if (loading || !token()) return;
+        loading = true;
+        try {
+            const rows = await api("/api/chat/messages?after=" + lastId);
+            if (lastId === 0) messagesBox.replaceChildren();
+            rows.forEach(message => { renderMessage(message); lastId = Math.max(lastId, Number(message.id) || 0); });
+            if (lastId === 0 && !messagesBox.children.length) {
+                const empty = document.createElement("p"); empty.className = "chat-empty";
+                empty.textContent = "Todavía no hay mensajes. Inicia la conversación con respeto."; messagesBox.appendChild(empty);
+            }
+            if (rows.length) messagesBox.scrollTop = messagesBox.scrollHeight;
+            status(roomStatus, "");
+        } catch (error) {
+            if (error.message.includes("sesión") || error.message.includes("Inicia sesión")) {
+                sessionStorage.removeItem(tokenKey); sessionStorage.removeItem(emailKey); enterAuth(); status(authStatus, error.message, true);
+            } else status(roomStatus, error.message, true);
+        } finally { loading = false; }
+    }
+    messageForm.addEventListener("submit", async event => {
+        event.preventDefault(); const message = messageInput.value.trim(); if (!message) return;
+        const button = document.getElementById("chatSendButton"); button.disabled = true;
+        try { await api("/api/chat/messages", { method: "POST", body: JSON.stringify({ message }) }); messageInput.value = ""; await loadMessages(); }
+        catch (error) { status(roomStatus, error.message, true); }
+        finally { button.disabled = false; messageInput.focus(); }
+    });
+    document.getElementById("chatLogoutButton").addEventListener("click", async () => {
+        try { await api("/api/chat/auth/logout", { method: "POST", body: "{}" }); } catch (_) {}
+        sessionStorage.removeItem(tokenKey); sessionStorage.removeItem(emailKey); lastId = 0; messagesBox.replaceChildren(); enterAuth();
+        status(authStatus, "Has cerrado sesión del chat.");
+    });
+    const savedToken = token(), savedEmail = sessionStorage.getItem(emailKey);
+    if (savedToken && savedEmail) enterRoom(savedEmail);
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
     cargarAvisosPublicos();
     cargarTareasPublicas();
