@@ -888,7 +888,7 @@ async function cargarImagenCalendarioPublica() {
     function renderMessage(message) {
         const article = document.createElement("article"); article.className = "chat-message";
         const meta = document.createElement("div"); meta.className = "chat-message-meta";
-        const email = document.createElement("strong"); email.textContent = message.correo;
+        const email = document.createElement("strong"); email.textContent = message.apodo || "Alumno";
         const time = document.createElement("time"); const date = new Date(message.creado_en);
         time.textContent = Number.isNaN(date.getTime()) ? "" : date.toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" });
         meta.append(email, time);
