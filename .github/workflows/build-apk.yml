@@ -125,4 +125,5 @@ jobs:
           # Elimina el nombre anterior y reemplaza el APK con el nombre limpio.
           gh release delete-asset latest app-debug.apk --yes 2>/dev/null || true
           gh release delete-asset latest 1D-EST60.apk --yes 2>/dev/null || true
-          gh release upload latest "$APK_PATH#1D-EST60.apk"
+          cp "$APK_PATH" /tmp/1D-EST60.apk
+          gh release upload latest /tmp/1D-EST60.apk
