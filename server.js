@@ -205,6 +205,12 @@ pool.query(`
     )
 `).catch(error => console.error("ERROR AL PREPARAR EL HISTORIAL:", error));
 
+function quitarImagenDeHistorial(datos) {
+    if (!datos || typeof datos !== "object" || Array.isArray(datos)) return datos;
+    const { imagen: imagenOmitida, ...copia } = datos;
+    return copia;
+}
+
 async function registrarCambio(accion, entidad, registro, anterior = null, nuevo = null) {
     try {
         const titulo = (nuevo && (nuevo.titulo || nuevo.materia))
@@ -214,7 +220,7 @@ async function registrarCambio(accion, entidad, registro, anterior = null, nuevo
             `INSERT INTO historial_admin
              (accion, entidad, registro_id, titulo, datos_anteriores, datos_nuevos)
              VALUES ($1, $2, $3, $4, $5, $6)`,
-            [accion, entidad, registro ? registro.id : null, titulo, anterior, nuevo]
+            [accion, entidad, registro ? registro.id : null, titulo, quitarImagenDeHistorial(anterior), quitarImagenDeHistorial(nuevo)]
         );
     } catch (error) {
         console.error("ERROR AL REGISTRAR CAMBIO:", error);
