@@ -42,7 +42,7 @@
       var nickname = root.querySelector('#eaCredentialNickname').value.trim();
       var age = Number(root.querySelector('#eaCredentialAge').value);
       var file = root.querySelector('#eaCredentialPhoto').files[0];
-      if (!/^[^\\s@]+@chih\\.nuevaescuela\\.mx$/i.test(email)) { status.textContent = 'Usa tu correo escolar terminado en @chih.nuevaescuela.mx.'; return; }
+      if (!/^[^\s@]+@chih\.nuevaescuela\.mx$/i.test(email)) { status.textContent = 'Usa tu correo escolar terminado en @chih.nuevaescuela.mx.'; return; }
       if (!file) { status.textContent = 'Selecciona una foto con buena luz y el uniforme visible.'; return; }
       if (!root.querySelector('#eaCredentialConsent').checked) { status.textContent = 'Necesitas autorización de tu padre, madre o tutor.'; return; }
       submit.disabled = true; status.textContent = 'Preparando la foto…';
