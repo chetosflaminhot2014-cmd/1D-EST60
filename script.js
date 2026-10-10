@@ -69,6 +69,78 @@ function formatearFecha(fecha) {
 const AVISOS_LEIDOS_KEY = "est60_avisos_leidos_v1";
 let avisosPublicadosActuales = [];
 
+const NOTIFICACIONES_KEY = "est60_notificaciones_activadas_v1";
+const AVISOS_NOTIFICADOS_KEY = "est60_avisos_notificados_v1";
+let primeraCargaAvisos = true;
+
+function actualizarBotonNotificaciones() {
+    const boton = document.getElementById("activarNotificaciones");
+    if (!boton) return;
+    const activadas = localStorage.getItem(NOTIFICACIONES_KEY) === "1";
+    boton.textContent = activadas ? "Notificaciones activadas" : "Activar notificaciones";
+    boton.setAttribute("aria-pressed", activadas ? "true" : "false");
+}
+
+async function activarNotificacionesAvisos() {
+    if (!("Notification" in window)) {
+        alert("Este navegador no admite notificaciones. En Android, usa la aplicación instalada y permite las notificaciones del sistema.");
+        return;
+    }
+    if (!window.isSecureContext) {
+        alert("Las notificaciones requieren una conexión segura HTTPS.");
+        return;
+    }
+    try {
+        const permiso = Notification.permission === "granted"
+            ? "granted"
+            : await Notification.requestPermission();
+        if (permiso !== "granted") {
+            alert("No se concedió el permiso. Puedes activarlo desde la configuración del navegador.");
+            return;
+        }
+        localStorage.setItem(NOTIFICACIONES_KEY, "1");
+        const idsActuales = avisosPublicadosActuales.map(aviso => String(aviso.id));
+        localStorage.setItem(AVISOS_NOTIFICADOS_KEY, JSON.stringify(idsActuales));
+        actualizarBotonNotificaciones();
+        new Notification("Notificaciones activadas", {
+            body: "Te avisaremos cuando aparezcan nuevos avisos mientras la página esté abierta.",
+            icon: "logo.png",
+            tag: "est60-notificaciones-activadas"
+        });
+    } catch (error) {
+        console.error("No se pudieron activar las notificaciones:", error);
+        alert("No se pudieron activar las notificaciones en este dispositivo.");
+    }
+}
+
+function notificarAvisosNuevos(avisos) {
+    if (!Array.isArray(avisos)) return;
+    const previos = new Set(JSON.parse(localStorage.getItem(AVISOS_NOTIFICADOS_KEY) || "[]").map(String));
+    if (!primeraCargaAvisos && localStorage.getItem(NOTIFICACIONES_KEY) === "1" &&
+        "Notification" in window && Notification.permission === "granted") {
+        avisos.filter(aviso => !previos.has(String(aviso.id))).forEach(aviso => {
+            try {
+                new Notification(String(aviso.titulo || "Nuevo aviso de 1°D EST60"), {
+                    body: String(aviso.contenido || "Hay un nuevo aviso del grupo.").slice(0, 220),
+                    icon: "logo.png",
+                    tag: "est60-aviso-" + String(aviso.id),
+                    data: { url: window.location.origin + window.location.pathname + "#avisos" }
+                });
+            } catch (error) {
+                console.warn("No se pudo mostrar una notificación:", error);
+            }
+        });
+    }
+    localStorage.setItem(AVISOS_NOTIFICADOS_KEY, JSON.stringify(avisos.map(aviso => String(aviso.id))));
+    primeraCargaAvisos = false;
+}
+
+const botonActivarNotificaciones = document.getElementById("activarNotificaciones");
+if (botonActivarNotificaciones) {
+    botonActivarNotificaciones.addEventListener("click", activarNotificacionesAvisos);
+    actualizarBotonNotificaciones();
+}
+
 function obtenerAvisosLeidos() {
     try {
         const value = JSON.parse(localStorage.getItem(AVISOS_LEIDOS_KEY) || "[]");
@@ -149,6 +221,7 @@ async function cargarAvisosPublicos() {
         if (!response.ok) throw new Error("Error HTTP");
         const avisos = await response.json();
         if (!Array.isArray(avisos)) throw new Error("La respuesta de avisos no es válida.");
+        notificarAvisosNuevos(avisos);
         avisosPublicadosActuales = avisos;
         renderizarAvisosPublicos();
     } catch (error) {
