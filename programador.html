@@ -179,6 +179,13 @@
                     </div>
 
 
+                    <div class="form-group image-upload-group">
+                        <label for="avisoImagen">Imagen del aviso (opcional)</label>
+                        <input type="file" id="avisoImagen" accept="image/*">
+                        <small>JPG, PNG o WebP. La imagen se optimiza automáticamente.</small>
+                        <img id="avisoImagenPreview" class="upload-preview" alt="Vista previa de Imagen del aviso" hidden>
+                    </div>
+
                     <button type="submit" class="primary-button">
                         Publicar aviso
                     </button>
@@ -317,6 +324,13 @@
                     </div>
 
 
+                    <div class="form-group image-upload-group">
+                        <label for="tareaImagen">Imagen de la tarea (opcional)</label>
+                        <input type="file" id="tareaImagen" accept="image/*">
+                        <small>Fotografía o instrucciones. La imagen se optimiza automáticamente.</small>
+                        <img id="tareaImagenPreview" class="upload-preview" alt="Vista previa de Imagen de la tarea" hidden>
+                    </div>
+
                     <button type="submit" class="primary-button">
                         Crear tarea
                     </button>
@@ -435,6 +449,13 @@
                     </div>
 
 
+                    <div class="form-group image-upload-group">
+                        <label for="eventoImagen">Imagen del evento (opcional)</label>
+                        <input type="file" id="eventoImagen" accept="image/*">
+                        <small>Fotografía o cartel del evento. La imagen se optimiza automáticamente.</small>
+                        <img id="eventoImagenPreview" class="upload-preview" alt="Vista previa de Imagen del evento" hidden>
+                    </div>
+
                     <button type="submit" class="primary-button">
                         Agregar evento
                     </button>
@@ -443,6 +464,23 @@
 
             </div>
 
+
+            <div class="admin-card">
+                <h3>Imagen del calendario escolar</h3>
+                <p>Sube una imagen independiente para mostrarla en la sección Calendario de la página pública.</p>
+                <form id="calendarioImagenForm">
+                    <div class="form-group image-upload-group">
+                        <label for="calendarioImagen">Imagen del calendario (opcional)</label>
+                        <input type="file" id="calendarioImagen" accept="image/*">
+                        <small>La imagen se verá en la web para todos. La imagen se optimiza automáticamente.</small>
+                        <img id="calendarioImagenPreview" class="upload-preview" alt="Vista previa de Imagen del calendario" hidden>
+                    </div>
+
+                    <button type="submit" class="primary-button">Guardar imagen del calendario</button>
+                    <button type="button" id="quitarImagenCalendario" class="secondary-button">Quitar imagen actual</button>
+                    <p id="calendarioImagenEstado" role="status" aria-live="polite"></p>
+                </form>
+            </div>
 
             <div class="admin-card">
 
@@ -853,6 +891,126 @@
         });
 
 
+        function leerImagenOptimizada(inputId) {
+            const input = document.getElementById(inputId);
+            const file = input && input.files && input.files[0];
+            if (!file) return Promise.resolve(null);
+            if (!file.type.startsWith("image/")) return Promise.reject(new Error("Selecciona un archivo de imagen."));
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error("El archivo de imagen no se pudo abrir."));
+                    img.onload = () => {
+                        const scale = Math.min(1, 1280 / Math.max(img.width, img.height));
+                        const canvas = document.createElement("canvas");
+                        canvas.width = Math.max(1, Math.round(img.width * scale));
+                        canvas.height = Math.max(1, Math.round(img.height * scale));
+                        const ctx = canvas.getContext("2d");
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        let data = canvas.toDataURL("image/jpeg", 0.78);
+                        if (data.length > 1450000) data = canvas.toDataURL("image/jpeg", 0.58);
+                        if (data.length > 1450000) return reject(new Error("La imagen sigue siendo demasiado pesada. Elige otra más pequeña."));
+                        resolve(data);
+                    };
+                    img.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function configurarVistaPreviaImagen(inputId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(inputId + "Preview");
+            if (!input || !preview) return;
+            input.addEventListener("change", async () => {
+                if (!input.files || !input.files.length) {
+                    preview.hidden = true;
+                    preview.removeAttribute("src");
+                    return;
+                }
+                try {
+                    preview.src = await leerImagenOptimizada(inputId);
+                    preview.hidden = false;
+                } catch (error) {
+                    preview.hidden = true;
+                    alert(error.message || "No se pudo preparar la imagen.");
+                }
+            });
+        }
+
+        ["avisoImagen", "tareaImagen", "eventoImagen", "calendarioImagen"].forEach(configurarVistaPreviaImagen);
+
+        async function cargarImagenCalendarioAdmin() {
+            const estado = document.getElementById("calendarioImagenEstado");
+            const preview = document.getElementById("calendarioImagenPreview");
+            try {
+                const response = await fetch(`${API_BASE}/api/calendario/imagen`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudo consultar la imagen.");
+                if (data.imagen) {
+                    preview.src = data.imagen;
+                    preview.hidden = false;
+                    estado.textContent = "Hay una imagen publicada actualmente.";
+                } else {
+                    preview.hidden = true;
+                    preview.removeAttribute("src");
+                    estado.textContent = "Todavía no hay una imagen publicada.";
+                }
+            } catch (error) {
+                estado.textContent = error.message || "No se pudo cargar la imagen actual.";
+            }
+        }
+
+        document.getElementById("calendarioImagenForm").addEventListener("submit", async event => {
+            event.preventDefault();
+            const estado = document.getElementById("calendarioImagenEstado");
+            try {
+                const imagen = await leerImagenOptimizada("calendarioImagen");
+                if (!imagen) throw new Error("Primero selecciona una imagen.");
+                estado.textContent = "Guardando imagen…";
+                const response = await fetch(`${API_BASE}/api/calendario/imagen`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+                    body: JSON.stringify({ imagen })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudo guardar.");
+                event.target.reset();
+                document.getElementById("calendarioImagenPreview").src = imagen;
+                document.getElementById("calendarioImagenPreview").hidden = false;
+                estado.textContent = "Imagen del calendario publicada.";
+                alert("Imagen del calendario guardada.");
+            } catch (error) {
+                estado.textContent = error.message || "No se pudo guardar la imagen.";
+                alert(estado.textContent);
+            }
+        });
+
+        document.getElementById("quitarImagenCalendario").addEventListener("click", async () => {
+            if (!confirm("¿Quitar la imagen del calendario de la web?")) return;
+            const estado = document.getElementById("calendarioImagenEstado");
+            try {
+                const response = await fetch(`${API_BASE}/api/calendario/imagen`, {
+                    method: "DELETE", headers: { "x-admin-key": ADMIN_KEY }
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudo quitar.");
+                document.getElementById("calendarioImagenPreview").hidden = true;
+                document.getElementById("calendarioImagenPreview").removeAttribute("src");
+                estado.textContent = "Imagen del calendario retirada.";
+                alert("Imagen retirada.");
+            } catch (error) {
+                estado.textContent = error.message || "No se pudo quitar la imagen.";
+                alert(estado.textContent);
+            }
+        });
+
+        cargarImagenCalendarioAdmin();
+
         // ==========================================
         // AVISOS
         // ==========================================
@@ -909,6 +1067,7 @@
                     elemento.innerHTML = `
 
                         <div class="item-content">
+                            ${aviso.imagen ? `<img class="admin-item-image" src="${escapeHTML(aviso.imagen)}" alt="Imagen del aviso" loading="lazy">` : ""}
 
                             <span class="item-date">
                                 ${fecha.toLocaleDateString("es-MX")}
@@ -962,8 +1121,8 @@
                 const contenido =
                     document.getElementById("avisoContenido").value.trim();
 
-
                 try {
+                    const imagen = await leerImagenOptimizada("avisoImagen");
 
                     const response =
                         await fetch(`${API_BASE}/api/avisos`, {
@@ -977,7 +1136,8 @@
 
                             body: JSON.stringify({
                                 titulo,
-                                contenido
+                                contenido,
+                                imagen
                             })
 
                         });
@@ -1101,6 +1261,7 @@
                     elemento.innerHTML = `
 
                         <div class="item-content">
+                            ${tarea.imagen ? `<img class="admin-item-image" src="${escapeHTML(tarea.imagen)}" alt="Imagen de la tarea" loading="lazy">` : ""}
 
                             <span class="item-tag">
                                 ${escapeHTML(tarea.materia)}
@@ -1165,8 +1326,8 @@
                 const fecha_entrega =
                     document.getElementById("tareaFecha").value;
 
-
                 try {
+                    const imagen = await leerImagenOptimizada("tareaImagen");
 
                     const response =
                         await fetch(`${API_BASE}/api/tareas`, {
@@ -1182,7 +1343,8 @@
                                 materia,
                                 titulo,
                                 descripcion,
-                                fecha_entrega
+                                fecha_entrega,
+                                imagen
                             })
 
                         });
@@ -1306,6 +1468,7 @@
                     elemento.innerHTML = `
 
                         <div class="item-content">
+                            ${evento.imagen ? `<img class="admin-item-image" src="${escapeHTML(evento.imagen)}" alt="Imagen del evento" loading="lazy">` : ""}
 
                             <span class="item-date">
                                 ${formatearFecha(evento.fecha)}
@@ -1362,8 +1525,8 @@
                 const fecha =
                     document.getElementById("eventoFecha").value;
 
-
                 try {
+                    const imagen = await leerImagenOptimizada("eventoImagen");
 
                     const response =
                         await fetch(`${API_BASE}/api/eventos`, {
@@ -1378,7 +1541,8 @@
                             body: JSON.stringify({
                                 titulo,
                                 descripcion,
-                                fecha
+                                fecha,
+                                imagen
                             })
 
                         });
