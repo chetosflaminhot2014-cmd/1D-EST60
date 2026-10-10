@@ -23,7 +23,7 @@
       '<div class="ea-profile"><div class="ea-avatar" id="eaAvatar">1D</div><div class="ea-profile-text"><strong id="eaProfileName">Alumno de 1°D</strong><span>Tu panel personal · se guarda en este celular</span></div><button type="button" id="eaEditProfile" class="ea-quiet-btn">Editar</button></div>' +
       '<div class="ea-feature-grid"><article class="ea-feature-card ea-id-card"><div class="ea-feature-heading"><div><span class="ea-kicker">IDENTIFICACIÓN PERSONAL</span><h3>Mi credencial digital</h3></div><span class="ea-id-chip">1°D</span></div><div class="ea-id-layout"><div class="ea-id-mini-avatar" id="eaIdAvatar">1D</div><div class="ea-id-info"><strong id="eaIdName">Alumno de 1°D</strong><span>Escuela Secundaria Técnica No. 60</span><small id="eaIdCode">Código local: —</small></div><div class="ea-qr-wrap"><img id="eaProfileQr" alt="Código QR de perfil" loading="lazy"><span>QR de perfil</span></div></div><p class="ea-id-disclaimer">Identificación personal dentro de la app; no es una credencial oficial ni verifica identidad.</p><button type="button" id="eaCopyIdCode" class="ea-quiet-btn">Copiar código</button></article><article class="ea-feature-card"><div class="ea-feature-heading"><div><span class="ea-kicker">PROGRESO PERSONAL</span><h3>Mis logros</h3></div><span class="ea-achievement-count" id="eaAchievementCount">0/6</span></div><p class="ea-feature-description">Se desbloquean al usar las funciones de tu espacio personal.</p><div id="eaAchievements" class="ea-achievements"></div></article></div>' +
       '<div class="ea-feature-card ea-suggestion-card"><div class="ea-feature-heading"><div><span class="ea-kicker">TU OPINIÓN CUENTA</span><h3>Buzón de sugerencias</h3></div><span class="ea-suggestion-mark">IDEAS</span></div><p class="ea-feature-description">Escribe una idea para mejorar la app o proponer una actividad para el grupo.</p><form id="eaSuggestionForm" class="ea-suggestion-form"><label>Tipo de sugerencia<select id="eaSuggestionCategory"><option value="Mejora de la app">Mejora de la app</option><option value="Actividad del grupo">Actividad del grupo</option><option value="Contenido escolar">Contenido escolar</option><option value="Otra">Otra</option></select></label><label>Tu sugerencia<textarea id="eaSuggestionText" maxlength="500" required rows="3" placeholder="Describe tu idea (máximo 500 caracteres)…"></textarea></label><div class="ea-suggestion-bottom"><small><span id="eaSuggestionChars">0</span>/500 · No incluyas datos personales.</small><button type="submit" class="ea-primary-btn">Guardar sugerencia</button></div></form><div id="eaSuggestionList" class="ea-suggestion-list"></div><p class="ea-suggestion-notice">Por ahora las sugerencias se guardan solo en este dispositivo; no se envían al profesor ni a otros compañeros.</p></div>' +
-      '<article class="ea-feature-card ea-suggestion-card"><div class="ea-feature-heading"><div><span class="ea-kicker">ACCESO AL CHAT</span><h3>Solicitar credencial</h3></div><span class="ea-id-chip">REVISIÓN</span></div><p class="ea-feature-description">Un administrador revisará manualmente la foto. Tómala con buena luz, de frente y con el uniforme visible. No incluyas a otras personas ni datos privados en la imagen.</p><form id="eaCredentialForm" class="ea-suggestion-form"><label>Correo escolar<input id="eaCredentialEmail" type="email" maxlength="254" required placeholder="tu correo institucional"></label><label>Apodo para el chat<input id="eaCredentialNickname" maxlength="32" minlength="2" required placeholder="Cómo te verán tus compañeros"></label><label>Edad<select id="eaCredentialAge" required><option value="">Selecciona tu edad</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option></select></label><label>Foto con uniforme<input id="eaCredentialPhoto" type="file" accept="image/jpeg,image/png,image/webp" required></label><label class="ea-consent-label"><input id="eaCredentialConsent" type="checkbox" required> Mi padre, madre o tutor autorizó esta solicitud y la revisión privada de la foto.</label><button type="submit" class="ea-primary-btn">Enviar solicitud</button><p id="eaCredentialStatus" role="status" aria-live="polite"></p></form><p class="ea-suggestion-notice">No escribas tu nombre legal. La foto se elimina cuando se aprueba o rechaza la solicitud. El envío permanece pausado hasta que un adulto responsable autorice activar el sistema.</p></article>' +
+      '<article class="ea-feature-card ea-suggestion-card"><div class="ea-feature-heading"><div><span class="ea-kicker">ACCESO AL CHAT</span><h3>Solicitar credencial</h3></div><span class="ea-id-chip">REVISIÓN</span></div><p class="ea-feature-description">Solicita acceso al chat con tu correo escolar y un apodo. No se pide fotografía ni nombre legal; la revisión es manual.</p><form id="eaCredentialForm" class="ea-suggestion-form"><label>Correo escolar<input id="eaCredentialEmail" type="email" maxlength="254" required placeholder="tu correo institucional"></label><label>Apodo para el chat<input id="eaCredentialNickname" maxlength="32" minlength="2" required placeholder="Cómo te verán tus compañeros"></label><label>Edad<select id="eaCredentialAge" required><option value="">Selecciona tu edad</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option></select></label><label class="ea-consent-label"><input id="eaCredentialConsent" type="checkbox" required> Mi padre, madre o tutor autorizó esta solicitud.</label><button type="submit" class="ea-primary-btn">Enviar solicitud</button><p id="eaCredentialStatus" role="status" aria-live="polite"></p></form><p class="ea-suggestion-notice">No escribas tu nombre legal. No se recopilan fotografías. El envío permanece pausado hasta que un adulto responsable autorice activar el sistema.</p></article>' +
       '<div class="ea-stats"><div><span>Tareas personales</span><strong id="eaTaskCount">0</strong></div><div><span>Por completar</span><strong id="eaPendingCount">0</strong></div><div><span>Avisos nuevos</span><strong id="eaAlertCount">0</strong></div></div>' +
       '<div class="ea-card ea-now"><div class="ea-card-heading"><span class="ea-kicker">HORARIO INTELIGENTE</span><span class="ea-live-dot"></span></div><strong id="eaCurrentClass">Consultando horario…</strong><p id="eaCurrentMessage">Se actualizará al leer el horario del grupo.</p><div class="ea-next"><span>PRÓXIMA CLASE</span><strong id="eaNextClass">Calculando…</strong><small id="eaNextTime">Consulta el horario completo abajo.</small></div><button type="button" class="ea-link-btn" data-target="horario">Abrir horario completo →</button></div>' +
       '<div class="ea-section-title"><div><span class="ea-kicker">ORGANÍZATE</span><h3>Mis tareas</h3></div><button type="button" id="eaAddTaskOpen" class="ea-primary-btn">+ Añadir</button></div>' +
@@ -41,40 +41,14 @@
       var email = root.querySelector('#eaCredentialEmail').value.trim().toLowerCase();
       var nickname = root.querySelector('#eaCredentialNickname').value.trim();
       var age = Number(root.querySelector('#eaCredentialAge').value);
-      var file = root.querySelector('#eaCredentialPhoto').files[0];
       if (!/^[^\s@]+@chih\.nuevaescuela\.mx$/i.test(email)) { status.textContent = 'Usa tu correo escolar terminado en @chih.nuevaescuela.mx.'; return; }
-      if (!file) { status.textContent = 'Selecciona una foto con buena luz y el uniforme visible.'; return; }
       if (!root.querySelector('#eaCredentialConsent').checked) { status.textContent = 'Necesitas autorización de tu padre, madre o tutor.'; return; }
-      submit.disabled = true; status.textContent = 'Preparando la foto…';
+      submit.disabled = true; status.textContent = 'Enviando solicitud…';
       try {
-        var photo = await new Promise(function(resolve, reject) {
-          var reader = new FileReader();
-          reader.onerror = function(){ reject(new Error('No se pudo leer la foto.')); };
-          reader.onload = function() {
-            var image = new Image();
-            image.onerror = function(){ reject(new Error('La foto no se pudo abrir.')); };
-            image.onload = function() {
-              var scale = Math.min(1, 1280 / Math.max(image.width, image.height));
-              var canvas = document.createElement('canvas');
-              canvas.width = Math.max(1, Math.round(image.width * scale));
-              canvas.height = Math.max(1, Math.round(image.height * scale));
-              var context = canvas.getContext('2d');
-              context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height);
-              context.drawImage(image, 0, 0, canvas.width, canvas.height);
-              var result = canvas.toDataURL('image/jpeg', 0.72);
-              if (result.length > 1450000) result = canvas.toDataURL('image/jpeg', 0.5);
-              if (result.length > 1450000) reject(new Error('La foto pesa demasiado; elige otra más pequeña.'));
-              else resolve(result);
-            };
-            image.src = reader.result;
-          };
-          reader.readAsDataURL(file);
-        });
-        status.textContent = 'Enviando solicitud…';
         var response = await fetch('https://oned-est60-server.onrender.com/api/credentials', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email, nickname: nickname, age: age, photo: photo, guardianAuthorization: true })
+          body: JSON.stringify({ email: email, nickname: nickname, age: age, guardianAuthorization: true })
         });
         var data = await response.json();
         if (!response.ok) throw new Error(data.error || 'No se pudo enviar la solicitud.');
@@ -84,6 +58,7 @@
         status.textContent = error.message || 'No se pudo enviar la solicitud.';
       } finally { submit.disabled = false; }
     });
+
     root.querySelector('#eaSettingsOpen').addEventListener('click', function () { root.querySelector('.ea-settings').scrollIntoView({behavior:'smooth',block:'center'}); root.querySelector('#eaNameInput').focus(); });
     root.querySelector('#eaEditProfile').addEventListener('click', function () { root.querySelector('.ea-settings').scrollIntoView({behavior:'smooth',block:'center'}); root.querySelector('#eaNameInput').focus(); });
     root.querySelector('#eaAddTaskOpen').addEventListener('click', function () { var f=root.querySelector('#eaTaskForm'); f.hidden=!f.hidden; if(!f.hidden) root.querySelector('#eaTaskTitle').focus(); });
