@@ -135,7 +135,12 @@ const allowedOrigins = [
 app.use((req, res, next) => {
     const origin = req.headers.origin;
 
-    if (allowedOrigins.includes(origin)) {
+    // Permite el sitio oficial y subdominios de Render, donde se aloja la web.
+    const isRenderOrigin =
+        typeof origin === "string" &&
+        /^https:\/\/[a-z0-9-]+\.onrender\.com$/i.test(origin);
+
+    if (allowedOrigins.includes(origin) || isRenderOrigin) {
         res.setHeader("Access-Control-Allow-Origin", origin);
     }
 
