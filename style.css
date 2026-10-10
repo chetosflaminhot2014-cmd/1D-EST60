@@ -318,6 +318,16 @@ a {
    AVISOS
 ========================================================= */
 
+.notice-notifications{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 18px;padding:14px 18px;border:1px solid rgba(100,116,139,.25);border-radius:14px;background:rgba(148,163,184,.08);color:var(--text-color,#1f2937);font-size:14px}
+.notice-notifications.has-unread{border-color:rgba(37,99,235,.45);background:rgba(59,130,246,.08)}
+.notice-bell{margin-right:4px}
+.notice-read-all,.notice-read-button{border:1px solid rgba(100,116,139,.4);border-radius:8px;padding:8px 11px;background:transparent;color:inherit;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.notice-read-all:hover,.notice-read-button:hover{background:rgba(59,130,246,.1)}
+.notice-read-button{margin-top:12px}
+.notice-read-button:disabled{opacity:.65;cursor:default}
+.notice-is-unread{border-left:4px solid #2563eb}
+.notice-is-read{opacity:.84}
+.notice-is-read .notice-icon{background:#15803d}
 .notice-card {
     display: flex;
     align-items: center;
