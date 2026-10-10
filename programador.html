@@ -771,7 +771,7 @@
         </section>
 
         <section id="credenciales" class="admin-section">
-            <div class="section-header"><div><span class="section-label">ACCESO AL CHAT</span><h2>Credenciales por aprobar</h2><p>Revisa las solicitudes manualmente. La foto se elimina al aprobar o rechazar.</p></div><button type="button" class="secondary-button" id="refreshCredentialsButton">Actualizar</button></div>
+            <div class="section-header"><div><span class="section-label">ACCESO AL CHAT</span><h2>Credenciales por aprobar</h2><p>Revisa manualmente las solicitudes. No se recopilan fotografías.</p></div><button type="button" class="secondary-button" id="refreshCredentialsButton">Actualizar</button></div>
             <div class="admin-card"><p id="credentialsStatus" role="status" aria-live="polite">Solicitudes pendientes</p><div id="credentialsList" class="items-list"><p class="loading">Conectando con el servidor…</p></div></div>
             <div class="admin-card"><div class="card-title-row"><h3>Credenciales aprobadas</h3><button type="button" class="secondary-button" id="refreshApprovedCredentialsButton">Actualizar</button></div><p id="approvedCredentialsStatus" role="status" aria-live="polite">Lista de credenciales aprobadas.</p><div id="approvedCredentialsList" class="items-list"></div></div>
             <div class="admin-card"><h3>Protección de datos</h3><p>Se usa un apodo, no un nombre legal. La solicitud requiere autorización de padre, madre o tutor. El sistema permanece deshabilitado hasta que un adulto responsable revise el proceso y se active CREDENTIALS_ENABLED=true en la configuración privada del servidor.</p></div>
@@ -1041,8 +1041,8 @@
                 status.textContent = data.length + " solicitud(es) pendiente(s).";
                 list.innerHTML = data.map(item => {
                     const id = Number(item.id);
-                    const photo = item.foto ? '<img src="' + item.foto + '" alt="Foto para revisión" class="upload-preview" style="display:block;max-width:320px;max-height:360px;object-fit:contain">': "<p>Foto no disponible.</p>";
-                    return '<article class="admin-card"><h3>' + escapeHTML(item.apodo) + " · " + Number(item.edad) + ' años</h3><p>Correo escolar: ' + escapeHTML(item.correo) + "</p>" + photo + '<label for="reason-' + id + '">Motivo si rechazas</label><textarea id="reason-' + id + '" rows="2" maxlength="500" placeholder="Qué debe corregir…"></textarea><div class="card-title-row"><button type="button" class="primary-button" data-review="approve" data-id="' + id + '">Aprobar</button><button type="button" class="secondary-button" data-review="reject" data-id="' + id + '">Rechazar</button></div></article>";
+                    
+                    return '<article class="admin-card"><h3>' + escapeHTML(item.apodo) + " · " + Number(item.edad) + ' años</h3><p>Correo escolar: ' + escapeHTML(item.correo) + "</p>" + '<label for="reason-' + id + '">Motivo si rechazas</label><textarea id="reason-' + id + '" rows="2" maxlength="500" placeholder="Qué debe corregir…"></textarea><div class="card-title-row"><button type="button" class="primary-button" data-review="approve" data-id="' + id + '">Aprobar</button><button type="button" class="secondary-button" data-review="reject" data-id="' + id + '">Rechazar</button></div></article>";
                 }).join("");
                 list.querySelectorAll("[data-review]").forEach(button => button.addEventListener("click", () => revisarCredencial(button.dataset.id, button.dataset.review)));
             } catch (error) { status.textContent = error.message || "Error cargando solicitudes."; list.replaceChildren(); }
@@ -1052,7 +1052,7 @@
             const field = document.getElementById("reason-" + id);
             const reason = field ? field.value.trim() : "";
             if (action === "reject" && !reason) { alert("Escribe un motivo para rechazar."); if (field) field.focus(); return; }
-            if (!confirm("¿Confirmas esta decisión? La foto se eliminará del registro.")) return;
+            if (!confirm("¿Confirmas esta decisión?")) return;
             try {
                 const response = await fetch(API_BASE + "/api/admin/credentials/" + encodeURIComponent(id) + "/review", { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY }, body: JSON.stringify({ action, reason }) });
                 const data = await response.json();
