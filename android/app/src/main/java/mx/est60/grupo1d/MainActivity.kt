@@ -123,6 +123,19 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    private fun callJsConfigured(status: String, value: String) {
+        val safeStatus = org.json.JSONObject.quote(status)
+        val safeValue = org.json.JSONObject.quote(value)
+        runOnUiThread {
+            if (::webView.isInitialized) {
+                webView.evaluateJavascript(
+                    "if(window.onAdminBiometricConfigured)window.onAdminBiometricConfigured($safeStatus,$safeValue);",
+                    null
+                )
+            }
+        }
+    }
+
     private fun callJsResult(status: String, value: String) {
         val safeStatus = org.json.JSONObject.quote(status)
         val safeValue = org.json.JSONObject.quote(value)
@@ -148,6 +161,52 @@ class MainActivity : FragmentActivity() {
                 } catch (_: Exception) {
                     // The password login still works if secure local storage is unavailable.
                 }
+            }
+        }
+
+        @JavascriptInterface
+        fun configureAdminBiometrics(password: String) {
+            runOnUiThread {
+                if (password.isBlank() || password.length > 512) {
+                    callJsConfigured("error", "Vuelve a iniciar sesión con tu contraseña y prueba otra vez.")
+                    return@runOnUiThread
+                }
+                if (!biometricAvailable()) {
+                    callJsConfigured("error", "No hay huella configurada en Android. Regístrala en Ajustes y vuelve a intentarlo.")
+                    return@runOnUiThread
+                }
+                val prompt = BiometricPrompt(
+                    this@MainActivity,
+                    ContextCompat.getMainExecutor(this@MainActivity),
+                    object : BiometricPrompt.AuthenticationCallback() {
+                        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                            super.onAuthenticationSucceeded(result)
+                            try {
+                                saveEncryptedPassword(password)
+                                callJsConfigured("success", "Huella configurada correctamente en este dispositivo.")
+                            } catch (_: Exception) {
+                                callJsConfigured("error", "No se pudo guardar el acceso biométrico. Usa tu contraseña.")
+                            }
+                        }
+
+                        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                            super.onAuthenticationError(errorCode, errString)
+                            callJsConfigured("error", errString.toString())
+                        }
+
+                        override fun onAuthenticationFailed() {
+                            super.onAuthenticationFailed()
+                            callJsConfigured("error", "Huella no reconocida. Inténtalo de nuevo.")
+                        }
+                    }
+                )
+                val info = BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Configurar huella digital")
+                    .setSubtitle("Confirma tu identidad para habilitar el acceso de administrador")
+                    .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                    .setNegativeButtonText("Cancelar")
+                    .build()
+                prompt.authenticate(info)
             }
         }
 
