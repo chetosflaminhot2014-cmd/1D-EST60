@@ -4,78 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Acceso limitado | 1°D</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="access-page">
-
     <main class="programmer-login">
-
         <div class="login-left">
-
             <div class="lock-container">
-
                 <div class="lock-shackle"></div>
-
-                <div class="lock-body">
-                    <div class="lock-hole"></div>
-                </div>
-
-                <div class="lock-password">
-                    <span>*****</span>
-                    <span class="cursor">|</span>
-                </div>
-
+                <div class="lock-body"><div class="lock-hole"></div></div>
+                <div class="lock-password"><span>*****</span><span class="cursor">|</span></div>
             </div>
-
         </div>
-
-
         <div class="login-right">
-
             <div class="login-content">
-
                 <span class="login-kicker">MENÚ DE ADMINISTRADOR · 1°D EST60</span>
                 <h1>Menú de Administrador</h1>
-
-                <p class="login-description">
-                    Ingresa tu clave para continuar al panel de administración.
-                </p>
-
-
+                <p class="login-description">Ingresa tu clave para continuar al panel de administración.</p>
                 <form id="programmerLogin">
-
-                    <input
-                        type="password"
-                        id="programmerPassword"
-                        placeholder="Introduce la contraseña"
-                        autocomplete="current-password"
-                        required
-                    >
-
-                    <button type="submit" class="login-button">
-                        Iniciar sesión
-                    </button>
-
+                    <input type="password" id="programmerPassword" placeholder="Introduce la contraseña" autocomplete="current-password" required>
+                    <button type="submit" class="login-button">Iniciar sesión</button>
                 </form>
-
-
                 <p id="loginError" class="login-error"></p>
-
-
-                <a href="index.html" class="back-home">
-                    Volver a <span>Inicio</span>
-                </a>
-
+                <a href="index.html" class="back-home">Volver a <span>Inicio</span></a>
             </div>
-
         </div>
-
     </main>
-
 
     <script>
         const API_BASE = "https://oned-est60-server.onrender.com";
@@ -99,6 +54,9 @@
                     throw new Error(data.error || "No se pudo verificar el acceso.");
                 }
 
+                if (window.AndroidAdminBiometrics) {
+                    window.AndroidAdminBiometrics.saveAdminPassword(passwordInput.value);
+                }
                 sessionStorage.setItem("est60_admin_key", passwordInput.value);
                 window.location.href = "programador.html";
             } catch (error) {
@@ -106,7 +64,5 @@
             }
         });
     </script>
-
 </body>
-
 </html>
