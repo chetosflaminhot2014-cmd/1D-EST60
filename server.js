@@ -161,7 +161,35 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
+
+function imagenValida(imagen) {
+    return imagen === null || imagen === undefined || imagen === ""
+        || (typeof imagen === "string"
+            && imagen.length <= 1450000
+            && imagen.startsWith("data:image/jpeg;base64,")
+            && /^[A-Za-z0-9+/=]+$/.test(imagen.slice("data:image/jpeg;base64,".length)));
+}
+
+const imagenesSchemaReady = Promise.all([
+    pool.query("ALTER TABLE avisos ADD COLUMN IF NOT EXISTS imagen TEXT").catch(error => console.error("Migración imagen avisos:", error.message)),
+    pool.query("ALTER TABLE tareas ADD COLUMN IF NOT EXISTS imagen TEXT").catch(error => console.error("Migración imagen tareas:", error.message)),
+    pool.query("ALTER TABLE eventos ADD COLUMN IF NOT EXISTS imagen TEXT").catch(error => console.error("Migración imagen eventos:", error.message)),
+    pool.query(`CREATE TABLE IF NOT EXISTS imagenes_calendario (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        imagen TEXT NOT NULL,
+        actualizado TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )`).catch(error => console.error("Migración imagen calendario:", error.message))
+]);
+
+app.use((req, res, next) => {
+    const rutasConImagen = ["/api/avisos", "/api/tareas", "/api/eventos", "/api/calendario/imagen"];
+    if (rutasConImagen.some(ruta => req.path === ruta || req.path.startsWith(ruta + "/"))) {
+        imagenesSchemaReady.then(() => next()).catch(next);
+    } else {
+        next();
+    }
+});
 
 // Historial persistente de operaciones administrativas.
 pool.query(`
@@ -258,10 +286,8 @@ app.get("/api/avisos", async (req, res) => {
 app.post("/api/avisos", requireAdmin, async (req, res) => {
     try {
 
-        const {
-            titulo,
-            contenido
-        } = req.body;
+        const { titulo, contenido, imagen = null } = req.body;
+        if (!imagenValida(imagen)) return res.status(400).json({ error: "La imagen no es válida o supera el límite permitido." });
 
         if (!titulo || !contenido) {
             return res.status(400).json({
@@ -271,13 +297,10 @@ app.post("/api/avisos", requireAdmin, async (req, res) => {
 
         const result = await pool.query(
             `INSERT INTO avisos
-            (titulo, contenido)
-            VALUES ($1, $2)
+            (titulo, contenido, imagen)
+            VALUES ($1, $2, $3)
             RETURNING *`,
-            [
-                titulo,
-                contenido
-            ]
+            [titulo, contenido, imagen]
         );
 
         await registrarCambio("CREACIÓN", "Aviso", result.rows[0], null, result.rows[0]);
@@ -299,14 +322,16 @@ app.post("/api/avisos", requireAdmin, async (req, res) => {
 app.put("/api/avisos/:id", requireAdmin, async (req, res) => {
     try {
         const { titulo, contenido } = req.body;
+        const imagen = Object.prototype.hasOwnProperty.call(req.body, "imagen") ? req.body.imagen : undefined;
+        if (imagen !== undefined && !imagenValida(imagen)) return res.status(400).json({ error: "La imagen no es válida o supera el límite permitido." });
         if (typeof titulo !== "string" || !titulo.trim() || typeof contenido !== "string" || !contenido.trim()) {
             return res.status(400).json({ error: "Título y contenido son obligatorios." });
         }
         const anterior = await pool.query("SELECT * FROM avisos WHERE id = $1", [req.params.id]);
         if (!anterior.rows.length) return res.status(404).json({ error: "Aviso no encontrado." });
         const result = await pool.query(
-            "UPDATE avisos SET titulo = $1, contenido = $2 WHERE id = $3 RETURNING *",
-            [titulo.trim(), contenido.trim(), req.params.id]
+            "UPDATE avisos SET titulo = $1, contenido = $2, imagen = COALESCE($3, imagen) WHERE id = $4 RETURNING *",
+            [titulo.trim(), contenido.trim(), imagen === undefined ? null : imagen, req.params.id]
         );
         await registrarCambio("EDICIÓN", "Aviso", result.rows[0], anterior.rows[0], result.rows[0]);
         res.json(result.rows[0]);
@@ -415,12 +440,8 @@ app.get("/api/tareas", async (req, res) => {
 app.post("/api/tareas", requireAdmin, async (req, res) => {
     try {
 
-        const {
-            materia,
-            titulo,
-            descripcion,
-            fecha_entrega
-        } = req.body;
+        const { materia, titulo, descripcion, fecha_entrega, imagen = null } = req.body;
+        if (!imagenValida(imagen)) return res.status(400).json({ error: "La imagen no es válida o supera el límite permitido." });
 
         if (!materia || !titulo || !fecha_entrega) {
             return res.status(400).json({
@@ -430,15 +451,10 @@ app.post("/api/tareas", requireAdmin, async (req, res) => {
 
         const result = await pool.query(
             `INSERT INTO tareas
-            (materia, titulo, descripcion, fecha_entrega)
-            VALUES ($1, $2, $3, $4)
+            (materia, titulo, descripcion, fecha_entrega, imagen)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
-            [
-                materia,
-                titulo,
-                descripcion || "",
-                fecha_entrega
-            ]
+            [materia, titulo, descripcion || "", fecha_entrega, imagen]
         );
 
         await registrarCambio("CREACIÓN", "Tarea", result.rows[0], null, result.rows[0]);
@@ -463,14 +479,16 @@ app.post("/api/tareas", requireAdmin, async (req, res) => {
 app.put("/api/tareas/:id", requireAdmin, async (req, res) => {
     try {
         const { materia, titulo, descripcion, fecha_entrega } = req.body;
+        const imagen = Object.prototype.hasOwnProperty.call(req.body, "imagen") ? req.body.imagen : undefined;
+        if (imagen !== undefined && !imagenValida(imagen)) return res.status(400).json({ error: "La imagen no es válida o supera el límite permitido." });
         if (typeof materia !== "string" || !materia.trim() || typeof titulo !== "string" || !titulo.trim() || typeof fecha_entrega !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(fecha_entrega)) {
             return res.status(400).json({ error: "Materia, título y fecha válida son obligatorios." });
         }
         const anterior = await pool.query("SELECT * FROM tareas WHERE id = $1", [req.params.id]);
         if (!anterior.rows.length) return res.status(404).json({ error: "Tarea no encontrada." });
         const result = await pool.query(
-            "UPDATE tareas SET materia = $1, titulo = $2, descripcion = $3, fecha_entrega = $4 WHERE id = $5 RETURNING *",
-            [materia.trim(), titulo.trim(), typeof descripcion === "string" ? descripcion.trim() : "", fecha_entrega, req.params.id]
+            "UPDATE tareas SET materia = $1, titulo = $2, descripcion = $3, fecha_entrega = $4, imagen = COALESCE($5, imagen) WHERE id = $6 RETURNING *",
+            [materia.trim(), titulo.trim(), typeof descripcion === "string" ? descripcion.trim() : "", fecha_entrega, imagen === undefined ? null : imagen, req.params.id]
         );
         await registrarCambio("EDICIÓN", "Tarea", result.rows[0], anterior.rows[0], result.rows[0]);
         res.json(result.rows[0]);
@@ -534,11 +552,8 @@ app.get("/api/eventos", async (req, res) => {
 app.post("/api/eventos", requireAdmin, async (req, res) => {
     try {
 
-        const {
-            titulo,
-            descripcion,
-            fecha
-        } = req.body;
+        const { titulo, descripcion, fecha, imagen = null } = req.body;
+        if (!imagenValida(imagen)) return res.status(400).json({ error: "La imagen no es válida o supera el límite permitido." });
 
         if (!titulo || !fecha) {
             return res.status(400).json({
@@ -548,14 +563,10 @@ app.post("/api/eventos", requireAdmin, async (req, res) => {
 
         const result = await pool.query(
             `INSERT INTO eventos
-            (titulo, descripcion, fecha)
-            VALUES ($1, $2, $3)
+            (titulo, descripcion, fecha, imagen)
+            VALUES ($1, $2, $3, $4)
             RETURNING *`,
-            [
-                titulo,
-                descripcion || "",
-                fecha
-            ]
+            [titulo, descripcion || "", fecha, imagen]
         );
 
         await registrarCambio("CREACIÓN", "Evento", result.rows[0], null, result.rows[0]);
@@ -580,14 +591,16 @@ app.post("/api/eventos", requireAdmin, async (req, res) => {
 app.put("/api/eventos/:id", requireAdmin, async (req, res) => {
     try {
         const { titulo, descripcion, fecha } = req.body;
+        const imagen = Object.prototype.hasOwnProperty.call(req.body, "imagen") ? req.body.imagen : undefined;
+        if (imagen !== undefined && !imagenValida(imagen)) return res.status(400).json({ error: "La imagen no es válida o supera el límite permitido." });
         if (typeof titulo !== "string" || !titulo.trim() || typeof fecha !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
             return res.status(400).json({ error: "Título y fecha válida son obligatorios." });
         }
         const anterior = await pool.query("SELECT * FROM eventos WHERE id = $1", [req.params.id]);
         if (!anterior.rows.length) return res.status(404).json({ error: "Evento no encontrado." });
         const result = await pool.query(
-            "UPDATE eventos SET titulo = $1, descripcion = $2, fecha = $3 WHERE id = $4 RETURNING *",
-            [titulo.trim(), typeof descripcion === "string" ? descripcion.trim() : "", fecha, req.params.id]
+            "UPDATE eventos SET titulo = $1, descripcion = $2, fecha = $3, imagen = COALESCE($4, imagen) WHERE id = $5 RETURNING *",
+            [titulo.trim(), typeof descripcion === "string" ? descripcion.trim() : "", fecha, imagen === undefined ? null : imagen, req.params.id]
         );
         await registrarCambio("EDICIÓN", "Evento", result.rows[0], anterior.rows[0], result.rows[0]);
         res.json(result.rows[0]);
@@ -724,6 +737,48 @@ app.post("/api/gemini", async (req, res) => {
     } catch (error) {
         console.error("Error de Gemini:", error.message);
         return res.status(500).json({ error: "No se pudo conectar con Gemini." });
+    }
+});
+
+app.get("/api/calendario/imagen", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT imagen, actualizado FROM imagenes_calendario WHERE id = 1");
+        res.json(result.rows[0] || { imagen: null });
+    } catch (error) {
+        console.error("ERROR AL OBTENER IMAGEN DEL CALENDARIO:", error);
+        res.status(500).json({ error: "No se pudo cargar la imagen del calendario." });
+    }
+});
+
+app.put("/api/calendario/imagen", requireAdmin, async (req, res) => {
+    try {
+        const { imagen } = req.body || {};
+        if (typeof imagen !== "string" || !imagenValida(imagen) || !imagen) {
+            return res.status(400).json({ error: "Selecciona una imagen válida de calendario." });
+        }
+        const result = await pool.query(
+            `INSERT INTO imagenes_calendario (id, imagen, actualizado)
+             VALUES (1, $1, CURRENT_TIMESTAMP)
+             ON CONFLICT (id) DO UPDATE SET imagen = EXCLUDED.imagen, actualizado = CURRENT_TIMESTAMP
+             RETURNING imagen, actualizado`,
+            [imagen]
+        );
+        await registrarCambio("ACTUALIZACIÓN", "Calendario", { id: 1, titulo: "Imagen del calendario" }, null, { actualizado: result.rows[0].actualizado });
+        res.json({ success: true, actualizado: result.rows[0].actualizado });
+    } catch (error) {
+        console.error("ERROR AL GUARDAR IMAGEN DEL CALENDARIO:", error);
+        res.status(500).json({ error: "No se pudo guardar la imagen del calendario." });
+    }
+});
+
+app.delete("/api/calendario/imagen", requireAdmin, async (req, res) => {
+    try {
+        await pool.query("DELETE FROM imagenes_calendario WHERE id = 1");
+        await registrarCambio("ELIMINACIÓN", "Calendario", { id: 1, titulo: "Imagen del calendario" });
+        res.json({ success: true });
+    } catch (error) {
+        console.error("ERROR AL ELIMINAR IMAGEN DEL CALENDARIO:", error);
+        res.status(500).json({ error: "No se pudo quitar la imagen del calendario." });
     }
 });
 
