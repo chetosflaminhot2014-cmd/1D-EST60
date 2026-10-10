@@ -770,7 +770,7 @@
             biometricButton.disabled = true;
         } else {
             biometricNotice.textContent = "Dispositivo compatible. Pulsa el botón y confirma tu identidad con la huella.";
-            window.onAdminBiometricResult = (status, message) => {
+            window.onAdminBiometricConfigured = (status, message) => {
                 biometricButton.disabled = false;
                 biometricButton.textContent = "Configurar huella digital";
                 biometricStatus.textContent = message || "";
@@ -780,8 +780,7 @@
                 biometricButton.disabled = true;
                 biometricButton.textContent = "Esperando verificación…";
                 biometricStatus.textContent = "";
-                window.AndroidAdminBiometrics.saveAdminPassword(ADMIN_KEY);
-                window.AndroidAdminBiometrics.authenticateAdmin();
+                window.AndroidAdminBiometrics.configureAdminBiometrics(ADMIN_KEY);
             });
         }
         let avisosActuales = [];
