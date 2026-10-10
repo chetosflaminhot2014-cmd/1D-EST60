@@ -1077,3 +1077,87 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
         try { localStorage.setItem(storageKey, nextTheme); } catch (_) {}
     });
 })();
+
+
+/* ==========================================
+   PERFIL DEL ESTUDIANTE (LOCAL)
+========================================== */
+(function () {
+    const PROFILE_KEY = "est60_student_profile_v1";
+    const DONE_KEY = "est60_student_profile_done_v1";
+    const avatarOptions = ["📘","🦊","🐼","🐸","🐯","🚀","🎧","⚽","🎮","🌟"];
+    const read = (key, fallback) => {
+        try { const value = JSON.parse(localStorage.getItem(key) || "null"); return value == null ? fallback : value; }
+        catch (_) { return fallback; }
+    };
+    const profile = Object.assign({ nickname: "", avatar: "📘" }, read(PROFILE_KEY, {}));
+    let done = read(DONE_KEY, []);
+    if (!Array.isArray(done)) done = [];
+    const form = document.getElementById("webProfileForm");
+    if (!form) return;
+    const name = document.getElementById("webProfileName");
+    const avatar = document.getElementById("webProfileAvatar");
+    const nickname = document.getElementById("webProfileNickname");
+    const select = document.getElementById("webProfileAvatarSelect");
+    const status = document.getElementById("webProfileStatus");
+    const list = document.getElementById("webProfileTaskList");
+    const bar = document.getElementById("webProfileProgressBar");
+    const label = document.getElementById("webProfileProgressLabel");
+    const progressText = document.getElementById("webProfileProgressText");
+    nickname.value = profile.nickname || "";
+    select.value = avatarOptions.includes(profile.avatar) ? profile.avatar : "📘";
+    function renderProfile() {
+        name.textContent = profile.nickname || "Alumno de 1°D";
+        avatar.textContent = profile.avatar || "📘";
+    }
+    function getTasks() {
+        const container = document.getElementById("tareasPublicas");
+        if (!container) return [];
+        return Array.from(container.querySelectorAll(".task-card")).map((card, index) => {
+            const title = (card.querySelector("h3") || {}).textContent || "";
+            const id = title.trim().toLocaleLowerCase("es-MX").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "") || "tarea-" + index;
+            return { id, title: title.trim() };
+        }).filter(task => task.title && !/cargando|no hay tareas|no se pudieron/i.test(task.title));
+    }
+    function renderTasks() {
+        const tasks = getTasks();
+        list.innerHTML = "";
+        if (!tasks.length) {
+            list.innerHTML = '<p class="profile-task-empty">Las tareas publicadas aparecerán aquí cuando se carguen.</p>';
+        } else {
+            tasks.forEach(task => {
+                const row = document.createElement("label");
+                row.className = "student-profile-task" + (done.includes(task.id) ? " is-complete" : "");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = done.includes(task.id);
+                checkbox.addEventListener("change", () => {
+                    done = checkbox.checked ? Array.from(new Set(done.concat(task.id))) : done.filter(id => id !== task.id);
+                    localStorage.setItem(DONE_KEY, JSON.stringify(done));
+                    renderTasks();
+                });
+                const title = document.createElement("span");
+                title.textContent = task.title;
+                row.append(checkbox, title);
+                list.appendChild(row);
+            });
+        }
+        const complete = tasks.filter(task => done.includes(task.id)).length;
+        const percent = tasks.length ? Math.round(complete / tasks.length * 100) : 0;
+        label.textContent = percent + "%";
+        bar.style.width = percent + "%";
+        progressText.textContent = tasks.length ? complete + " de " + tasks.length + " tareas marcadas como terminadas." : "Todavía no hay tareas públicas para calcular el avance.";
+    }
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        profile.nickname = nickname.value.trim().slice(0, 32);
+        profile.avatar = avatarOptions.includes(select.value) ? select.value : "📘";
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        renderProfile();
+        status.textContent = "Perfil guardado en este dispositivo.";
+    });
+    renderProfile();
+    renderTasks();
+    const tasksContainer = document.getElementById("tareasPublicas");
+    if (tasksContainer && window.MutationObserver) new MutationObserver(renderTasks).observe(tasksContainer, { childList: true, subtree: true, characterData: true });
+})();
