@@ -66,78 +66,115 @@ function formatearFecha(fecha) {
    AVISOS
 ========================================== */
 
-async function cargarAvisosPublicos() {
+const AVISOS_LEIDOS_KEY = "est60_avisos_leidos_v1";
+let avisosPublicadosActuales = [];
+
+function obtenerAvisosLeidos() {
+    try {
+        const value = JSON.parse(localStorage.getItem(AVISOS_LEIDOS_KEY) || "[]");
+        return new Set(Array.isArray(value) ? value.map(String) : []);
+    } catch (_) {
+        return new Set();
+    }
+}
+
+function guardarAvisosLeidos(leidos) {
+    try { localStorage.setItem(AVISOS_LEIDOS_KEY, JSON.stringify([...leidos])); } catch (_) {}
+}
+
+function actualizarContadorAvisos() {
+    const contador = document.getElementById("avisosNoLeidos");
+    if (!contador) return;
+    const leidos = obtenerAvisosLeidos();
+    const pendientes = avisosPublicadosActuales.filter(aviso => !leidos.has(String(aviso.id))).length;
+    contador.textContent = String(pendientes);
+    const barra = contador.closest(".notice-notifications");
+    if (barra) barra.classList.toggle("has-unread", pendientes > 0);
+}
+
+function renderizarAvisosPublicos() {
     const contenedor = document.getElementById("avisosPublicos");
     if (!contenedor) return;
+    const leidos = obtenerAvisosLeidos();
 
-    try {
-        const response = await fetch(`${API_BASE}/api/avisos`);
-
-        if (!response.ok) throw new Error("Error HTTP");
-
-        const avisos = await response.json();
-
-        if (!Array.isArray(avisos) || avisos.length === 0) {
-            contenedor.innerHTML = `
-                <div class="notice-card">
-                    <div class="notice-icon">!</div>
-                    <div class="notice-content">
-                        <span class="notice-tag">AVISO GENERAL</span>
-                        <h3>No hay avisos publicados</h3>
-                        <p>Actualmente no hay avisos importantes para el grupo.</p>
-                    </div>
-                    <span class="notice-date">—</span>
-                </div>
-            `;
-            return;
-        }
-
-        contenedor.innerHTML = "";
-
-        avisos.forEach((aviso, index) => {
-            const fecha = new Date(aviso.fecha);
-            const elemento = document.createElement("div");
-
-            elemento.className = "notice-card";
-
-            elemento.innerHTML = `
-                <div class="notice-icon">!</div>
-                <div class="notice-content">
-                    <span class="notice-tag">AVISO GENERAL</span>
-                    ${aviso.imagen ? `<img class="publication-image notice-publication-image" src="${escapeHTML(aviso.imagen)}" alt="Imagen del aviso" loading="lazy">` : ""}
-                    <h3>${escapeHTML(aviso.titulo)}</h3>
-                    <p>${escapeHTML(aviso.contenido)}</p>
-                    <small>Publicado: ${
-                        Number.isNaN(fecha.getTime())
-                            ? "Fecha no disponible"
-                            : fecha.toLocaleDateString("es-MX")
-                    }</small>
-                </div>
-                <span class="notice-date">${String(index + 1).padStart(2, "0")}</span>
-            `;
-
-            contenedor.appendChild(elemento);
-        });
-    } catch (error) {
-        console.error("Error al cargar avisos:", error);
-
+    if (!avisosPublicadosActuales.length) {
         contenedor.innerHTML = `
             <div class="notice-card">
                 <div class="notice-icon">!</div>
                 <div class="notice-content">
-                    <span class="notice-tag">ERROR</span>
-                    <h3>No se pudieron cargar los avisos</h3>
-                    <p>No fue posible conectar con el servidor.</p>
+                    <span class="notice-tag">AVISOS DEL GRUPO</span>
+                    <h3>No hay avisos publicados</h3>
+                    <p>Cuando se publique un aviso importante, aparecerá aquí.</p>
                 </div>
+                <span class="notice-date">—</span>
+            </div>`;
+        actualizarContadorAvisos();
+        return;
+    }
+
+    contenedor.innerHTML = "";
+    avisosPublicadosActuales.forEach((aviso, index) => {
+        const fecha = new Date(aviso.fecha);
+        const leido = leidos.has(String(aviso.id));
+        const elemento = document.createElement("article");
+        elemento.className = "notice-card" + (leido ? " notice-is-read" : " notice-is-unread");
+        elemento.innerHTML = `
+            <div class="notice-icon">${leido ? "✓" : "!"}</div>
+            <div class="notice-content">
+                <span class="notice-tag">${leido ? "LEÍDO" : "AVISO NUEVO"}</span>
+                ${aviso.imagen ? `<img class="publication-image notice-publication-image" src="${escapeHTML(aviso.imagen)}" alt="Imagen del aviso" loading="lazy">` : ""}
+                <h3>${escapeHTML(aviso.titulo)}</h3>
+                <p>${escapeHTML(aviso.contenido)}</p>
+                <small>Publicado: ${Number.isNaN(fecha.getTime()) ? "Fecha no disponible" : fecha.toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })}</small>
+                <button type="button" class="notice-read-button" data-aviso-id="${escapeHTML(String(aviso.id))}" ${leido ? "disabled" : ""}>${leido ? "Marcado como leído" : "Marcar como leído"}</button>
             </div>
-        `;
+            <span class="notice-date">${String(index + 1).padStart(2, "0")}</span>`;
+        contenedor.appendChild(elemento);
+    });
+
+    contenedor.querySelectorAll(".notice-read-button:not(:disabled)").forEach(button => {
+        button.addEventListener("click", () => {
+            const leidosActuales = obtenerAvisosLeidos();
+            leidosActuales.add(String(button.dataset.avisoId));
+            guardarAvisosLeidos(leidosActuales);
+            renderizarAvisosPublicos();
+        });
+    });
+    actualizarContadorAvisos();
+}
+
+async function cargarAvisosPublicos() {
+    try {
+        const response = await fetch(`${API_BASE}/api/avisos`);
+        if (!response.ok) throw new Error("Error HTTP");
+        const avisos = await response.json();
+        if (!Array.isArray(avisos)) throw new Error("La respuesta de avisos no es válida.");
+        avisosPublicadosActuales = avisos;
+        renderizarAvisosPublicos();
+    } catch (error) {
+        console.error("Error al cargar avisos:", error);
+        const contenedor = document.getElementById("avisosPublicos");
+        if (contenedor) contenedor.innerHTML = `
+            <div class="notice-card">
+                <div class="notice-icon">!</div>
+                <div class="notice-content">
+                    <span class="notice-tag">SIN CONEXIÓN</span>
+                    <h3>No se pudieron actualizar los avisos</h3>
+                    <p>Comprueba tu conexión. Intentaremos actualizar de nuevo automáticamente.</p>
+                </div>
+            </div>`;
     }
 }
 
-
-/* ==========================================
-   TAREAS
-========================================== */
+const botonMarcarTodosLeidos = document.getElementById("marcarAvisosLeidos");
+if (botonMarcarTodosLeidos) {
+    botonMarcarTodosLeidos.addEventListener("click", () => {
+        const leidos = obtenerAvisosLeidos();
+        avisosPublicadosActuales.forEach(aviso => leidos.add(String(aviso.id)));
+        guardarAvisosLeidos(leidos);
+        renderizarAvisosPublicos();
+    });
+}
 
 async function cargarTareasPublicas() {
     const contenedor = document.getElementById("tareasPublicas");
@@ -822,6 +859,7 @@ async function cargarImagenCalendarioPublica() {
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarAvisosPublicos();
+    window.setInterval(cargarAvisosPublicos, 30000);
     cargarTareasPublicas();
     cargarEventosPublicos();
     cargarImagenCalendarioPublica();
