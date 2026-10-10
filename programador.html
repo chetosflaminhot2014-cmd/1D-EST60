@@ -771,22 +771,9 @@
         </section>
 
         <section id="credenciales" class="admin-section">
-            <div class="section-header">
-                <div>
-                    <span class="section-label">ACCESO AL CHAT</span>
-                    <h2>Credenciales por aprobar</h2>
-                    <p>Desde aquí podrás revisar las solicitudes de credencial y decidir si se aprueban o rechazan.</p>
-                </div>
-            </div>
-            <div class="admin-card">
-                <div class="empty-state">
-                    <div class="empty-icon">🪪</div>
-                    <h3>Revisión manual</h3>
-                    <p>La bandeja de solicitudes todavía no está conectada al servidor. No se están recibiendo ni almacenando fotos o datos personales desde esta sección.</p>
-                    <p>Antes de activar solicitudes reales de estudiantes menores, hay que acordar con un adulto responsable cómo se autoriza la recopilación, quién puede ver las fotos y cuándo se eliminan.</p>
-                    <span class="badge">Pendiente de conectar</span>
-                </div>
-            </div>
+            <div class="section-header"><div><span class="section-label">ACCESO AL CHAT</span><h2>Credenciales por aprobar</h2><p>Revisa las solicitudes manualmente. La foto se elimina al aprobar o rechazar.</p></div><button type="button" class="secondary-button" id="refreshCredentialsButton">Actualizar</button></div>
+            <div class="admin-card"><p id="credentialsStatus" role="status" aria-live="polite">Solicitudes pendientes</p><div id="credentialsList" class="items-list"><p class="loading">Conectando con el servidor…</p></div></div>
+            <div class="admin-card"><h3>Protección de datos</h3><p>Se usa un apodo, no un nombre legal. La solicitud requiere autorización de padre, madre o tutor. El sistema permanece deshabilitado hasta que un adulto responsable revise el proceso y se active CREDENTIALS_ENABLED=true en la configuración privada del servidor.</p></div>
         </section>
 
         <section id="seguridad" class="admin-section">
@@ -913,6 +900,8 @@
                     cargarHistorial();
                 }
 
+                if (sectionId === "credenciales") cargarCredenciales();
+
             });
 
         });
@@ -1037,6 +1026,41 @@
         });
 
         cargarImagenCalendarioAdmin();
+
+        async function cargarCredenciales() {
+            const list = document.getElementById("credentialsList");
+            const status = document.getElementById("credentialsStatus");
+            list.innerHTML = '<p class="loading">Cargando solicitudes…</p>';
+            if (!ADMIN_KEY) { status.textContent = "Inicia sesión como administrador."; list.replaceChildren(); return; }
+            try {
+                const response = await fetch(API_BASE + "/api/admin/credentials", { headers: { "x-admin-key": ADMIN_KEY } });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudieron cargar las solicitudes.");
+                if (!data.length) { status.textContent = "No hay solicitudes pendientes."; list.innerHTML = '<div class="empty-state"><h3>Bandeja vacía</h3><p>Las nuevas solicitudes aparecerán aquí.</p></div>'; return; }
+                status.textContent = data.length + " solicitud(es) pendiente(s).";
+                list.innerHTML = data.map(item => {
+                    const id = Number(item.id);
+                    const photo = item.foto ? '<img src="' + item.foto + '" alt="Foto para revisión" class="upload-preview" style="display:block;max-width:320px;max-height:360px;object-fit:contain">': "<p>Foto no disponible.</p>";
+                    return '<article class="admin-card"><h3>' + escapeHTML(item.apodo) + " · " + Number(item.edad) + ' años</h3><p>Correo escolar: ' + escapeHTML(item.correo) + "</p>" + photo + '<label for="reason-' + id + '">Motivo si rechazas</label><textarea id="reason-' + id + '" rows="2" maxlength="500" placeholder="Qué debe corregir…"></textarea><div class="card-title-row"><button type="button" class="primary-button" data-review="approve" data-id="' + id + '">Aprobar</button><button type="button" class="secondary-button" data-review="reject" data-id="' + id + '">Rechazar</button></div></article>";
+                }).join("");
+                list.querySelectorAll("[data-review]").forEach(button => button.addEventListener("click", () => revisarCredencial(button.dataset.id, button.dataset.review)));
+            } catch (error) { status.textContent = error.message || "Error cargando solicitudes."; list.replaceChildren(); }
+        }
+
+        async function revisarCredencial(id, action) {
+            const field = document.getElementById("reason-" + id);
+            const reason = field ? field.value.trim() : "";
+            if (action === "reject" && !reason) { alert("Escribe un motivo para rechazar."); if (field) field.focus(); return; }
+            if (!confirm("¿Confirmas esta decisión? La foto se eliminará del registro.")) return;
+            try {
+                const response = await fetch(API_BASE + "/api/admin/credentials/" + encodeURIComponent(id) + "/review", { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY }, body: JSON.stringify({ action, reason }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudo guardar la decisión.");
+                await cargarCredenciales();
+                alert(action === "approve" ? "Credencial aprobada. El chat sigue deshabilitado hasta activar el sistema." : "Solicitud rechazada.");
+            } catch (error) { alert(error.message || "Error al revisar la solicitud."); }
+        }
+        document.getElementById("refreshCredentialsButton")?.addEventListener("click", cargarCredenciales);
 
         // ==========================================
         // AVISOS
