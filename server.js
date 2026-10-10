@@ -825,7 +825,8 @@ const chatTablesReady = Promise.all([
     pool.query("CREATE TABLE IF NOT EXISTS credenciales_alumnos (id BIGSERIAL PRIMARY KEY, correo VARCHAR(254) NOT NULL UNIQUE, apodo VARCHAR(32) NOT NULL, edad SMALLINT NOT NULL CHECK (edad BETWEEN 10 AND 15), foto TEXT, estado VARCHAR(16) NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente','aprobada','rechazada')), motivo TEXT NOT NULL DEFAULT '', autorizacion_tutor BOOLEAN NOT NULL DEFAULT FALSE, creada_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, revisada_en TIMESTAMPTZ)"),
     pool.query("CREATE TABLE IF NOT EXISTS chat_mensajes (id BIGSERIAL PRIMARY KEY, correo VARCHAR(254) NOT NULL, apodo VARCHAR(32), mensaje VARCHAR(1200) NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     pool.query("ALTER TABLE chat_mensajes ADD COLUMN IF NOT EXISTS apodo VARCHAR(32)"),
-    pool.query("CREATE TABLE IF NOT EXISTS chat_sesiones (token_hash CHAR(64) PRIMARY KEY, correo VARCHAR(254) NOT NULL, expira_en TIMESTAMPTZ NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)")
+    pool.query("CREATE TABLE IF NOT EXISTS chat_sesiones (token_hash CHAR(64) PRIMARY KEY, correo VARCHAR(254) NOT NULL, expira_en TIMESTAMPTZ NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    pool.query("UPDATE credenciales_alumnos SET foto = NULL WHERE foto IS NOT NULL")
 ]).catch(error => {
     console.error("ERROR PREPARANDO CHAT Y CREDENCIALES:", error.message);
     throw error;
@@ -969,24 +970,22 @@ app.post("/api/credentials", async (req, res) => {
     const correo = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const apodo = typeof req.body?.nickname === "string" ? req.body.nickname.trim() : "";
     const edad = Number(req.body?.age);
-    const foto = typeof req.body?.photo === "string" ? req.body.photo : "";
     const autorizacion = req.body?.guardianAuthorization === true;
     if (!correoEscolarValido(correo)) return res.status(400).json({ error: "Usa tu correo escolar institucional." });
     if (!/^[\p{L}0-9 _.-]{2,32}$/u.test(apodo)) return res.status(400).json({ error: "El apodo debe tener entre 2 y 32 caracteres." });
     if (!Number.isInteger(edad) || edad < 10 || edad > 15) return res.status(400).json({ error: "La edad permitida es de 10 a 15 años." });
     if (!autorizacion) return res.status(400).json({ error: "Un padre, madre o tutor debe autorizar la solicitud antes de enviarla." });
-    if (!foto.startsWith("data:image/jpeg;base64,") || !imagenValida(foto)) return res.status(400).json({ error: "Sube una foto JPG válida y optimizada." });
     try {
         await chatTablesReady;
         const existing = await pool.query("SELECT estado FROM credenciales_alumnos WHERE correo = $1", [correo]);
         if (existing.rows[0]?.estado === "aprobada") return res.status(409).json({ error: "Este correo ya tiene una credencial aprobada." });
         await pool.query(
             `INSERT INTO credenciales_alumnos (correo, apodo, edad, foto, estado, motivo, autorizacion_tutor, creada_en, revisada_en)
-             VALUES ($1, $2, $3, $4, 'pendiente', '', TRUE, CURRENT_TIMESTAMP, NULL)
-             ON CONFLICT (correo) DO UPDATE SET apodo = EXCLUDED.apodo, edad = EXCLUDED.edad, foto = EXCLUDED.foto, estado = 'pendiente', motivo = '', autorizacion_tutor = TRUE, creada_en = CURRENT_TIMESTAMP, revisada_en = NULL`,
-            [correo, apodo, edad, foto]
+             VALUES ($1, $2, $3, NULL, 'pendiente', '', TRUE, CURRENT_TIMESTAMP, NULL)
+             ON CONFLICT (correo) DO UPDATE SET apodo = EXCLUDED.apodo, edad = EXCLUDED.edad, foto = NULL, estado = 'pendiente', motivo = '', autorizacion_tutor = TRUE, creada_en = CURRENT_TIMESTAMP, revisada_en = NULL`,
+            [correo, apodo, edad]
         );
-        res.status(201).json({ success: true, message: "Solicitud recibida. Un administrador revisará la foto de forma privada." });
+        res.status(201).json({ success: true, message: "Solicitud recibida. Un administrador revisará los datos sin necesidad de una fotografía." });
     } catch (error) {
         console.error("ERROR GUARDANDO SOLICITUD DE CREDENCIAL:", error.message);
         res.status(500).json({ error: "No se pudo guardar la solicitud." });
