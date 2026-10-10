@@ -75,7 +75,7 @@ jobs:
           python3 -m pip install --quiet Pillow
           python3 - <<'PY'
           from pathlib import Path
-          from PIL import Image
+          from PIL import Image, ImageOps
 
           source = Image.open("logo.png").convert("RGBA")
           sizes = {
@@ -89,9 +89,14 @@ jobs:
               target = Path("android/app/src/main/res") / folder
               target.mkdir(parents=True, exist_ok=True)
               canvas = Image.new("RGBA", (size, size), (13, 26, 42, 255))
-              image = source.copy()
-              image.thumbnail((int(size * 0.82), int(size * 0.82)), Image.Resampling.LANCZOS)
-              canvas.alpha_composite(image, ((size - image.width) // 2, (size - image.height) // 2))
+              # Recorta y escala el logo para llenar todo el icono, sin bordes vacíos.
+              image = ImageOps.fit(
+                  source,
+                  (size, size),
+                  method=Image.Resampling.LANCZOS,
+                  centering=(0.5, 0.5)
+              )
+              canvas.alpha_composite(image, (0, 0))
               canvas.convert("RGB").save(target / "ic_launcher.png", quality=95)
           PY
 
@@ -117,4 +122,7 @@ jobs:
           else
             gh release create latest --title "1°D EST60 - Última versión" --notes "Descarga siempre la versión más reciente de la aplicación Android de 1°D EST60."
           fi
-          gh release upload latest "$APK_PATH#1D-EST60.apk" --clobber
+          # Elimina el nombre anterior y reemplaza el APK con el nombre limpio.
+          gh release delete-asset latest app-debug.apk --yes 2>/dev/null || true
+          gh release delete-asset latest 1D-EST60.apk --yes 2>/dev/null || true
+          gh release upload latest "$APK_PATH#1D-EST60.apk"
