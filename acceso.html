@@ -53,10 +53,6 @@
                 if (!response.ok) {
                     throw new Error(data.error || "No se pudo verificar el acceso.");
                 }
-
-                if (window.AndroidAdminBiometrics) {
-                    window.AndroidAdminBiometrics.saveAdminPassword(passwordInput.value);
-                }
                 sessionStorage.setItem("est60_admin_key", passwordInput.value);
                 window.location.href = "programador.html";
             } catch (error) {
