@@ -28,3 +28,12 @@
 @media(max-width:380px){.ea-id-layout{grid-template-columns:42px minmax(0,1fr) 66px;gap:8px;padding:10px}.ea-id-mini-avatar{width:42px;height:42px}.ea-qr-wrap img{width:60px;height:60px}.ea-achievement-state{max-width:54px}}
 
 .ea-settings select{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #2a405a;border-radius:10px;background:#08182a;color:var(--ea-text);font:inherit;font-size:12px}.ea-settings select:focus{outline:2px solid rgba(96,165,250,.6);outline-offset:1px}.ea-light .ea-settings select{background:#fff;color:#102039;border-color:#cbd8e8}
+
+
+/* Perfil de la app: superficies y controles coherentes con el tema elegido */
+.ea-settings select{color-scheme:dark}
+.ea-light .ea-settings select{color-scheme:light}
+.ea-light .ea-avatar,.ea-light .ea-id-mini-avatar{color:#17304d}
+.ea-light .ea-profile{background:#f1f6fc;border-color:#d4dfec}
+.ea-light .ea-profile-text strong{color:#102039}
+.ea-light .ea-settings input,.ea-light .ea-settings select{background:#fff;color:#102039;border-color:#cbd8e8}
