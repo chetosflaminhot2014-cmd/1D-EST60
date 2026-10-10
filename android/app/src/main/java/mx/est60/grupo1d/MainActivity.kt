@@ -67,48 +67,10 @@ class MainActivity : Activity() {
                     "(function(){var b=document.getElementById('installAppButton');if(b)b.remove();var h=document.getElementById('installAppHelp');if(h)h.remove();})();",
                     null
                 )
-                if (url == "file:///android_asset/www/acceso.html") {
-                    injectBiometricButton(view)
-                }
             }
         }
         setContentView(webView)
         webView.loadUrl("file:///android_asset/www/index.html")
-    }
-
-    private fun injectBiometricButton(view: WebView) {
-        val script = """
-            (function() {
-              if (!window.AndroidAdminBiometrics || document.getElementById('adminBiometricButton')) return;
-              if (!window.AndroidAdminBiometrics.isBiometricAvailable()) return;
-              var form = document.getElementById('programmerLogin');
-              if (!form) return;
-              var button = document.createElement('button');
-              button.type = 'button';
-              button.id = 'adminBiometricButton';
-              button.textContent = 'Ingresar con huella digital';
-              button.style.cssText = 'width:100%;margin-top:12px;padding:13px 16px;border:1px solid #2b5b83;border-radius:10px;background:#102a43;color:#fff;font-weight:700;font-size:15px;cursor:pointer;';
-              button.onclick = function() {
-                button.disabled = true;
-                button.textContent = 'Esperando verificación biométrica…';
-                window.AndroidAdminBiometrics.authenticateAdmin();
-              };
-              form.appendChild(button);
-              window.onAdminBiometricResult = function(status, value) {
-                button.disabled = false;
-                button.textContent = 'Ingresar con huella digital';
-                var error = document.getElementById('loginError');
-                if (status !== 'success') {
-                  if (error) error.textContent = value || 'No se pudo validar la huella. Usa tu contraseña.';
-                  return;
-                }
-                var input = document.getElementById('programmerPassword');
-                input.value = value;
-                form.requestSubmit();
-              };
-            })();
-        """.trimIndent()
-        view.evaluateJavascript(script, null)
     }
 
     private fun biometricAvailable(): Boolean {
