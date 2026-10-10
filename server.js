@@ -822,12 +822,18 @@ app.get("/api/health", async (req, res) => {
 // CHAT GRUPAL CON CORREO INSTITUCIONAL
 // ========================================
 const chatTablesReady = Promise.all([
-    pool.query("CREATE TABLE IF NOT EXISTS chat_mensajes (id BIGSERIAL PRIMARY KEY, correo VARCHAR(254) NOT NULL, mensaje VARCHAR(1200) NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    pool.query("CREATE TABLE IF NOT EXISTS credenciales_alumnos (id BIGSERIAL PRIMARY KEY, correo VARCHAR(254) NOT NULL UNIQUE, apodo VARCHAR(32) NOT NULL, edad SMALLINT NOT NULL CHECK (edad BETWEEN 10 AND 15), foto TEXT, estado VARCHAR(16) NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente','aprobada','rechazada')), motivo TEXT NOT NULL DEFAULT '', autorizacion_tutor BOOLEAN NOT NULL DEFAULT FALSE, creada_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, revisada_en TIMESTAMPTZ)"),
+    pool.query("CREATE TABLE IF NOT EXISTS chat_mensajes (id BIGSERIAL PRIMARY KEY, correo VARCHAR(254) NOT NULL, apodo VARCHAR(32), mensaje VARCHAR(1200) NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    pool.query("ALTER TABLE chat_mensajes ADD COLUMN IF NOT EXISTS apodo VARCHAR(32)"),
     pool.query("CREATE TABLE IF NOT EXISTS chat_sesiones (token_hash CHAR(64) PRIMARY KEY, correo VARCHAR(254) NOT NULL, expira_en TIMESTAMPTZ NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)")
 ]).catch(error => {
-    console.error("ERROR PREPARANDO CHAT:", error.message);
+    console.error("ERROR PREPARANDO CHAT Y CREDENCIALES:", error.message);
     throw error;
 });
+const credencialesHabilitadas = () => process.env.CREDENTIALS_ENABLED === "true";
+function correoEscolarValido(email) {
+    return typeof email === "string" && email.length <= 254 && /^[^\\s@]+@chih\\.nuevaescuela\\.mx$/i.test(email.trim());
+}
 const chatCodes = new Map();
 const chatLastRequest = new Map();
 const chatDomain = "@chih.nuevaescuela.mx";
@@ -852,7 +858,15 @@ app.use((req, res, next) => {
 });
 app.post("/api/chat/auth/request-code", async (req, res) => {
     const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    if (!credencialesHabilitadas()) return res.status(503).json({ error: "El acceso al chat por credencial todavía no está habilitado por el administrador responsable." });
     if (!validInstitutionalEmail(email)) return res.status(400).json({ error: "Usa tu correo terminado en @chih.nuevaescuela.mx." });
+    try {
+        const access = await pool.query("SELECT estado FROM credenciales_alumnos WHERE correo = $1", [email]);
+        if (!access.rows.length || access.rows[0].estado !== "aprobada") return res.status(403).json({ error: "Necesitas una credencial aprobada para acceder al chat." });
+    } catch (error) {
+        console.error("ERROR COMPROBANDO CREDENCIAL:", error.message);
+        return res.status(503).json({ error: "No se pudo comprobar tu credencial. Inténtalo más tarde." });
+    }
     const resend = chatResendConfig();
     if (!resend) return res.status(503).json({ error: "El envío de códigos todavía no está configurado. Revisa RESEND_API_KEY y RESEND_FROM en Render." });
     const now = Date.now();
@@ -890,7 +904,13 @@ app.post("/api/chat/auth/request-code", async (req, res) => {
 app.post("/api/chat/auth/verify-code", async (req, res) => {
     const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const code = typeof req.body?.code === "string" ? req.body.code.trim() : "";
-    if (!validInstitutionalEmail(email) || !/^\d{6}$/.test(code)) return res.status(400).json({ error: "Correo o código no válido." });
+    if (!credencialesHabilitadas()) return res.status(503).json({ error: "El acceso al chat por credencial todavía no está habilitado por el administrador responsable." });
+    if (!validInstitutionalEmail(email) || !/^\\d{6}$/.test(code)) return res.status(400).json({ error: "Correo o código no válido." });
+    const approved = await pool.query("SELECT estado FROM credenciales_alumnos WHERE correo = $1", [email]);
+    if (!approved.rows.length || approved.rows[0].estado !== "aprobada") {
+        chatCodes.delete(email);
+        return res.status(403).json({ error: "Tu credencial no está aprobada para entrar al chat." });
+    }
     const entry = chatCodes.get(email);
     if (!entry || Date.now() > entry.expires) {
         chatCodes.delete(email);
@@ -912,9 +932,11 @@ async function requireChatSession(req, res, next) {
     const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
     if (!token || token.length > 200) return res.status(401).json({ error: "Inicia sesión para usar el chat." });
     try {
-        const result = await pool.query("SELECT correo FROM chat_sesiones WHERE token_hash = $1 AND expira_en > NOW()", [chatHash(token)]);
-        if (!result.rows.length) return res.status(401).json({ error: "Tu sesión venció. Verifica tu correo otra vez." });
+        if (!credencialesHabilitadas()) return res.status(503).json({ error: "El acceso al chat está temporalmente deshabilitado." });
+        const result = await pool.query("SELECT s.correo, c.apodo FROM chat_sesiones s JOIN credenciales_alumnos c ON c.correo = s.correo WHERE s.token_hash = $1 AND s.expira_en > NOW() AND c.estado = 'aprobada'", [chatHash(token)]);
+        if (!result.rows.length) return res.status(401).json({ error: "Tu sesión venció o tu credencial ya no está aprobada." });
         req.chatEmail = result.rows[0].correo;
+        req.chatNickname = result.rows[0].apodo;
         next();
     } catch (error) {
         console.error("ERROR VALIDANDO CHAT:", error.message);
@@ -924,7 +946,7 @@ async function requireChatSession(req, res, next) {
 app.get("/api/chat/messages", requireChatSession, async (req, res) => {
     try {
         const after = Math.max(0, Number.parseInt(req.query.after, 10) || 0);
-        const result = await pool.query("SELECT id, correo, mensaje, creado_en FROM chat_mensajes WHERE id > $1 ORDER BY id ASC LIMIT 100", [after]);
+        const result = await pool.query("SELECT id, COALESCE(apodo, 'Alumno') AS apodo, mensaje, creado_en FROM chat_mensajes WHERE id > $1 ORDER BY id ASC LIMIT 100", [after]);
         res.json(result.rows);
     } catch (error) {
         console.error("ERROR LEYENDO CHAT:", error.message);
@@ -935,11 +957,83 @@ app.post("/api/chat/messages", requireChatSession, async (req, res) => {
     const message = typeof req.body?.message === "string" ? req.body.message.trim() : "";
     if (!message || message.length > 1200) return res.status(400).json({ error: "El mensaje debe tener entre 1 y 1200 caracteres." });
     try {
-        const result = await pool.query("INSERT INTO chat_mensajes (correo, mensaje) VALUES ($1, $2) RETURNING id, correo, mensaje, creado_en", [req.chatEmail, message]);
+        const result = await pool.query("INSERT INTO chat_mensajes (correo, apodo, mensaje) VALUES ($1, $2, $3) RETURNING id, apodo, mensaje, creado_en", [req.chatEmail, req.chatNickname, message]);
         res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error("ERROR PUBLICANDO CHAT:", error.message);
         res.status(500).json({ error: "No se pudo publicar el mensaje." });
+    }
+});
+app.post("/api/credentials", async (req, res) => {
+    if (!credencialesHabilitadas()) return res.status(503).json({ error: "Las solicitudes están pausadas mientras se configura la revisión responsable." });
+    const correo = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const apodo = typeof req.body?.nickname === "string" ? req.body.nickname.trim() : "";
+    const edad = Number(req.body?.age);
+    const foto = typeof req.body?.photo === "string" ? req.body.photo : "";
+    const autorizacion = req.body?.guardianAuthorization === true;
+    if (!correoEscolarValido(correo)) return res.status(400).json({ error: "Usa tu correo escolar institucional." });
+    if (!/^[\\p{L}0-9 _.-]{2,32}$/u.test(apodo)) return res.status(400).json({ error: "El apodo debe tener entre 2 y 32 caracteres." });
+    if (!Number.isInteger(edad) || edad < 10 || edad > 15) return res.status(400).json({ error: "La edad permitida es de 10 a 15 años." });
+    if (!autorizacion) return res.status(400).json({ error: "Un padre, madre o tutor debe autorizar la solicitud antes de enviarla." });
+    if (!foto.startsWith("data:image/jpeg;base64,") || !imagenValida(foto)) return res.status(400).json({ error: "Sube una foto JPG válida y optimizada." });
+    try {
+        await chatTablesReady;
+        const existing = await pool.query("SELECT estado FROM credenciales_alumnos WHERE correo = $1", [correo]);
+        if (existing.rows[0]?.estado === "aprobada") return res.status(409).json({ error: "Este correo ya tiene una credencial aprobada." });
+        await pool.query(
+            `INSERT INTO credenciales_alumnos (correo, apodo, edad, foto, estado, motivo, autorizacion_tutor, creada_en, revisada_en)
+             VALUES ($1, $2, $3, $4, 'pendiente', '', TRUE, CURRENT_TIMESTAMP, NULL)
+             ON CONFLICT (correo) DO UPDATE SET apodo = EXCLUDED.apodo, edad = EXCLUDED.edad, foto = EXCLUDED.foto, estado = 'pendiente', motivo = '', autorizacion_tutor = TRUE, creada_en = CURRENT_TIMESTAMP, revisada_en = NULL`,
+            [correo, apodo, edad, foto]
+        );
+        res.status(201).json({ success: true, message: "Solicitud recibida. Un administrador revisará la foto de forma privada." });
+    } catch (error) {
+        console.error("ERROR GUARDANDO SOLICITUD DE CREDENCIAL:", error.message);
+        res.status(500).json({ error: "No se pudo guardar la solicitud." });
+    }
+});
+app.get("/api/credentials/status", async (req, res) => {
+    const correo = typeof req.query.email === "string" ? req.query.email.trim().toLowerCase() : "";
+    if (!correoEscolarValido(correo)) return res.status(400).json({ error: "Correo escolar no válido." });
+    if (!credencialesHabilitadas()) return res.status(503).json({ error: "El sistema de credenciales aún no está habilitado." });
+    try {
+        const result = await pool.query("SELECT estado, motivo FROM credenciales_alumnos WHERE correo = $1", [correo]);
+        if (!result.rows.length) return res.json({ status: "sin_solicitud" });
+        return res.json({ status: result.rows[0].estado, reason: result.rows[0].estado === "rechazada" ? result.rows[0].motivo : "" });
+    } catch (error) {
+        res.status(500).json({ error: "No se pudo consultar el estado." });
+    }
+});
+app.get("/api/admin/credentials", requireAdmin, async (req, res) => {
+    try {
+        await chatTablesReady;
+        const result = await pool.query("SELECT id, correo, apodo, edad, foto, estado, motivo, creada_en FROM credenciales_alumnos WHERE estado = 'pendiente' ORDER BY creada_en ASC");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("ERROR LEYENDO SOLICITUDES:", error.message);
+        res.status(500).json({ error: "No se pudieron cargar las solicitudes." });
+    }
+});
+app.post("/api/admin/credentials/:id/review", requireAdmin, async (req, res) => {
+    const id = Number.parseInt(req.params.id, 10);
+    const action = req.body?.action;
+    const reason = typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 500) : "";
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: "Solicitud no válida." });
+    if (!["approve", "reject"].includes(action)) return res.status(400).json({ error: "Elige aprobar o rechazar." });
+    if (action === "reject" && !reason) return res.status(400).json({ error: "Escribe un motivo breve para que la persona sepa qué corregir." });
+    try {
+        await chatTablesReady;
+        const result = await pool.query(
+            "UPDATE credenciales_alumnos SET estado = $1, motivo = $2, foto = NULL, revisada_en = CURRENT_TIMESTAMP WHERE id = $3 AND estado = 'pendiente' RETURNING id, correo, apodo, estado",
+            [action === "approve" ? "aprobada" : "rechazada", reason, id]
+        );
+        if (!result.rows.length) return res.status(404).json({ error: "La solicitud ya no está pendiente o no existe." });
+        if (action === "reject") await pool.query("DELETE FROM chat_sesiones WHERE correo = $1", [result.rows[0].correo]);
+        await registrarCambio(action === "approve" ? "APROBACIÓN" : "RECHAZO", "Credencial", { id, titulo: result.rows[0].apodo }, null, { estado: result.rows[0].estado });
+        res.json({ success: true, status: result.rows[0].estado, nickname: result.rows[0].apodo });
+    } catch (error) {
+        console.error("ERROR REVISANDO CREDENCIAL:", error.message);
+        res.status(500).json({ error: "No se pudo actualizar la solicitud." });
     }
 });
 app.post("/api/chat/auth/logout", requireChatSession, async (req, res) => {
