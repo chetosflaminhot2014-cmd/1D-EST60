@@ -126,7 +126,7 @@
       {codigo:'imparable',icono:'🚀',titulo:'Imparable',descripcion:'Completaste 10 tareas personales',condicion:'tareas',objetivo:10},
       {codigo:'con-iniciativa',icono:'💡',titulo:'Con iniciativa',descripcion:'Guardaste una sugerencia',condicion:'sugerencias',objetivo:1}
     ];
-    var defs=(Array.isArray(achievementDefinitions)&&achievementDefinitions.length?achievementDefinitions:fallback).map(function(d){
+    var defs=(Array.isArray(achievementDefinitions)?achievementDefinitions:fallback).map(function(d){
       var target=Math.max(1,Number(d.objetivo)||1);
       var ok=false;
       if(d.condicion==='perfil') ok=!!(profile.name&&profile.name.trim());
