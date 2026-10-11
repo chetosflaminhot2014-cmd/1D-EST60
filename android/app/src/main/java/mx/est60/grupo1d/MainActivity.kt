@@ -2,7 +2,11 @@ package mx.est60.grupo1d
 
 import android.Manifest
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.pm.PackageManager
+import androidx.core.app.NotificationCompat
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -28,6 +32,9 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import java.net.HttpURLConnection
+import java.net.URL
+import org.json.JSONObject
 
 class MainActivity : FragmentActivity() {
     private lateinit var webView: WebView
@@ -44,6 +51,7 @@ class MainActivity : FragmentActivity() {
 
         requestNotificationPermissionIfNeeded()
         FirebaseMessaging.getInstance().subscribeToTopic("1d-est60-all")
+        checkForAppUpdate()
 
         webView = WebView(this)
         webView.layoutParams = ViewGroup.LayoutParams(
@@ -101,6 +109,64 @@ class MainActivity : FragmentActivity() {
         }
         setContentView(webView)
         webView.loadUrl("file:///android_asset/www/index.html")
+    }
+
+
+    private fun checkForAppUpdate() {
+        Thread {
+            var connection: HttpURLConnection? = null
+            try {
+                connection = (URL("https://github.com/chetosflaminhot2014-cmd/1D-EST60/releases/download/latest/version.json").openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    setRequestProperty("Cache-Control", "no-cache")
+                }
+                if (connection.responseCode != HttpURLConnection.HTTP_OK) return@Thread
+                val payload = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                val remoteVersion = JSONObject(payload).optInt("versionCode", 0)
+                if (remoteVersion <= BuildConfig.VERSION_CODE) return@Thread
+
+                val updatePrefs = getSharedPreferences("app_updates", MODE_PRIVATE)
+                if (updatePrefs.getInt("last_notified_version", 0) >= remoteVersion) return@Thread
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                ) return@Thread
+
+                runOnUiThread {
+                    val channelId = "app_updates_1d_est60"
+                    val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        manager.createNotificationChannel(
+                            NotificationChannel(channelId, "Actualizaciones de la app", NotificationManager.IMPORTANCE_HIGH).apply {
+                                description = "Avisos cuando hay una nueva versión de 1°D EST60"
+                            }
+                        )
+                    }
+                    val downloadUrl = "https://github.com/chetosflaminhot2014-cmd/1D-EST60/releases/download/latest/1D-EST60.apk"
+                    val openDownload = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                    val pendingIntent = PendingIntent.getActivity(
+                        this, 2002, openDownload,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    val notification = NotificationCompat.Builder(this, channelId)
+                        .setSmallIcon(applicationInfo.icon)
+                        .setContentTitle("Actualización disponible")
+                        .setContentText("La app 1°D EST60 tiene una nueva versión. Toca para descargarla.")
+                        .setStyle(NotificationCompat.BigTextStyle().bigText("Hay una versión nueva de 1°D EST60. Toca esta notificación para descargar el APK actualizado."))
+                        .setContentIntent(pendingIntent)
+                        .setAutoCancel(true)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .build()
+                    manager.notify(2002, notification)
+                    updatePrefs.edit().putInt("last_notified_version", remoteVersion).apply()
+                }
+            } catch (_: Exception) {
+                // Sin conexión o sin publicación: la app sigue funcionando normalmente.
+            } finally {
+                connection?.disconnect()
+            }
+        }.start()
     }
 
     private fun biometricAvailable(): Boolean {
