@@ -41,6 +41,8 @@
         loginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
             loginError.textContent = "Verificando acceso...";
+            const submitButton = loginForm.querySelector("button[type='submit']");
+            if (submitButton) submitButton.disabled = true;
 
             try {
                 const response = await fetch(`${API_BASE}/api/admin/login`, {
@@ -57,6 +59,9 @@
                 window.location.href = "programador.html";
             } catch (error) {
                 loginError.textContent = error.message || "No se pudo conectar con el servidor.";
+            } finally {
+                const button = loginForm.querySelector("button[type='submit']");
+                if (button) button.disabled = false;
             }
         });
     </script>
