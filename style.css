@@ -2826,3 +2826,24 @@ body.theme-dark #perfil.student-profile-section .profile-task-empty {
 body.theme-dark #perfil.student-profile-section .student-progress-track {
     background: #26364b !important;
 }
+
+
+/* ADMINISTRACIÓN DE LOGROS */
+.achievement-admin-item{display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px;margin:0 0 12px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
+.achievement-admin-icon{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:12px;background:#eff6ff;font-size:27px}
+.achievement-admin-content{min-width:0}
+.achievement-admin-content h3{margin:0 0 5px;font-size:17px}
+.achievement-admin-content p{margin:0 0 7px;color:#64748b;font-size:13px;overflow-wrap:anywhere}
+.achievement-admin-content small{color:#64748b;font-size:11px}
+.achievement-admin-actions{display:flex;flex-wrap:wrap;gap:8px}
+.danger-button{min-height:38px;padding:0 13px;border:1px solid #fecaca;border-radius:7px;background:#fff1f2;color:#be123c;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.danger-button:hover{background:#ffe4e6}
+.form-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px}
+#achievementFormStatus{margin-top:10px;color:#2563eb;font-size:13px}
+#achievementForm [hidden]{display:none!important}
+body.theme-dark .achievement-admin-item{background:#0d1b2d;border-color:#26384e;color:#e5edf8}
+body.theme-dark .achievement-admin-content h3{color:#f1f5f9}
+body.theme-dark .achievement-admin-content p,body.theme-dark .achievement-admin-content small{color:#a6b5c9}
+body.theme-dark .achievement-admin-icon{background:#172b46}
+body.theme-dark .danger-button{background:#3b1420;border-color:#713044;color:#fecdd3}
+@media(max-width:700px){.achievement-admin-item{grid-template-columns:46px minmax(0,1fr);gap:12px;padding:14px}.achievement-admin-icon{width:44px;height:44px;font-size:23px}.achievement-admin-actions{grid-column:1/-1}.achievement-admin-actions button{flex:1}.achievement-admin-content h3{font-size:15px}}
