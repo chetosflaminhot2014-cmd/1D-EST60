@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1424">
+<meta name="description" content="Centro de ayuda y diagnóstico para la aplicación escolar 1°D EST60.">
+<title>Ayuda y diagnóstico | 1°D EST60</title>
+<link rel="icon" href="icon-192.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<style>
+:root{--help-bg:#f3f6fb;--help-card:#fff;--help-text:#152238;--help-muted:#61718a;--help-line:#dce5f0;--help-accent:#2563eb;--help-soft:#edf4ff}
+body{background:var(--help-bg);color:var(--help-text);min-height:100vh}
+.help-wrap{width:min(1060px,calc(100% - 32px));margin:38px auto 64px}
+.help-top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:25px}
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--help-accent);font-size:13px;font-weight:800}
+.help-kicker{font-size:10px;font-weight:900;letter-spacing:2px;color:var(--help-accent);text-transform:uppercase}
+.help-hero{position:relative;overflow:hidden;padding:clamp(24px,5vw,48px);border-radius:24px;background:linear-gradient(125deg,#0a1729,#152f52 68%,#264a77);color:#fff;box-shadow:0 20px 50px #142d4b20}
+.help-hero:after{content:"?";position:absolute;right:5%;top:-50px;font-size:260px;line-height:1;font-weight:900;color:#ffffff09;pointer-events:none}
+.help-hero h1{position:relative;z-index:1;margin:10px 0;font-size:clamp(30px,5vw,48px);line-height:1.08;letter-spacing:-1.4px}
+.help-hero p{position:relative;z-index:1;max-width:620px;color:#d1dfef;font-size:14px}
+.help-hero .help-kicker{color:#93c5fd}
+.help-actions{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.help-btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:42px;padding:10px 15px;border:1px solid #ffffff32;border-radius:10px;background:#ffffff12;color:#fff;font-size:12px;font-weight:800;cursor:pointer}
+.help-btn.primary{background:#fff;color:#122541;border-color:#fff}
+.help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+.help-card{min-width:0;padding:22px;border:1px solid var(--help-line);border-radius:17px;background:var(--help-card);box-shadow:0 8px 26px #15223808}
+.help-card.full{grid-column:1/-1}
+.help-card h2{margin:0 0 5px;font-size:17px;letter-spacing:-.3px}
+.help-card .sub{margin-bottom:16px;color:var(--help-muted);font-size:12px}
+.status-list{display:grid;gap:10px}
+.status-row{display:flex;align-items:center;gap:12px;min-width:0;padding:12px;border:1px solid var(--help-line);border-radius:11px}
+.status-icon{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:10px;background:var(--help-soft);color:var(--help-accent);font-size:17px}
+.status-copy{flex:1;min-width:0}
+.status-copy strong{display:block;font-size:12px;overflow-wrap:anywhere}
+.status-copy small{display:block;color:var(--help-muted);font-size:11px;overflow-wrap:anywhere}
+.status-pill{flex:0 0 auto;padding:5px 8px;border-radius:99px;background:#eef2f7;color:#64748b;font-size:10px;font-weight:900}
+.status-pill.ok{background:#dcfce7;color:#166534}.status-pill.warn{background:#fef3c7;color:#92400e}.status-pill.fail{background:#fee2e2;color:#991b1b}
+.steps{display:grid;gap:14px;list-style:none;counter-reset:help}
+.steps li{position:relative;padding-left:42px;counter-increment:help}
+.steps li:before{content:counter(help,decimal-leading-zero);position:absolute;left:0;top:0;display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--help-soft);color:var(--help-accent);font-size:10px;font-weight:900}
+.steps strong{display:block;margin-bottom:2px;font-size:12px}
+.steps p{color:var(--help-muted);font-size:12px}
+.help-note{padding:13px 14px;border-left:3px solid #3b82f6;border-radius:0 9px 9px 0;background:var(--help-soft);color:var(--help-text);font-size:12px}
+.help-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;color:var(--help-muted);font-size:11px}
+.help-bottom button{border:1px solid var(--help-line);border-radius:8px;padding:9px 12px;background:var(--help-card);color:var(--help-text);font-size:11px;font-weight:800;cursor:pointer}
+body.theme-dark{--help-bg:#080f1a;--help-card:#101d30;--help-text:#e5edf7;--help-muted:#a9b8cd;--help-line:#293c55;--help-accent:#93c5fd;--help-soft:#142a46;background:var(--help-bg);color:var(--help-text)}
+body.theme-dark .help-hero{background:linear-gradient(125deg,#050b13,#0e2038 68%,#172f4e)}
+body.theme-dark .status-pill{background:#25364d;color:#dbeafe}
+body.theme-dark .status-pill.ok{background:#123d2b;color:#bbf7d0}
+body.theme-dark .status-pill.warn{background:#453519;color:#fde68a}
+body.theme-dark .status-pill.fail{background:#4b2028;color:#fecaca}
+body.theme-dark .status-icon{background:#172d49}
+body.theme-dark .help-note{background:#142a46;color:#e5edf7}
+body.theme-dark .help-hero p{color:#c7d6e9}
+@media(max-width:650px){.help-wrap{width:calc(100% - 22px);margin:18px auto 40px}.help-grid{grid-template-columns:minmax(0,1fr);gap:11px}.help-card.full{grid-column:auto}.help-card{padding:17px}.help-top{margin-bottom:15px}.help-hero{border-radius:18px}.help-hero:after{right:-10%;font-size:190px}.help-bottom{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<main class="help-wrap">
+  <div class="help-top">
+    <a class="back-link" href="index.html">← Volver a 1°D</a>
+    <button class="help-btn" id="themeToggle" type="button" style="color:inherit;background:var(--help-card);border-color:var(--help-line)">Cambiar tema</button>
+  </div>
+  <section class="help-hero">
+    <span class="help-kicker">1°D · EST No. 60</span>
+    <h1>Centro de ayuda<br>y diagnóstico</h1>
+    <p>Comprueba si los servicios están disponibles, revisa el almacenamiento del dispositivo y encuentra soluciones a los problemas más comunes de la aplicación.</p>
+    <div class="help-actions">
+      <button class="help-btn primary" id="runCheck" type="button">↻ Ejecutar diagnóstico</button>
+      <a class="help-btn" href="index.html">Ir a la página principal →</a>
+    </div>
+  </section>
+  <div class="help-grid">
+    <section class="help-card">
+      <h2>Estado de los servicios</h2>
+      <p class="sub">La comprobación consulta el servidor escolar. No envía tus calificaciones ni tu perfil.</p>
+      <div class="status-list">
+        <div class="status-row"><div class="status-icon">⌁</div><div class="status-copy"><strong>Conexión del dispositivo</strong><small id="networkDetail">Comprobando…</small></div><span id="networkStatus" class="status-pill">Pendiente</span></div>
+        <div class="status-row"><div class="status-icon">◈</div><div class="status-copy"><strong>Servidor escolar</strong><small id="serverDetail">Aún no se ha comprobado.</small></div><span id="serverStatus" class="status-pill">Pendiente</span></div>
+        <div class="status-row"><div class="status-icon">▤</div><div class="status-copy"><strong>Almacenamiento local</strong><small id="storageDetail">Comprobando…</small></div><span id="storageStatus" class="status-pill">Pendiente</span></div>
+        <div class="status-row"><div class="status-icon">▣</div><div class="status-copy"><strong>Modo de aplicación</strong><small id="appDetail">Detectando cómo abriste la página.</small></div><span id="appStatus" class="status-pill">Pendiente</span></div>
+      </div>
+    </section>
+    <section class="help-card">
+      <h2>Soluciones rápidas</h2><p class="sub">Prueba estos pasos si algo no carga o no se guarda.</p>
+      <ol class="steps">
+        <li><strong>La página no actualiza</strong><p>Cierra y vuelve a abrir la app. Si sigue igual, abre la página con conexión a internet.</p></li>
+        <li><strong>Gemini tarda o no responde</strong><p>Comprueba la conexión y vuelve a enviar una pregunta breve. El servicio puede estar ocupado temporalmente.</p></li>
+        <li><strong>No se guardan tus datos</strong><p>Evita borrar los datos del navegador o de la aplicación: algunas preferencias se guardan localmente.</p></li>
+        <li><strong>No llegan notificaciones</strong><p>Revisa el permiso de notificaciones en los ajustes de Android y que no esté activo “No molestar”.</p></li>
+      </ol>
+    </section>
+    <section class="help-card full">
+      <h2>Privacidad y datos</h2><p class="sub">Qué conviene saber antes de usar las funciones escolares.</p>
+      <div class="help-note"><strong>Importante:</strong> las calificaciones personales se guardan en este dispositivo y no son calificaciones oficiales. Si borras los datos de la app o del navegador, podrías perder registros locales. No escribas contraseñas, datos bancarios ni información privada en las preguntas de la IA.</div>
+    </section>
+  </div>
+  <div class="help-bottom"><span id="lastCheck">Diagnóstico no ejecutado.</span><button id="copyReport" type="button">Copiar reporte técnico</button></div>
+</main>
+<script>
+(() => {
+ const API="https://oned-est60-server.onrender.com/api/health";
+ const $=id=>document.getElementById(id);
+ const keys={network:["networkStatus","networkDetail"],server:["serverStatus","serverDetail"],storage:["storageStatus","storageDetail"],app:["appStatus","appDetail"]};
+ const report={};
+ function setStatus(key,state,title,detail){const [pillId,detailId]=keys[key];const pill=$(pillId);pill.className="status-pill "+state;pill.textContent=title;$(detailId).textContent=detail;report[key]={status:title,detail};}
+ async function check(){
+  $("runCheck").disabled=true;$("runCheck").textContent="Comprobando…";
+  setStatus("network",navigator.onLine?"ok":"fail",navigator.onLine?"Con conexión":"Sin conexión",navigator.onLine?"El dispositivo indica que hay acceso a la red.":"El dispositivo indica que no hay conexión a internet.");
+  try { const key="est60_help_diagnostic_test";localStorage.setItem(key,"ok");localStorage.removeItem(key);setStatus("storage","ok","Disponible","El navegador permite guardar datos locales."); } catch(e){setStatus("storage","fail","No disponible","El almacenamiento local está bloqueado o lleno.");}
+  const standalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+  setStatus("app","ok",standalone?"App instalada":"Navegador",standalone?"La página está abierta en modo de aplicación.":"La página está abierta en una pestaña del navegador.");
+  if(!navigator.onLine){setStatus("server","fail","Sin conexión","Conéctate a internet para consultar el servidor.");}
+  else {
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
+   try {const response=await fetch(API,{method:"GET",cache:"no-store",signal:controller.signal});const data=await response.json();if(response.ok&&data.status==="online"&&data.database==="connected"){setStatus("server","ok","Operativo","Servidor accesible y base de datos conectada.");}else if(response.ok&&data.status==="online"){setStatus("server","warn","Parcial","El servidor responde, pero la base de datos no está conectada.");}else{setStatus("server","fail","Con problemas","El servidor respondió con un estado inesperado.");}}
+   catch(e){setStatus("server","warn","No confirmado","No hubo respuesta en 5 segundos; puede estar iniciando o temporalmente ocupado.");}
+   finally{clearTimeout(timer);}
+  }
+  $("lastCheck").textContent="Última comprobación: "+new Date().toLocaleString("es-MX")+" · Los resultados son orientativos.";
+  $("runCheck").disabled=false;$("runCheck").textContent="↻ Volver a comprobar";
+ }
+ const toggle=$("themeToggle"),themeKey="est60_tema_web_v1";
+ function applyTheme(){const dark=localStorage.getItem(themeKey)==="dark";document.body.classList.toggle("theme-dark",dark);toggle.textContent=dark?"☀️ Modo claro":"🌙 Modo oscuro";}
+ try{applyTheme();}catch(e){}
+ toggle.addEventListener("click",()=>{try{localStorage.setItem(themeKey,document.body.classList.contains("theme-dark")?"light":"dark");applyTheme();}catch(e){document.body.classList.toggle("theme-dark");}});
+ $("runCheck").addEventListener("click",check);
+ $("copyReport").addEventListener("click",async()=>{const textReport="1°D EST60 — Reporte de diagnóstico\n"+Object.entries(report).map(([key,value])=>key+": "+value.status+" — "+value.detail).join("\n")+"\nFecha: "+new Date().toISOString();try{await navigator.clipboard.writeText(textReport);$("copyReport").textContent="Reporte copiado";}catch(e){const area=document.createElement("textarea");area.value=textReport;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();const ok=document.execCommand("copy");area.remove();$("copyReport").textContent=ok?"Reporte copiado":"No se pudo copiar";}setTimeout(()=>$("copyReport").textContent="Copiar reporte técnico",2200);});
+ check();
+})();
+</script>
+</body>
+</html>
