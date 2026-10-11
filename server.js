@@ -266,6 +266,115 @@ app.post("/api/admin/login", (req, res) => {
 app.use(express.static(path.join(__dirname)));
 
 // ========================================
+// LOGROS CONFIGURABLES
+// ========================================
+const achievementsSchemaReady = (async () => {
+    await pool.query("CREATE TABLE IF NOT EXISTS logros (id SERIAL PRIMARY KEY, codigo VARCHAR(100) UNIQUE NOT NULL, icono VARCHAR(24) NOT NULL DEFAULT '🏆', titulo VARCHAR(100) NOT NULL, descripcion VARCHAR(240) NOT NULL DEFAULT '', condicion VARCHAR(30) NOT NULL DEFAULT 'perfil', objetivo INTEGER NOT NULL DEFAULT 1 CHECK (objetivo > 0), activo BOOLEAN NOT NULL DEFAULT TRUE, creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+    const existing = await pool.query("SELECT COUNT(*)::int AS total FROM logros");
+    if (existing.rows[0].total === 0) {
+        const defaults = [
+            ["perfil-listo", "👤", "Perfil listo", "Guardaste tus preferencias", "perfil", 1],
+            ["buena-imagen", "📷", "Buena imagen", "Personalizaste tu avatar", "foto", 1],
+            ["primer-paso", "🎯", "Primer paso", "Completaste una tarea personal", "tareas", 1],
+            ["constancia", "🔥", "Constancia", "Completaste 5 tareas personales", "tareas", 5],
+            ["imparable", "🚀", "Imparable", "Completaste 10 tareas personales", "tareas", 10],
+            ["con-iniciativa", "💡", "Con iniciativa", "Guardaste una sugerencia", "sugerencias", 1]
+        ];
+        for (const item of defaults) {
+            await pool.query("INSERT INTO logros (codigo, icono, titulo, descripcion, condicion, objetivo) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (codigo) DO NOTHING", item);
+        }
+    }
+})().catch(error => {
+    console.error("ERROR AL PREPARAR LOGROS:", error.message);
+    throw error;
+});
+
+function validarLogro(body) {
+    const icono = typeof body?.icono === "string" ? body.icono.trim().slice(0, 24) : "";
+    const titulo = typeof body?.titulo === "string" ? body.titulo.trim().slice(0, 100) : "";
+    const descripcion = typeof body?.descripcion === "string" ? body.descripcion.trim().slice(0, 240) : "";
+    const condicion = typeof body?.condicion === "string" ? body.condicion : "";
+    const objetivo = Number(body?.objetivo ?? 1);
+    if (!icono || !titulo || !["perfil", "foto", "tareas", "sugerencias"].includes(condicion) || !Number.isInteger(objetivo) || objetivo < 1 || objetivo > 1000) {
+        return { error: "Completa el icono, el título y una condición válida. El objetivo debe estar entre 1 y 1000." };
+    }
+    return { value: { icono, titulo, descripcion, condicion, objetivo } };
+}
+
+app.get("/api/logros", async (_req, res) => {
+    try {
+        await achievementsSchemaReady;
+        const result = await pool.query("SELECT id, codigo, icono, titulo, descripcion, condicion, objetivo, activo FROM logros WHERE activo = TRUE ORDER BY id ASC");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("ERROR AL OBTENER LOGROS:", error.message);
+        res.status(500).json({ error: "No se pudieron cargar los logros." });
+    }
+});
+
+app.get("/api/admin/logros", requireAdmin, async (_req, res) => {
+    try {
+        await achievementsSchemaReady;
+        const result = await pool.query("SELECT id, codigo, icono, titulo, descripcion, condicion, objetivo, activo FROM logros ORDER BY id ASC");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("ERROR AL OBTENER LOGROS ADMIN:", error.message);
+        res.status(500).json({ error: "No se pudieron cargar los logros." });
+    }
+});
+
+app.post("/api/admin/logros", requireAdmin, async (req, res) => {
+    const checked = validarLogro(req.body);
+    if (checked.error) return res.status(400).json({ error: checked.error });
+    try {
+        await achievementsSchemaReady;
+        const { icono, titulo, descripcion, condicion, objetivo } = checked.value;
+        const base = titulo.toLocaleLowerCase("es-MX").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70) || "logro";
+        const codigo = base + "-" + Date.now().toString(36);
+        const result = await pool.query("INSERT INTO logros (codigo, icono, titulo, descripcion, condicion, objetivo) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, codigo, icono, titulo, descripcion, condicion, objetivo, activo", [codigo, icono, titulo, descripcion, condicion, objetivo]);
+        await registrarCambio("CREACIÓN", "Logro", { id: result.rows[0].id, titulo }, null, result.rows[0]);
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("ERROR AL CREAR LOGRO:", error.message);
+        res.status(500).json({ error: "No se pudo crear el logro." });
+    }
+});
+
+app.put("/api/admin/logros/:id", requireAdmin, async (req, res) => {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: "Identificador no válido." });
+    const checked = validarLogro(req.body);
+    if (checked.error) return res.status(400).json({ error: checked.error });
+    try {
+        await achievementsSchemaReady;
+        const previous = await pool.query("SELECT * FROM logros WHERE id = $1", [id]);
+        if (!previous.rows.length) return res.status(404).json({ error: "Logro no encontrado." });
+        const { icono, titulo, descripcion, condicion, objetivo } = checked.value;
+        const result = await pool.query("UPDATE logros SET icono = $1, titulo = $2, descripcion = $3, condicion = $4, objetivo = $5 WHERE id = $6 RETURNING id, codigo, icono, titulo, descripcion, condicion, objetivo, activo", [icono, titulo, descripcion, condicion, objetivo, id]);
+        await registrarCambio("EDICIÓN", "Logro", { id, titulo }, previous.rows[0], result.rows[0]);
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error("ERROR AL EDITAR LOGRO:", error.message);
+        res.status(500).json({ error: "No se pudo editar el logro." });
+    }
+});
+
+app.delete("/api/admin/logros/:id", requireAdmin, async (req, res) => {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: "Identificador no válido." });
+    try {
+        await achievementsSchemaReady;
+        const result = await pool.query("DELETE FROM logros WHERE id = $1 RETURNING id, codigo, icono, titulo, descripcion, condicion, objetivo, activo", [id]);
+        if (!result.rows.length) return res.status(404).json({ error: "Logro no encontrado." });
+        await registrarCambio("ELIMINACIÓN", "Logro", { id, titulo: result.rows[0].titulo }, result.rows[0], null);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("ERROR AL ELIMINAR LOGRO:", error.message);
+        res.status(500).json({ error: "No se pudo eliminar el logro." });
+    }
+});
+
+// ========================================
 // AVISOS
 // ========================================
 
