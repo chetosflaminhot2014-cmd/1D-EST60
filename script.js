@@ -1,5 +1,44 @@
 const API_BASE = "https://oned-est60-server.onrender.com";
 
+/* OCULTAR CHAT Y CREDENCIAL EN LA WEB PÚBLICA */
+(() => {
+    const ocultarFuncionesPrivadas = () => {
+        const ids = [
+            "chatAuthPanel", "chatRoomPanel", "eaCredentialForm",
+            "ea-id-card", "credentialPanel", "credentialsPanel",
+            "chatPanel", "groupChatPanel"
+        ];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.hidden = true;
+        });
+
+        document.querySelectorAll("a, button, [role='button']").forEach(el => {
+            const label = (el.innerText || el.getAttribute("aria-label") || "").trim().toLocaleLowerCase("es-MX");
+            if (/^(chat|chat grupal|credencial|mi credencial|solicitar credencial)$/.test(label)) {
+                const container = el.closest("nav, section, article, .card, .feature-card");
+                if (container && container !== document.querySelector("nav")) {
+                    container.hidden = true;
+                } else {
+                    el.hidden = true;
+                }
+            }
+        });
+
+        document.querySelectorAll("h1, h2, h3, h4").forEach(heading => {
+            const label = (heading.innerText || "").trim().toLocaleLowerCase("es-MX");
+            if (!/^(chat|chat grupal|credencial|mi credencial|solicitar credencial)$/.test(label)) return;
+            const container = heading.closest("section, article, .card, .feature-card");
+            if (container) container.hidden = true;
+        });
+    };
+
+    ocultarFuncionesPrivadas();
+    const observer = new MutationObserver(ocultarFuncionesPrivadas);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+
 
 /* ==========================================
    MENÚ MÓVIL
