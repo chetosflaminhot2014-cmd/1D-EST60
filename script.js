@@ -916,8 +916,12 @@ async function cargarImagenCalendarioPublica() {
     messageForm.addEventListener("submit", async event => {
         event.preventDefault(); const message = messageInput.value.trim(); if (!message) return;
         const button = document.getElementById("chatSendButton"); button.disabled = true;
-        try { await api("/api/chat/messages", { method: "POST", body: JSON.stringify({ message }) }); messageInput.value = ""; await loadMessages(); }
-        catch (error) { status(roomStatus, error.message, true); }
+        try {
+            const result = await api("/api/chat/messages", { method: "POST", body: JSON.stringify({ message }) });
+            messageInput.value = "";
+            await loadMessages();
+            if (result.moderated) status(roomStatus, result.message || "No se permiten groserías en el chat.", true);
+        } catch (error) { status(roomStatus, error.message, true); }
         finally { button.disabled = false; messageInput.focus(); }
     });
     document.getElementById("chatLogoutButton").addEventListener("click", async () => {
