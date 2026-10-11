@@ -113,7 +113,7 @@ jobs:
 
       - name: Compilar APK
         working-directory: android
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon -PappVersionCode=${{ github.run_number }} assembleDebug
 
       - name: Publicar APK descargable
         uses: actions/upload-artifact@v4
@@ -138,3 +138,6 @@ jobs:
           gh release delete-asset latest 1D-EST60.apk --yes 2>/dev/null || true
           cp "$APK_PATH" /tmp/1D-EST60.apk
           gh release upload latest /tmp/1D-EST60.apk
+          printf '{"versionCode":%s,"versionName":"1.0.%s"}\n' "${{ github.run_number }}" "${{ github.run_number }}" > /tmp/version.json
+          gh release delete-asset latest version.json --yes 2>/dev/null || true
+          gh release upload latest /tmp/version.json
