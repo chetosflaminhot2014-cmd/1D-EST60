@@ -38,7 +38,8 @@
             <a href="#inicio">Inicio</a>
             <a href="#avisos">Avisos</a>
             <a href="#tareas">Tareas</a>
-            <a href="#geminiPanel">Repaso IA</a>
+            <a href="#geminiPanel">Chat IA</a>
+            <a href="#chat">Chat grupal</a>
             <a href="#horario">Horario</a>
             <a href="#calendario">Calendario</a>
             <a href="#recursos">Recursos</a>
@@ -685,6 +686,28 @@
 
     </section>
 
+
+
+    <!-- CHAT ENTRE ESTUDIANTES -->
+    <section id="chat" class="section dark-section">
+        <div class="section-number">06</div>
+        <div class="section-heading light"><span>COMUNIDAD 1°D</span><h2>Chat grupal</h2><p>Conversa con tus compañeros. El acceso requiere correo institucional y credencial aprobada.</p></div>
+        <div class="chat-shell">
+            <div id="chatAuthPanel" class="chat-auth-panel">
+                <div class="chat-lock-icon" aria-hidden="true">✉</div><h3>Entra al chat de 1°D</h3>
+                <p>Usa tu correo institucional <strong>@chih.nuevaescuela.mx</strong>. Si tu credencial aún no ha sido aprobada, tendrás que esperar la revisión.</p>
+                <form id="chatRequestCodeForm" class="chat-auth-form"><label for="chatEmail">Correo institucional</label><input id="chatEmail" type="email" maxlength="254" autocomplete="email" placeholder="tu.correo@chih.nuevaescuela.mx" required><button id="chatRequestCodeButton" class="btn btn-primary" type="submit">Enviar código</button></form>
+                <form id="chatVerifyCodeForm" class="chat-auth-form" hidden><label for="chatCode">Código recibido por correo</label><input id="chatCode" inputmode="numeric" autocomplete="one-time-code" minlength="6" maxlength="8" placeholder="Código de verificación" required><button id="chatVerifyCodeButton" class="btn btn-primary" type="submit">Verificar y entrar</button><button id="chatChangeEmail" class="btn btn-secondary" type="button">Cambiar correo</button></form>
+                <p id="chatAuthStatus" class="chat-status" role="status" aria-live="polite"></p>
+            </div>
+            <div id="chatRoomPanel" class="chat-room-panel" hidden>
+                <div class="chat-room-header"><div><span class="chat-online-dot" aria-hidden="true"></span><strong>Chat de estudiantes</strong><small id="chatSignedEmail"></small></div><button id="chatLogoutButton" class="btn btn-secondary" type="button">Cerrar sesión</button></div>
+                <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="Mensajes del chat"></div>
+                <form id="chatMessageForm" class="chat-message-form"><label class="sr-only" for="chatMessageInput">Escribe un mensaje</label><textarea id="chatMessageInput" maxlength="1200" rows="2" placeholder="Escribe un mensaje..." required></textarea><button id="chatSendButton" type="submit">Enviar</button></form>
+                <p class="chat-guideline">No compartas contraseñas, direcciones, teléfonos ni información privada. Evita el spam y respeta a los demás.</p><p id="chatRoomStatus" class="chat-status" role="status" aria-live="polite"></p>
+            </div>
+        </div>
+    </section>
 
     <!-- ==========================================
          RECURSOS
