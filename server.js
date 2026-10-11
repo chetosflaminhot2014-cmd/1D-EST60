@@ -811,11 +811,11 @@ app.post("/api/gemini", async (req, res) => {
 
     try {
         // Flash-Lite prioriza baja latencia. El modelo se puede cambiar desde Render.
-        const modeloPrincipal = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+        const modeloPrincipal = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
         let resultado = await pedirModelo(modeloPrincipal);
         // Sin pausa ni reintento redundante: si hay saturación, se prueba una vez el modelo Flash.
-        if ([429, 503].includes(resultado.response.status) && modeloPrincipal !== "gemini-2.5-flash") {
-            resultado = await pedirModelo("gemini-2.5-flash");
+        if ([429, 503].includes(resultado.response.status) && modeloPrincipal !== "gemini-3.8-flash") {
+            resultado = await pedirModelo("gemini-3.8-flash");
         }
 
         const { response, data } = resultado;
