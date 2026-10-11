@@ -776,19 +776,19 @@ app.post("/api/gemini", async (req, res) => {
     if (!apiKey) {
         return res.status(503).json({ error: "Gemini no está configurado todavía. Falta GEMINI_API_KEY en Render." });
     }
-    if (!message || message.length > 900) {
-        return res.status(400).json({ error: "Escribe una pregunta de hasta 900 caracteres." });
+    if (!message || message.length > 4000) {
+        return res.status(400).json({ error: "Escribe un mensaje de hasta 4000 caracteres." });
     }
 
     const prompt = (task ? "Contexto de la tarea:\n" + task + "\n\n" : "") + message;
     const requestBody = {
         system_instruction: {
             parts: [{
-                text: "Eres un tutor escolar para secundaria en México. Responde en español claro y directo, normalmente en 3 a 7 frases. Prioriza la respuesta concreta, un paso útil y un ejemplo breve solo si aporta valor. Para cuestionarios, haz una pregunta a la vez y espera la respuesta del alumno. No inventes datos ni instrucciones escolares; si no sabes, dilo. No pidas datos personales."
+                text: "Eres un asistente conversacional general. Puedes hablar con naturalidad sobre cultura, ciencia, tecnología, programación, videojuegos, historia, entretenimiento, ideas, tareas y muchos otros temas. Responde en el idioma del usuario, con claridad y al nivel de detalle que pida. No limites la conversación a temas escolares. Si no sabes algo, dilo con honestidad; distingue hechos de opiniones y no inventes datos. No solicites información personal sensible. Mantén límites razonables ante solicitudes que puedan facilitar daños reales."
             }]
         },
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.35, maxOutputTokens: 700 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
     };
 
     async function pedirModelo(modelo) {
