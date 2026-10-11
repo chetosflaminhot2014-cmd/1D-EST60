@@ -6,6 +6,8 @@ on:
     paths:
       - "android/**"
       - "index.html"
+      - "acceso.html"
+      - "programador.html"
       - "ayuda.html"
       - "organizador.html"
       - "estudio.html"
