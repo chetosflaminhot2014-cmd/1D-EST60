@@ -832,6 +832,14 @@ async function cargarImagenCalendarioPublica() {
     const roomStatus = document.getElementById("chatRoomStatus");
     const tokenKey = "est60_chat_token";
     const emailKey = "est60_chat_email";
+    const profileKey = "est60_student_profile_v1";
+    function getProfileNickname() {
+        try {
+            const profile = JSON.parse(localStorage.getItem(profileKey) || "{}");
+            return typeof profile.nickname === "string" ? profile.nickname.trim().slice(0, 32) : "";
+        } catch (_) { return ""; }
+    }
+    let activeNickname = "";
     let lastId = 0, pollTimer = null, loading = false;
     const token = () => { try { return sessionStorage.getItem(tokenKey) || ""; } catch (_) { return ""; } };
     function status(el, text, error) { el.textContent = text; el.classList.toggle("is-error", !!error); }
@@ -846,7 +854,8 @@ async function cargarImagenCalendarioPublica() {
     }
     function enterRoom(email) {
         authPanel.hidden = true; roomPanel.hidden = false;
-        document.getElementById("chatSignedEmail").textContent = email;
+        activeNickname = getProfileNickname();
+        document.getElementById("chatSignedEmail").textContent = activeNickname ? activeNickname + " · " + email : email;
         loadMessages();
         if (pollTimer) clearInterval(pollTimer);
         pollTimer = setInterval(loadMessages, 5000);
@@ -862,7 +871,8 @@ async function cargarImagenCalendarioPublica() {
         const button = document.getElementById("chatRequestCodeButton");
         button.disabled = true; button.textContent = "Entrando...";
         try {
-            const data = await api("/api/chat/auth/email", { method: "POST", body: JSON.stringify({ email }) });
+            const nickname = getProfileNickname();
+            const data = await api("/api/chat/auth/email", { method: "POST", body: JSON.stringify({ email, nickname }) });
             sessionStorage.setItem(tokenKey, data.token); sessionStorage.setItem(emailKey, data.email);
             status(authStatus, ""); enterRoom(data.email);
         } catch (error) { status(authStatus, error.message, true); }
