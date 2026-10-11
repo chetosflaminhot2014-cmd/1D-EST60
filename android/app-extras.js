@@ -15,7 +15,8 @@
   var completedPublic = read(DONE_KEY, []);
   var seenAlerts = read(ALERTS_KEY, []);
   var root;
-  var achievementDefinitions = null;
+  var ACHIEVEMENTS_KEY = 'est60_app_achievements_v1';
+  var achievementDefinitions = read(ACHIEVEMENTS_KEY, null);
   function createPanel() {
     if (document.getElementById('est60AppSpace')) return;
     /* Los estilos exclusivos se cargan desde app-extras.css. */
@@ -144,8 +145,10 @@
       var response=await fetch('https://oned-est60-server.onrender.com/api/logros',{cache:'no-store'});
       if(!response.ok)throw new Error('No se pudieron actualizar los logros.');
       var data=await response.json();
-      if(Array.isArray(data)&&data.length)achievementDefinitions=data;
-      else if(Array.isArray(data))achievementDefinitions=[];
+      if(Array.isArray(data)) {
+        achievementDefinitions=data;
+        write(ACHIEVEMENTS_KEY, achievementDefinitions);
+      }
       renderAchievements();
     } catch(error) {
       /* Sin internet se conservan los logros predeterminados y el espacio sigue funcionando. */
