@@ -94,7 +94,7 @@ class MainActivity : FragmentActivity() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
                 view.evaluateJavascript(
-                    "(function(){var b=document.getElementById('installAppButton');if(b)b.remove();var h=document.getElementById('installAppHelp');if(h)h.remove();})();",
+                    "(function(){var b=document.getElementById('installAppButton');if(b)b.remove();var h=document.getElementById('installAppHelp');if(h)h.remove();var ids=['chatAuthPanel','chatRoomPanel'];ids.forEach(function(id){var e=document.getElementById(id);if(e){var p=e.closest('section,article,.card')||e;p.style.display='none';}});Array.from(document.querySelectorAll('a,button,[role=button]')).forEach(function(e){var t=(e.innerText||e.textContent||'').trim();if(/^(chat|chat grupal|credencial|mi credencial|solicitar credencial)$/i.test(t)){e.style.display='none';}});})();",
                     null
                 )
             }
