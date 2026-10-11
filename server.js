@@ -771,24 +771,24 @@ app.get("/api/admin/historial", requireAdmin, async (req, res) => {
 app.post("/api/gemini", async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
     const message = typeof req.body?.message === "string" ? req.body.message.trim() : "";
-    const task = typeof req.body?.taskContext === "string" ? req.body.taskContext.slice(0, 1000) : "";
+    const task = typeof req.body?.taskContext === "string" ? req.body.taskContext.slice(0, 800) : "";
 
     if (!apiKey) {
         return res.status(503).json({ error: "Gemini no está configurado todavía. Falta GEMINI_API_KEY en Render." });
     }
-    if (!message || message.length > 1200) {
-        return res.status(400).json({ error: "Escribe una pregunta de hasta 1200 caracteres." });
+    if (!message || message.length > 900) {
+        return res.status(400).json({ error: "Escribe una pregunta de hasta 900 caracteres." });
     }
 
     const prompt = (task ? "Contexto de la tarea:\n" + task + "\n\n" : "") + message;
     const requestBody = {
         system_instruction: {
             parts: [{
-                text: "Eres un asistente educativo para alumnos de secundaria de México. Responde en español claro y útil. Da una explicación completa pero concisa, con pasos claros y un ejemplo cuando ayude. Termina todas las frases y no cortes la respuesta a la mitad. Prioriza la exactitud sobre la seguridad aparente: no inventes datos, fuentes, citas ni instrucciones escolares. En temas históricos, culturales o científicos, distingue las variantes regionales y los hechos confirmados de las interpretaciones. Si no tienes suficiente certeza, dilo claramente y recomienda verificar con el libro de texto o el profesor. No pidas datos personales."
+                text: "Eres un tutor escolar para secundaria en México. Responde en español claro y directo, normalmente en 3 a 7 frases. Prioriza la respuesta concreta, un paso útil y un ejemplo breve solo si aporta valor. Para cuestionarios, haz una pregunta a la vez y espera la respuesta del alumno. No inventes datos ni instrucciones escolares; si no sabes, dilo. No pidas datos personales."
             }]
         },
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.5, maxOutputTokens: 1400 }
+        generationConfig: { temperature: 0.35, maxOutputTokens: 700 }
     };
 
     async function pedirModelo(modelo) {
@@ -810,19 +810,12 @@ app.post("/api/gemini", async (req, res) => {
     }
 
     try {
-        let resultado = await pedirModelo("gemini-3.8-flash");
-
-        // 503 suele indicar saturación temporal. Reintenta una vez y, si persiste,
-        // cambia a Gemini 3.5 Flash-Lite como alternativa.
-        if (resultado.response.status === 503) {
-            console.warn("Gemini 3.8 Flash está saturado; reintentando una vez.");
-            await new Promise(resolve => setTimeout(resolve, 1200));
-            resultado = await pedirModelo("gemini-3.8-flash");
-
-            if (resultado.response.status === 503) {
-                console.warn("Gemini 3.8 Flash sigue saturado; probando gemini-3.5-flash-lite.");
-                resultado = await pedirModelo("gemini-3.5-flash-lite");
-            }
+        // Flash-Lite prioriza baja latencia. El modelo se puede cambiar desde Render.
+        const modeloPrincipal = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+        let resultado = await pedirModelo(modeloPrincipal);
+        // Sin pausa ni reintento redundante: si hay saturación, se prueba una vez el modelo Flash.
+        if ([429, 503].includes(resultado.response.status) && modeloPrincipal !== "gemini-2.5-flash") {
+            resultado = await pedirModelo("gemini-2.5-flash");
         }
 
         const { response, data } = resultado;
