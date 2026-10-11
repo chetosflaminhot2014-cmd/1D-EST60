@@ -1058,10 +1058,49 @@ app.get("/api/chat/messages", requireChatSession, async (req, res) => {
         res.status(500).json({ error: "No se pudieron cargar los mensajes." });
     }
 });
+// Moderación automática del chat: el servidor filtra antes de guardar cualquier mensaje.
+function detectarGroseriasChat(texto) {
+    const normalizado = String(texto || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[0]/g, "o")
+        .replace(/[1!]/g, "i")
+        .replace(/[3]/g, "e")
+        .replace(/[4@]/g, "a")
+        .replace(/[5$]/g, "s")
+        .replace(/[7]/g, "t")
+        .replace(/[^a-z\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    const groserias = [
+        "puta", "putas", "puto", "putos", "putete",
+        "pendejo", "pendeja", "pendejos", "pendejas",
+        "cabron", "cabrones", "cabrona", "cabronas",
+        "mierda", "verga", "vergas", "chingar", "chingada", "chingado", "chingados", "chingadas", "chinguen", "chingas", "chinga",
+        "pinche", "pinches", "culero", "culera", "culeros", "culeras",
+        "mamon", "mamona", "mamones", "mamonas", "imbecil", "imbeciles",
+        "estupido", "estupida", "estupidos", "estupidas",
+        "joder", "jodido", "jodida", "coño", "cagada", "cagar", "cabrón"
+    ];
+    const palabras = new Set(normalizado.split(" "));
+    return groserias.some(palabra => {
+        const p = palabra.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return palabras.has(p);
+    });
+}
 app.post("/api/chat/messages", requireChatSession, async (req, res) => {
     const message = typeof req.body?.message === "string" ? req.body.message.trim() : "";
     if (!message || message.length > 1200) return res.status(400).json({ error: "El mensaje debe tener entre 1 y 1200 caracteres." });
     try {
+        if (detectarGroseriasChat(message)) {
+            const aviso = "No está permitido usar groserías en el chat. Tu mensaje no se publicó. Mantengamos una conversación respetuosa.";
+            await pool.query(
+                "INSERT INTO chat_mensajes (correo, apodo, mensaje) VALUES ($1, $2, $3)",
+                [req.chatEmail, "Moderación del chat", aviso]
+            );
+            return res.json({ success: false, moderated: true, message: aviso });
+        }
         const result = await pool.query("INSERT INTO chat_mensajes (correo, apodo, mensaje) VALUES ($1, $2, $3) RETURNING id, apodo, mensaje, creado_en", [req.chatEmail, req.chatNickname, message]);
         res.status(201).json(result.rows[0]);
     } catch (error) {
