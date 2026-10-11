@@ -2847,3 +2847,84 @@ body.theme-dark .achievement-admin-content p,body.theme-dark .achievement-admin-
 body.theme-dark .achievement-admin-icon{background:#172b46}
 body.theme-dark .danger-button{background:#3b1420;border-color:#713044;color:#fecdd3}
 @media(max-width:700px){.achievement-admin-item{grid-template-columns:46px minmax(0,1fr);gap:12px;padding:14px}.achievement-admin-icon{width:44px;height:44px;font-size:23px}.achievement-admin-actions{grid-column:1/-1}.achievement-admin-actions button{flex:1}.achievement-admin-content h3{font-size:15px}}
+
+
+/* CENTRO DE CALIFICACIONES Y ACADEMIA GEMINI */
+.grades-section { background:linear-gradient(180deg,#f4f7fb 0%,#eef4fc 100%); }
+.grades-layout { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr); gap:20px; align-items:stretch; }
+.grades-summary-card,.grades-entry-card,.grades-list-card { min-width:0; padding:26px; border:1px solid #dbe5f1; border-radius:16px; background:#fff; box-shadow:0 12px 34px rgba(15,23,42,.055); }
+.grades-summary-card { display:flex; flex-direction:column; justify-content:center; background:radial-gradient(circle at top right,rgba(59,130,246,.16),transparent 42%),#0b1728; color:#fff; }
+.grades-eyebrow { color:#93c5fd; font-size:10px; font-weight:900; letter-spacing:1.6px; }
+.grades-summary-card>strong { margin:8px 0; font-size:clamp(46px,7vw,72px); line-height:1.05; letter-spacing:-2px; }
+.grades-summary-card p { color:#c4d2e4; font-size:13px; }
+.grades-summary-card .grades-progress-track { height:7px; margin:22px 0 10px; border-radius:20px; background:#25364d; overflow:hidden; }
+.grades-progress-bar { height:100%; border-radius:inherit; background:linear-gradient(90deg,#3b82f6,#8b5cf6); transition:width .25s ease; }
+.grades-summary-card small { color:#9fb0c6; font-size:11px; }
+.grades-entry-card h3,.grades-list-heading h3 { margin-bottom:14px; font-size:18px; color:#172337; }
+.grades-form,.grades-form label { display:flex; flex-direction:column; gap:7px; min-width:0; }
+.grades-form { gap:14px; }
+.grades-form label { color:#334155; font-size:11px; font-weight:800; letter-spacing:.3px; }
+.grades-form input,.grades-form select { width:100%; min-width:0; min-height:44px; padding:10px 12px; border:1px solid #d5dfec; border-radius:8px; background:#f8fafc; color:#172337; font:inherit; font-size:14px; }
+.grades-form-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
+.grades-form .btn { width:100%; border:0; cursor:pointer; }
+#gradesStatus { color:#2563eb; font-size:12px; overflow-wrap:anywhere; }
+.grades-list-card { margin-top:20px; }
+.grades-list-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:12px; }
+.grades-list-heading h3 { margin-bottom:3px; }
+.grades-list-heading p { color:#64748b; font-size:12px; }
+.grades-clear-button,.grade-remove { border:1px solid #dbe4ef; border-radius:7px; padding:8px 11px; background:#f8fafc; color:#475569; font-size:11px; font-weight:800; cursor:pointer; }
+.grades-clear-button:hover,.grade-remove:hover { border-color:#fca5a5; background:#fff1f2; color:#be123c; }
+.grades-empty { padding:22px 8px; color:#64748b; text-align:center; font-size:13px; }
+.grade-subject-group { padding:14px 0; border-top:1px solid #e8eef6; }
+.grade-subject-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+.grade-subject-heading h4 { color:#1e293b; font-size:14px; }
+.grade-subject-heading strong { color:#2563eb; font-size:12px; white-space:nowrap; }
+.grade-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:12px; padding:10px 0; }
+.grade-row-info { display:flex; flex-direction:column; min-width:0; gap:2px; }
+.grade-row-info strong { color:#334155; font-size:13px; overflow-wrap:anywhere; }
+.grade-row-info small { color:#64748b; font-size:10px; }
+.grade-value { color:#0f172a; font-size:18px; font-variant-numeric:tabular-nums; }
+.grades-disclaimer { margin-top:15px; color:#64748b; font-size:11px; }
+.gemini-quick-prompts { display:flex; flex-wrap:wrap; gap:8px; padding:12px 18px; border-bottom:1px solid #e2e8f0; }
+.gemini-quick-prompts button { max-width:100%; padding:8px 11px; border:1px solid #dbe5f2; border-radius:999px; background:#f1f6ff; color:#244c87; font-size:11px; font-weight:800; cursor:pointer; white-space:normal; }
+.gemini-quick-prompts button:hover { background:#e2edff; border-color:#93c5fd; }
+.gemini-message { overflow-wrap:anywhere; }
+.gemini-form textarea { min-width:0; max-width:100%; }
+
+/* MENÚ ADMINISTRATIVO: cuadrícula adaptable, sin textos fuera de su botón */
+.programmer-panel, body:has(.admin-menu) { overflow-x:hidden; }
+body:has(.admin-menu) .container { width:min(1320px,94%); max-width:1320px; margin:0 auto; min-width:0; }
+.admin-menu { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr)); align-items:stretch; gap:9px; width:100%; max-width:100%; min-width:0; padding:12px; overflow:visible; }
+.admin-menu .menu-button { display:flex; justify-content:flex-start; align-items:center; gap:11px; width:100%; min-width:0; min-height:64px; padding:11px 12px; text-align:left; white-space:normal; text-transform:none; letter-spacing:0; font-size:20px; line-height:1.15; }
+.admin-menu .menu-button>span { display:flex; flex:1 1 auto; flex-direction:column; align-items:flex-start; justify-content:center; gap:4px; min-width:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+.admin-menu .menu-button strong { display:block; max-width:100%; color:inherit; font-size:11px; font-weight:900; line-height:1.3; text-transform:uppercase; letter-spacing:.35px; overflow-wrap:anywhere; }
+.admin-menu .menu-button small { display:block; max-width:100%; color:inherit; opacity:.72; font-size:10px; font-weight:500; line-height:1.35; text-transform:none; letter-spacing:0; white-space:normal; overflow-wrap:anywhere; }
+.admin-menu .menu-button.active { box-shadow:0 6px 16px rgba(7,16,29,.16); }
+.admin-section,.admin-section * { min-width:0; }
+.admin-section { width:100%; max-width:100%; }
+.admin-section .section-header p,.admin-card p,.admin-card h3,.admin-card label,.admin-card small { overflow-wrap:anywhere; }
+.admin-card { width:100%; max-width:100%; }
+.admin-card input,.admin-card select,.admin-card textarea { max-width:100%; min-width:0; }
+.admin-card img { max-width:100%; height:auto; }
+.admin-card .form-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+@media(max-width:700px) {
+  body:has(.admin-menu) .container { width:calc(100% - 24px); }
+  .admin-menu { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; padding:8px; margin-top:18px; }
+  .admin-menu .menu-button { min-height:60px; padding:9px; gap:8px; font-size:17px; }
+  .admin-menu .menu-button strong { font-size:10px; }
+  .admin-menu .menu-button small { font-size:9px; }
+  .admin-card { padding:17px; }
+  .admin-card .form-row { grid-template-columns:minmax(0,1fr); gap:0; }
+  .admin-section .section-header { gap:10px; }
+  .admin-section .section-header h2 { font-size:25px; overflow-wrap:anywhere; }
+  .grades-layout { grid-template-columns:minmax(0,1fr); }
+  .grades-summary-card,.grades-entry-card,.grades-list-card { padding:19px; }
+  .grades-form-row { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+  .grades-list-heading { align-items:flex-start; }
+  .grade-row { grid-template-columns:minmax(0,1fr) auto; }
+  .grade-remove { grid-column:2; justify-self:end; }
+}
+@media(max-width:380px) {
+  .admin-menu { grid-template-columns:minmax(0,1fr); }
+  .grades-form-row { grid-template-columns:minmax(0,1fr); }
+}
