@@ -929,7 +929,8 @@ const chatTablesReady = Promise.all([
     pool.query("CREATE TABLE IF NOT EXISTS credenciales_alumnos (id BIGSERIAL PRIMARY KEY, correo VARCHAR(254) NOT NULL UNIQUE, apodo VARCHAR(32) NOT NULL, edad SMALLINT NOT NULL CHECK (edad BETWEEN 10 AND 15), foto TEXT, estado VARCHAR(16) NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente','aprobada','rechazada')), motivo TEXT NOT NULL DEFAULT '', autorizacion_tutor BOOLEAN NOT NULL DEFAULT FALSE, creada_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, revisada_en TIMESTAMPTZ)"),
     pool.query("CREATE TABLE IF NOT EXISTS chat_mensajes (id BIGSERIAL PRIMARY KEY, correo VARCHAR(254) NOT NULL, apodo VARCHAR(32), mensaje VARCHAR(1200) NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     pool.query("ALTER TABLE chat_mensajes ADD COLUMN IF NOT EXISTS apodo VARCHAR(32)"),
-    pool.query("CREATE TABLE IF NOT EXISTS chat_sesiones (token_hash CHAR(64) PRIMARY KEY, correo VARCHAR(254) NOT NULL, expira_en TIMESTAMPTZ NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    pool.query("CREATE TABLE IF NOT EXISTS chat_sesiones (token_hash CHAR(64) PRIMARY KEY, correo VARCHAR(254) NOT NULL, apodo VARCHAR(32), expira_en TIMESTAMPTZ NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    pool.query("ALTER TABLE chat_sesiones ADD COLUMN IF NOT EXISTS apodo VARCHAR(32)"),
     pool.query("UPDATE credenciales_alumnos SET foto = NULL WHERE foto IS NOT NULL")
 ]).catch(error => {
     console.error("ERROR PREPARANDO CHAT Y CREDENCIALES:", error.message);
@@ -1037,10 +1038,10 @@ async function requireChatSession(req, res, next) {
     const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
     if (!token || token.length > 200) return res.status(401).json({ error: "Introduce tu correo institucional para entrar al chat." });
     try {
-        const result = await pool.query("SELECT correo FROM chat_sesiones WHERE token_hash = $1 AND expira_en > NOW()", [chatHash(token)]);
+        const result = await pool.query("SELECT correo, apodo FROM chat_sesiones WHERE token_hash = $1 AND expira_en > NOW()", [chatHash(token)]);
         if (!result.rows.length) return res.status(401).json({ error: "Tu sesión venció. Vuelve a introducir tu correo." });
         req.chatEmail = result.rows[0].correo;
-        req.chatNickname = "Alumno-" + chatHash(req.chatEmail).slice(0, 4).toUpperCase();
+        req.chatNickname = result.rows[0].apodo || "Alumno-" + chatHash(req.chatEmail).slice(0, 4).toUpperCase();
         next();
     } catch (error) {
         console.error("ERROR VALIDANDO CHAT:", error.message);
@@ -1051,6 +1052,7 @@ async function requireChatSession(req, res, next) {
 const chatEmailLoginRequests = new Map();
 app.post("/api/chat/auth/email", async (req, res) => {
     const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const apodo = typeof req.body?.nickname === "string" && /^[\p{L}0-9 _.-]{2,32}$/u.test(req.body.nickname.trim()) ? req.body.nickname.trim() : "";
     if (!validInstitutionalEmail(email)) return res.status(400).json({ error: "Usa un correo terminado en @chih.nuevaescuela.mx." });
     const now = Date.now(), previous = chatEmailLoginRequests.get(email) || 0;
     if (now - previous < 10000) return res.status(429).json({ error: "Espera unos segundos antes de volver a entrar." });
@@ -1058,8 +1060,8 @@ app.post("/api/chat/auth/email", async (req, res) => {
     try {
         await chatTablesReady;
         const token = crypto.randomBytes(32).toString("hex");
-        await pool.query("INSERT INTO chat_sesiones (token_hash, correo, expira_en) VALUES ($1, $2, NOW() + INTERVAL '30 days')", [chatHash(token), email]);
-        res.json({ success: true, token, email });
+        await pool.query("INSERT INTO chat_sesiones (token_hash, correo, apodo, expira_en) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days')", [chatHash(token), email, apodo || null]);
+        res.json({ success: true, token, email, nickname: apodo || "Alumno-" + chatHash(email).slice(0, 4).toUpperCase() });
     } catch (error) {
         console.error("ERROR INICIANDO CHAT POR CORREO:", error.message);
         res.status(500).json({ error: "No se pudo entrar al chat. Inténtalo más tarde." });
