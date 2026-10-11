@@ -1067,6 +1067,19 @@ app.post("/api/chat/auth/email", async (req, res) => {
         res.status(500).json({ error: "No se pudo entrar al chat. Inténtalo más tarde." });
     }
 });
+app.put("/api/chat/profile", requireChatSession, async (req, res) => {
+    const apodo = typeof req.body?.nickname === "string" && /^[\p{L}0-9 _.-]{2,32}$/u.test(req.body.nickname.trim()) ? req.body.nickname.trim() : "";
+    if (!apodo) return res.status(400).json({ error: "Guarda un apodo válido en Mi perfil antes de actualizarlo." });
+    try {
+        const token = (req.get("authorization") || "").slice(7).trim();
+        await pool.query("UPDATE chat_sesiones SET apodo = $1 WHERE token_hash = $2", [apodo, chatHash(token)]);
+        req.chatNickname = apodo;
+        res.json({ success: true, nickname: apodo });
+    } catch (error) {
+        console.error("ERROR ACTUALIZANDO APODO DEL CHAT:", error.message);
+        res.status(500).json({ error: "No se pudo actualizar el nombre del chat." });
+    }
+});
 app.get("/api/chat/messages", requireChatSession, async (req, res) => {
     try {
         const after = Math.max(0, Number.parseInt(req.query.after, 10) || 0);
