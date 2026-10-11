@@ -1035,19 +1035,36 @@ app.post("/api/chat/auth/verify-code", async (req, res) => {
 async function requireChatSession(req, res, next) {
     const authorization = req.get("authorization") || "";
     const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
-    if (!token || token.length > 200) return res.status(401).json({ error: "Inicia sesión para usar el chat." });
+    if (!token || token.length > 200) return res.status(401).json({ error: "Introduce tu correo institucional para entrar al chat." });
     try {
-        if (!credencialesHabilitadas()) return res.status(503).json({ error: "El acceso al chat está temporalmente deshabilitado." });
-        const result = await pool.query("SELECT s.correo, c.apodo FROM chat_sesiones s JOIN credenciales_alumnos c ON c.correo = s.correo WHERE s.token_hash = $1 AND s.expira_en > NOW() AND c.estado = 'aprobada'", [chatHash(token)]);
-        if (!result.rows.length) return res.status(401).json({ error: "Tu sesión venció o tu credencial ya no está aprobada." });
+        const result = await pool.query("SELECT correo FROM chat_sesiones WHERE token_hash = $1 AND expira_en > NOW()", [chatHash(token)]);
+        if (!result.rows.length) return res.status(401).json({ error: "Tu sesión venció. Vuelve a introducir tu correo." });
         req.chatEmail = result.rows[0].correo;
-        req.chatNickname = result.rows[0].apodo;
+        req.chatNickname = "Alumno-" + chatHash(req.chatEmail).slice(0, 4).toUpperCase();
         next();
     } catch (error) {
         console.error("ERROR VALIDANDO CHAT:", error.message);
         res.status(500).json({ error: "No se pudo validar tu sesión." });
     }
 }
+// Entrada simplificada: solo correo institucional, sin código ni autorización de tutor.
+const chatEmailLoginRequests = new Map();
+app.post("/api/chat/auth/email", async (req, res) => {
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    if (!validInstitutionalEmail(email)) return res.status(400).json({ error: "Usa un correo terminado en @chih.nuevaescuela.mx." });
+    const now = Date.now(), previous = chatEmailLoginRequests.get(email) || 0;
+    if (now - previous < 10000) return res.status(429).json({ error: "Espera unos segundos antes de volver a entrar." });
+    chatEmailLoginRequests.set(email, now);
+    try {
+        await chatTablesReady;
+        const token = crypto.randomBytes(32).toString("hex");
+        await pool.query("INSERT INTO chat_sesiones (token_hash, correo, expira_en) VALUES ($1, $2, NOW() + INTERVAL '30 days')", [chatHash(token), email]);
+        res.json({ success: true, token, email });
+    } catch (error) {
+        console.error("ERROR INICIANDO CHAT POR CORREO:", error.message);
+        res.status(500).json({ error: "No se pudo entrar al chat. Inténtalo más tarde." });
+    }
+});
 app.get("/api/chat/messages", requireChatSession, async (req, res) => {
     try {
         const after = Math.max(0, Number.parseInt(req.query.after, 10) || 0);
@@ -1108,6 +1125,31 @@ app.post("/api/chat/messages", requireChatSession, async (req, res) => {
         res.status(500).json({ error: "No se pudo publicar el mensaje." });
     }
 });
+// Moderación del chat: acceso restringido al administrador.
+app.get("/api/admin/chat/messages", requireAdmin, async (_req, res) => {
+    try {
+        await chatTablesReady;
+        const result = await pool.query("SELECT id, COALESCE(apodo, 'Alumno') AS apodo, mensaje, creado_en FROM chat_mensajes ORDER BY creado_en DESC, id DESC LIMIT 150");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("ERROR CARGANDO MENSAJES PARA MODERACIÓN:", error.message);
+        res.status(500).json({ error: "No se pudieron cargar los mensajes del chat." });
+    }
+});
+app.delete("/api/admin/chat/messages/:id", requireAdmin, async (req, res) => {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: "Identificador de mensaje no válido." });
+    try {
+        await chatTablesReady;
+        const result = await pool.query("DELETE FROM chat_mensajes WHERE id = $1 RETURNING id", [id]);
+        if (!result.rows.length) return res.status(404).json({ error: "El mensaje ya no existe." });
+        res.json({ success: true, id });
+    } catch (error) {
+        console.error("ERROR ELIMINANDO MENSAJE DEL CHAT:", error.message);
+        res.status(500).json({ error: "No se pudo eliminar el mensaje." });
+    }
+});
+
 app.post("/api/credentials", async (req, res) => {
     if (!credencialesHabilitadas()) return res.status(503).json({ error: "Las solicitudes están pausadas mientras se configura la revisión responsable." });
     const correo = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
