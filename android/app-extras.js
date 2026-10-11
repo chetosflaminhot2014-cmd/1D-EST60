@@ -15,6 +15,7 @@
   var completedPublic = read(DONE_KEY, []);
   var seenAlerts = read(ALERTS_KEY, []);
   var root;
+  var achievementDefinitions = null;
   function createPanel() {
     if (document.getElementById('est60AppSpace')) return;
     /* Los estilos exclusivos se cargan desde app-extras.css. */
@@ -84,7 +85,7 @@
     var subjects=['Español','Matemáticas','Inglés','Geografía','Ciencias','Tecnología','Historia','Artes','Educación Física','Tutoría','Formación Cívica y Ética'];
     root.querySelector('#eaFavorites').innerHTML=subjects.map(function(s){return '<label class="ea-fav"><input type="checkbox" value="'+esc(s)+'" '+(profile.favorites.indexOf(s)>=0?'checked':'')+'><span>'+esc(s)+'</span></label>';}).join('');
     if(!profile.cardCode) { profile.cardCode=Math.random().toString(36).slice(2,6).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase(); write(KEY,profile); }
-    renderProfile(); renderCredential(); renderAchievements(); renderSuggestions(); updateSuggestionChars(); applyTheme(); renderTasks(); renderStats(); updateSchedule(); refreshNotices();
+    renderProfile(); renderCredential(); renderAchievements(); renderSuggestions(); updateSuggestionChars(); applyTheme(); renderTasks(); renderStats(); updateSchedule(); refreshNotices(); loadAchievementDefinitions();
     var schedule=document.getElementById('smartSchedule'); if(schedule && window.MutationObserver){new MutationObserver(updateSchedule).observe(schedule,{childList:true,subtree:true,characterData:true,attributes:true});}
     var publicTasks=document.getElementById('tareasPublicas'); if(publicTasks && window.MutationObserver){new MutationObserver(function(){renderPublicTasks();renderStats();refreshNotices();}).observe(publicTasks,{childList:true,subtree:true,characterData:true});}
     var publicNotices=document.getElementById('avisosPublicos'); if(publicNotices && window.MutationObserver){new MutationObserver(function(){refreshNotices();renderStats();}).observe(publicNotices,{childList:true,subtree:true,characterData:true});}
@@ -117,17 +118,38 @@
   function renderAchievements(){
     if(!root)return;
     var completed=personalTasks.filter(function(t){return t.done;}).length;
-    var defs=[
-      {id:'profile',icon:'PERFIL',title:'Perfil listo',desc:'Guardaste tus preferencias',ok:!!(profile.name.trim()||profile.avatar||profile.favorites.length)},
-      {id:'photo',icon:'FOTO',title:'Buena imagen',desc:'Añadiste una foto de perfil',ok:!!profile.avatar},
-      {id:'task1',icon:'1 TAREA',title:'Primer paso',desc:'Completaste una tarea personal',ok:completed>=1},
-      {id:'task5',icon:'5 TAREAS',title:'Constancia',desc:'Completaste 5 tareas personales',ok:completed>=5},
-      {id:'task10',icon:'10 TAREAS',title:'Imparable',desc:'Completaste 10 tareas personales',ok:completed>=10},
-      {id:'ideas',icon:'IDEAS',title:'Con iniciativa',desc:'Guardaste una sugerencia',ok:suggestions.length>=1}
+    var fallback=[
+      {codigo:'perfil-listo',icono:'👤',titulo:'Perfil listo',descripcion:'Guardaste tus preferencias',condicion:'perfil',objetivo:1},
+      {codigo:'buena-imagen',icono:'📷',titulo:'Buena imagen',descripcion:'Personalizaste tu avatar',condicion:'foto',objetivo:1},
+      {codigo:'primer-paso',icono:'🎯',titulo:'Primer paso',descripcion:'Completaste una tarea personal',condicion:'tareas',objetivo:1},
+      {codigo:'constancia',icono:'🔥',titulo:'Constancia',descripcion:'Completaste 5 tareas personales',condicion:'tareas',objetivo:5},
+      {codigo:'imparable',icono:'🚀',titulo:'Imparable',descripcion:'Completaste 10 tareas personales',condicion:'tareas',objetivo:10},
+      {codigo:'con-iniciativa',icono:'💡',titulo:'Con iniciativa',descripcion:'Guardaste una sugerencia',condicion:'sugerencias',objetivo:1}
     ];
+    var defs=(Array.isArray(achievementDefinitions)&&achievementDefinitions.length?achievementDefinitions:fallback).map(function(d){
+      var target=Math.max(1,Number(d.objetivo)||1);
+      var ok=false;
+      if(d.condicion==='perfil') ok=!!(profile.name&&profile.name.trim());
+      else if(d.condicion==='foto') ok=!!profile.avatarPreset;
+      else if(d.condicion==='tareas') ok=completed>=target;
+      else if(d.condicion==='sugerencias') ok=suggestions.length>=target;
+      return {id:d.id||d.codigo,icon:d.icono||'🏆',title:d.titulo||'Logro',desc:d.descripcion||'',ok:ok};
+    });
     var earned=defs.filter(function(d){return d.ok;}).length;
     root.querySelector('#eaAchievementCount').textContent=earned+'/'+defs.length;
-    root.querySelector('#eaAchievements').innerHTML=defs.map(function(d){return '<div class="ea-achievement '+(d.ok?'is-earned':'')+'"><span class="ea-achievement-icon">'+(d.ok?'✓':d.icon)+'</span><span><strong>'+esc(d.title)+'</strong><small>'+esc(d.desc)+'</small></span><span class="ea-achievement-state">'+(d.ok?'DESBLOQUEADO':'BLOQUEADO')+'</span></div>';}).join('');
+    root.querySelector('#eaAchievements').innerHTML=defs.map(function(d){return '<div class="ea-achievement '+(d.ok?'is-earned':'')+'"><span class="ea-achievement-icon">'+(d.ok?'✓':esc(d.icon))+'</span><span><strong>'+esc(d.title)+'</strong><small>'+esc(d.desc)+'</small></span><span class="ea-achievement-state">'+(d.ok?'DESBLOQUEADO':'BLOQUEADO')+'</span></div>';}).join('');
+  }
+  async function loadAchievementDefinitions(){
+    try {
+      var response=await fetch('https://oned-est60-server.onrender.com/api/logros',{cache:'no-store'});
+      if(!response.ok)throw new Error('No se pudieron actualizar los logros.');
+      var data=await response.json();
+      if(Array.isArray(data)&&data.length)achievementDefinitions=data;
+      else if(Array.isArray(data))achievementDefinitions=[];
+      renderAchievements();
+    } catch(error) {
+      /* Sin internet se conservan los logros predeterminados y el espacio sigue funcionando. */
+    }
   }
   function updateSuggestionChars(){if(!root)return;var input=root.querySelector('#eaSuggestionText');root.querySelector('#eaSuggestionChars').textContent=String(input.value.length);}
   function saveSuggestion(event){
