@@ -80,6 +80,14 @@
                 </span>
             </button>
 
+            <button class="menu-button" data-section="logros">
+                🏆
+                <span>
+                    <strong>Logros</strong>
+                    <small>Añadir, editar y quitar</small>
+                </span>
+            </button>
+
             <button class="menu-button" data-section="credenciales">
                 🪪
                 <span>
@@ -574,6 +582,49 @@
              SISTEMA
         ========================== -->
 
+        <section id="logros" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <span class="section-label">PROGRESO PERSONAL</span>
+                    <h2>Administrar logros</h2>
+                    <p>Crea, modifica o elimina los logros que aparecerán en “Mis logros” dentro de la app.</p>
+                </div>
+                <button type="button" class="secondary-button" id="refreshAchievementsButton">Actualizar</button>
+            </div>
+            <div class="admin-card">
+                <h3 id="achievementFormHeading">Añadir un logro</h3>
+                <form id="achievementForm">
+                    <input type="hidden" id="achievementId">
+                    <div class="form-row">
+                        <div class="form-group"><label for="achievementIcon">Icono o emoji</label><input type="text" id="achievementIcon" maxlength="24" value="🏆" required placeholder="🏆"></div>
+                        <div class="form-group"><label for="achievementTitle">Nombre del logro</label><input type="text" id="achievementTitle" maxlength="100" required placeholder="Ej. Estudiante constante"></div>
+                    </div>
+                    <div class="form-group"><label for="achievementDescription">Descripción</label><textarea id="achievementDescription" maxlength="240" rows="3" placeholder="¿Qué tiene que conseguir el alumno?"></textarea></div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="achievementCondition">Condición para desbloquear</label>
+                            <select id="achievementCondition" required>
+                                <option value="perfil">Configurar el perfil</option>
+                                <option value="foto">Personalizar el avatar</option>
+                                <option value="tareas">Completar tareas personales</option>
+                                <option value="sugerencias">Guardar sugerencias</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label for="achievementTarget">Cantidad necesaria</label><input type="number" id="achievementTarget" min="1" max="1000" value="1" required></div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-button" id="saveAchievementButton">Guardar logro</button>
+                        <button type="button" class="secondary-button" id="cancelAchievementEdit" hidden>Cancelar edición</button>
+                    </div>
+                    <p id="achievementFormStatus" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+            <div class="admin-card">
+                <div class="card-title-row"><h3>Logros registrados</h3><span id="achievementTotal">0 logros</span></div>
+                <div id="achievementList" class="items-list"><p class="loading">Cargando logros...</p></div>
+            </div>
+        </section>
+
         <section id="sistema" class="admin-section">
 
             <div class="section-header">
@@ -891,6 +942,10 @@
 
                 if (sectionId === "calendario") {
                     cargarEventos();
+                }
+
+                if (sectionId === "logros") {
+                    cargarLogrosAdmin();
                 }
 
                 if (sectionId === "sistema") {
@@ -1788,6 +1843,115 @@
                 lista.innerHTML = `<p class="error-message">${escapeHTML(error.message || "No se pudo cargar el historial.")}</p>`;
             }
         }
+
+        // ==========================================
+        // LOGROS
+        // ==========================================
+        let logrosActuales = [];
+
+        async function cargarLogrosAdmin() {
+            const list = document.getElementById("achievementList");
+            const total = document.getElementById("achievementTotal");
+            list.innerHTML = '<p class="loading">Cargando logros…</p>';
+            if (!ADMIN_KEY) {
+                list.innerHTML = '<p class="error-message">Inicia sesión como administrador para gestionar los logros.</p>';
+                total.textContent = "—";
+                return;
+            }
+            try {
+                const response = await fetch(API_BASE + "/api/admin/logros", { headers: { "x-admin-key": ADMIN_KEY } });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudieron cargar los logros.");
+                logrosActuales = Array.isArray(data) ? data : [];
+                total.textContent = logrosActuales.length + (logrosActuales.length === 1 ? " logro" : " logros");
+                if (!logrosActuales.length) {
+                    list.innerHTML = '<div class="empty-state"><h3>No hay logros</h3><p>Añade el primero con el formulario.</p></div>';
+                    return;
+                }
+                const conditionNames = { perfil: "Perfil", foto: "Avatar", tareas: "Tareas completadas", sugerencias: "Sugerencias guardadas" };
+                list.innerHTML = logrosActuales.map(item => '<article class="admin-card achievement-admin-item"><div class="achievement-admin-icon">' + escapeHTML(item.icono) + '</div><div class="achievement-admin-content"><h3>' + escapeHTML(item.titulo) + '</h3><p>' + escapeHTML(item.descripcion || "Sin descripción") + '</p><small>Condición: ' + escapeHTML(conditionNames[item.condicion] || item.condicion) + ' · Objetivo: ' + Number(item.objetivo) + '</small></div><div class="achievement-admin-actions"><button type="button" class="secondary-button" data-edit-achievement="' + Number(item.id) + '">Editar</button><button type="button" class="danger-button" data-delete-achievement="' + Number(item.id) + '">Eliminar</button></div></article>').join("");
+                list.querySelectorAll("[data-edit-achievement]").forEach(button => button.addEventListener("click", () => editarLogro(Number(button.dataset.editAchievement))));
+                list.querySelectorAll("[data-delete-achievement]").forEach(button => button.addEventListener("click", () => eliminarLogro(Number(button.dataset.deleteAchievement))));
+            } catch (error) {
+                list.innerHTML = '<p class="error-message">' + escapeHTML(error.message || "No se pudieron cargar los logros.") + '</p>';
+                total.textContent = "Error";
+            }
+        }
+
+        function limpiarFormularioLogro() {
+            document.getElementById("achievementForm").reset();
+            document.getElementById("achievementId").value = "";
+            document.getElementById("achievementIcon").value = "🏆";
+            document.getElementById("achievementTarget").value = "1";
+            document.getElementById("achievementFormHeading").textContent = "Añadir un logro";
+            document.getElementById("saveAchievementButton").textContent = "Guardar logro";
+            document.getElementById("cancelAchievementEdit").hidden = true;
+            document.getElementById("achievementFormStatus").textContent = "";
+        }
+
+        function editarLogro(id) {
+            const item = logrosActuales.find(logro => Number(logro.id) === id);
+            if (!item) return;
+            document.getElementById("achievementId").value = String(item.id);
+            document.getElementById("achievementIcon").value = item.icono || "🏆";
+            document.getElementById("achievementTitle").value = item.titulo || "";
+            document.getElementById("achievementDescription").value = item.descripcion || "";
+            document.getElementById("achievementCondition").value = item.condicion || "perfil";
+            document.getElementById("achievementTarget").value = String(item.objetivo || 1);
+            document.getElementById("achievementFormHeading").textContent = "Editar logro";
+            document.getElementById("saveAchievementButton").textContent = "Guardar cambios";
+            document.getElementById("cancelAchievementEdit").hidden = false;
+            document.getElementById("achievementFormStatus").textContent = "Editando: " + item.titulo;
+            document.getElementById("achievementForm").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        async function eliminarLogro(id) {
+            const item = logrosActuales.find(logro => Number(logro.id) === id);
+            if (!item || !confirm('¿Eliminar el logro "' + item.titulo + '"? Dejará de aparecer en la app.')) return;
+            try {
+                const response = await fetch(API_BASE + "/api/admin/logros/" + encodeURIComponent(id), { method: "DELETE", headers: { "x-admin-key": ADMIN_KEY } });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudo eliminar el logro.");
+                if (document.getElementById("achievementId").value === String(id)) limpiarFormularioLogro();
+                await cargarLogrosAdmin();
+            } catch (error) {
+                alert(error.message || "No se pudo eliminar el logro.");
+            }
+        }
+
+        document.getElementById("achievementForm").addEventListener("submit", async event => {
+            event.preventDefault();
+            const id = document.getElementById("achievementId").value;
+            const payload = {
+                icono: document.getElementById("achievementIcon").value.trim(),
+                titulo: document.getElementById("achievementTitle").value.trim(),
+                descripcion: document.getElementById("achievementDescription").value.trim(),
+                condicion: document.getElementById("achievementCondition").value,
+                objetivo: Number(document.getElementById("achievementTarget").value)
+            };
+            const status = document.getElementById("achievementFormStatus");
+            const button = document.getElementById("saveAchievementButton");
+            button.disabled = true;
+            status.textContent = "Guardando…";
+            try {
+                const response = await fetch(API_BASE + (id ? "/api/admin/logros/" + encodeURIComponent(id) : "/api/admin/logros"), {
+                    method: id ? "PUT" : "POST",
+                    headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudo guardar el logro.");
+                limpiarFormularioLogro();
+                await cargarLogrosAdmin();
+                document.getElementById("achievementFormStatus").textContent = id ? "Cambios guardados." : "Logro añadido.";
+            } catch (error) {
+                status.textContent = error.message || "No se pudo guardar el logro.";
+            } finally {
+                button.disabled = false;
+            }
+        });
+        document.getElementById("cancelAchievementEdit").addEventListener("click", limpiarFormularioLogro);
+        document.getElementById("refreshAchievementsButton").addEventListener("click", cargarLogrosAdmin);
 
         // ==========================================
         // SISTEMA
