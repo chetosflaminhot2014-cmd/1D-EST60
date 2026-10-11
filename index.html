@@ -691,13 +691,12 @@
     <!-- CHAT ENTRE ESTUDIANTES -->
     <section id="chat" class="section dark-section">
         <div class="section-number">06</div>
-        <div class="section-heading light"><span>COMUNIDAD 1°D</span><h2>Chat grupal</h2><p>Conversa con tus compañeros. El acceso requiere correo institucional y credencial aprobada.</p></div>
+        <div class="section-heading light"><span>COMUNIDAD 1°D</span><h2>Chat grupal</h2><p>Introduce tu correo institucional para entrar al chat.</p></div>
         <div class="chat-shell">
             <div id="chatAuthPanel" class="chat-auth-panel">
                 <div class="chat-lock-icon" aria-hidden="true">✉</div><h3>Entra al chat de 1°D</h3>
-                <p>Usa tu correo institucional <strong>@chih.nuevaescuela.mx</strong>. Si tu credencial aún no ha sido aprobada, tendrás que esperar la revisión.</p>
-                <form id="chatRequestCodeForm" class="chat-auth-form"><label for="chatEmail">Correo institucional</label><input id="chatEmail" type="email" maxlength="254" autocomplete="email" placeholder="tu.correo@chih.nuevaescuela.mx" required><button id="chatRequestCodeButton" class="btn btn-primary" type="submit">Enviar código</button></form>
-                <form id="chatVerifyCodeForm" class="chat-auth-form" hidden><label for="chatCode">Código recibido por correo</label><input id="chatCode" inputmode="numeric" autocomplete="one-time-code" minlength="6" maxlength="8" placeholder="Código de verificación" required><button id="chatVerifyCodeButton" class="btn btn-primary" type="submit">Verificar y entrar</button><button id="chatChangeEmail" class="btn btn-secondary" type="button">Cambiar correo</button></form>
+                <p>Solo necesitas tu correo institucional terminado en <strong>@chih.nuevaescuela.mx</strong>. No se pide código ni autorización.</p>
+                <form id="chatRequestCodeForm" class="chat-auth-form"><label for="chatEmail">Correo institucional</label><input id="chatEmail" type="email" maxlength="254" autocomplete="email" placeholder="tu.correo@chih.nuevaescuela.mx" required><button id="chatRequestCodeButton" class="btn btn-primary" type="submit">Entrar al chat</button></form>
                 <p id="chatAuthStatus" class="chat-status" role="status" aria-live="polite"></p>
             </div>
             <div id="chatRoomPanel" class="chat-room-panel" hidden>
