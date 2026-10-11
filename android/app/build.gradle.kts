@@ -8,6 +8,10 @@ android {
     namespace = "mx.est60.grupo1d"
     compileSdk = 35
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "mx.est60.grupo1d"
         minSdk = 23
