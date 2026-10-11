@@ -856,9 +856,15 @@ async function cargarImagenCalendarioPublica() {
         authPanel.hidden = true; roomPanel.hidden = false;
         activeNickname = getProfileNickname();
         document.getElementById("chatSignedEmail").textContent = activeNickname ? activeNickname + " · " + email : email;
-        loadMessages();
         if (pollTimer) clearInterval(pollTimer);
         pollTimer = setInterval(loadMessages, 5000);
+        if (activeNickname && token()) {
+            api("/api/chat/profile", { method: "PUT", body: JSON.stringify({ nickname: activeNickname }) })
+                .catch(error => console.warn("No se pudo sincronizar el apodo del chat:", error.message))
+                .finally(loadMessages);
+        } else {
+            loadMessages();
+        }
     }
     function enterAuth() {
         if (pollTimer) clearInterval(pollTimer);
