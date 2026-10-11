@@ -48,7 +48,7 @@
 
         <section class="admin-menu">
 
-            <button class="menu-button active" data-section="avisos">
+            <button type="button" class="menu-button active" data-section="avisos">
                 📢
                 <span>
                     <strong>Avisos</strong>
@@ -56,7 +56,7 @@
                 </span>
             </button>
 
-            <button class="menu-button" data-section="tareas">
+            <button type="button" class="menu-button" data-section="tareas">
                 📝
                 <span>
                     <strong>Tareas</strong>
@@ -64,7 +64,7 @@
                 </span>
             </button>
 
-            <button class="menu-button" data-section="calendario">
+            <button type="button" class="menu-button" data-section="calendario">
                 📅
                 <span>
                     <strong>Calendario</strong>
@@ -72,7 +72,7 @@
                 </span>
             </button>
 
-            <button class="menu-button" data-section="recursos">
+            <button type="button" class="menu-button" data-section="recursos">
                 📚
                 <span>
                     <strong>Recursos</strong>
@@ -80,7 +80,7 @@
                 </span>
             </button>
 
-            <button class="menu-button" data-section="logros">
+            <button type="button" class="menu-button" data-section="logros">
                 🏆
                 <span>
                     <strong>Logros</strong>
@@ -88,15 +88,15 @@
                 </span>
             </button>
 
-            <button class="menu-button" data-section="credenciales">
-                🪪
+            <button type="button" class="menu-button" data-section="moderacionChat">
+                🛡️
                 <span>
-                    <strong>Credenciales</strong>
-                    <small>Revisar solicitudes</small>
+                    <strong>Moderación del chat</strong>
+                    <small>Revisar y borrar mensajes</small>
                 </span>
             </button>
 
-            <button class="menu-button" data-section="sistema">
+            <button type="button" class="menu-button" data-section="sistema">
                 ⚙️
                 <span>
                     <strong>Sistema</strong>
@@ -104,7 +104,7 @@
                 </span>
             </button>
 
-            <button class="menu-button" data-section="desarrollo">
+            <button type="button" class="menu-button" data-section="desarrollo">
                 💻
                 <span>
                     <strong>Desarrollo</strong>
@@ -112,7 +112,7 @@
                 </span>
             </button>
 
-            <button class="menu-button" data-section="seguridad">
+            <button type="button" class="menu-button" data-section="seguridad">
                 🔐
                 <span>
                     <strong>Seguridad</strong>
@@ -120,7 +120,7 @@
                 </span>
             </button>
 
-            <button class="menu-button" data-section="historial">
+            <button type="button" class="menu-button" data-section="historial">
                 🕘
                 <span>
                     <strong>Historial</strong>
@@ -821,6 +821,14 @@
             </div>
         </section>
 
+        <section id="moderacionChat" class="admin-section">
+            <div class="section-header">
+                <div><span class="section-label">COMUNIDAD 1°D</span><h2>Moderación del chat</h2><p>Consulta los mensajes recientes y elimina los que incumplan las reglas.</p></div>
+                <button type="button" class="secondary-button" id="refreshChatModerationButton">Actualizar mensajes</button>
+            </div>
+            <div class="admin-card"><p id="chatModerationStatus" role="status" aria-live="polite">Cargando mensajes…</p><div id="chatModerationList" class="items-list"><p class="loading">Conectando con el servidor…</p></div></div>
+        </section>
+
         <section id="credenciales" class="admin-section">
             <div class="section-header"><div><span class="section-label">ACCESO AL CHAT</span><h2>Credenciales por aprobar</h2><p>Revisa manualmente las solicitudes. No se recopilan fotografías.</p></div><button type="button" class="secondary-button" id="refreshCredentialsButton">Actualizar</button></div>
             <div class="admin-card"><p id="credentialsStatus" role="status" aria-live="polite">Solicitudes pendientes</p><div id="credentialsList" class="items-list"><p class="loading">Conectando con el servidor…</p></div></div>
@@ -902,64 +910,27 @@
             document.querySelectorAll(".admin-section");
 
 
-        menuButtons.forEach(button => {
-
-            button.addEventListener("click", () => {
-
-                const sectionId =
-                    button.dataset.section;
-
-
-                menuButtons.forEach(item => {
-                    item.classList.remove("active");
-                });
-
-
-                sections.forEach(section => {
-                    section.classList.remove("active");
-                });
-
-
-                button.classList.add("active");
-
-
-                const section =
-                    document.getElementById(sectionId);
-
-
-                if (section) {
-                    section.classList.add("active");
-                }
-
-
-                if (sectionId === "avisos") {
-                    cargarAvisos();
-                }
-
-                if (sectionId === "tareas") {
-                    cargarTareas();
-                }
-
-                if (sectionId === "calendario") {
-                    cargarEventos();
-                }
-
-                if (sectionId === "logros") {
-                    cargarLogrosAdmin();
-                }
-
-                if (sectionId === "sistema") {
-                    comprobarSistema();
-                }
-
-                if (sectionId === "historial") {
-                    cargarHistorial();
-                }
-
-                if (sectionId === "credenciales") { cargarCredenciales(); cargarCredencialesAprobadas(); }
-
+        document.querySelector(".admin-menu")?.addEventListener("click", event => {
+            const button = event.target.closest(".menu-button");
+            if (!button) return;
+            const sectionId = button.dataset.section;
+            const section = document.getElementById(sectionId);
+            if (!section) { console.error("No existe la sección administrativa:", sectionId); return; }
+            menuButtons.forEach(item => {
+                const selected = item === button;
+                item.classList.toggle("active", selected);
+                item.setAttribute("aria-current", selected ? "page" : "false");
             });
-
+            sections.forEach(item => item.classList.toggle("active", item === section));
+            if (sectionId === "avisos") cargarAvisos();
+            else if (sectionId === "tareas") cargarTareas();
+            else if (sectionId === "calendario") cargarEventos();
+            else if (sectionId === "logros") cargarLogrosAdmin();
+            else if (sectionId === "sistema") comprobarSistema();
+            else if (sectionId === "historial") cargarHistorial();
+            else if (sectionId === "moderacionChat") cargarMensajesChatAdmin();
+            else if (sectionId === "credenciales") { cargarCredenciales(); cargarCredencialesAprobadas(); }
+            section.scrollIntoView({ behavior: "smooth", block: "start" });
         });
 
 
@@ -1082,6 +1053,40 @@
         });
 
         cargarImagenCalendarioAdmin();
+
+        async function cargarMensajesChatAdmin() {
+            const list = document.getElementById("chatModerationList");
+            const status = document.getElementById("chatModerationStatus");
+            if (!list || !status) return;
+            if (!ADMIN_KEY) { status.textContent = "Inicia sesión desde acceso.html para administrar el chat."; list.replaceChildren(); return; }
+            status.textContent = "Cargando mensajes…";
+            try {
+                const response = await fetch(API_BASE + "/api/admin/chat/messages", { headers: { "x-admin-key": ADMIN_KEY } });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudieron cargar los mensajes.");
+                if (!data.length) { status.textContent = "No hay mensajes en el chat."; list.innerHTML = '<div class="empty-state"><h3>Chat vacío</h3><p>Los mensajes nuevos aparecerán aquí.</p></div>'; return; }
+                status.textContent = data.length + " mensaje(s) recientes.";
+                list.innerHTML = data.map(item => {
+                    const id = Number(item.id);
+                    const fecha = item.creado_en ? new Date(item.creado_en).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" }) : "";
+                    return '<article class="admin-card"><div class="card-title-row"><h3>' + escapeHTML(item.apodo || "Alumno") + '</h3><small>' + escapeHTML(fecha) + '</small></div><p style="white-space:pre-wrap;overflow-wrap:anywhere">' + escapeHTML(item.mensaje || "") + '</p><button type="button" class="danger-button" data-delete-chat-message="' + id + '">Eliminar mensaje</button></article>';
+                }).join("");
+            } catch (error) { status.textContent = error.message || "No se pudieron cargar los mensajes."; list.replaceChildren(); }
+        }
+        document.getElementById("refreshChatModerationButton")?.addEventListener("click", cargarMensajesChatAdmin);
+        document.getElementById("chatModerationList")?.addEventListener("click", async event => {
+            const button = event.target.closest("[data-delete-chat-message]");
+            if (!button) return;
+            const id = Number(button.dataset.deleteChatMessage);
+            if (!Number.isSafeInteger(id) || id < 1 || !confirm("¿Eliminar este mensaje del chat?")) return;
+            button.disabled = true;
+            try {
+                const response = await fetch(API_BASE + "/api/admin/chat/messages/" + id, { method: "DELETE", headers: { "x-admin-key": ADMIN_KEY } });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "No se pudo eliminar el mensaje.");
+                await cargarMensajesChatAdmin();
+            } catch (error) { alert(error.message || "No se pudo eliminar el mensaje."); button.disabled = false; }
+        });
 
         async function cargarCredenciales() {
             const list = document.getElementById("credentialsList");
