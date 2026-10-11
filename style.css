@@ -2928,3 +2928,18 @@ body:has(.admin-menu) .container { width:min(1320px,94%); max-width:1320px; marg
   .admin-menu { grid-template-columns:minmax(0,1fr); }
   .grades-form-row { grid-template-columns:minmax(0,1fr); }
 }
+
+
+/* MODO OSCURO PARA EL CENTRO ACADÉMICO */
+body.theme-dark .grades-section { background:#080f1a; color:#e5edf7; }
+body.theme-dark .grades-entry-card,body.theme-dark .grades-list-card { background:#101d30; border-color:#293c55; }
+body.theme-dark .grades-entry-card h3,body.theme-dark .grades-list-heading h3,body.theme-dark .grade-subject-heading h4,body.theme-dark .grade-row-info strong { color:#e5edf7; }
+body.theme-dark .grades-list-heading p,body.theme-dark .grades-disclaimer,body.theme-dark .grades-empty,body.theme-dark .grade-row-info small { color:#a9b8cd; }
+body.theme-dark .grades-form label { color:#cbd7e7; }
+body.theme-dark .grades-form input,body.theme-dark .grades-form select { background:#07101d; border-color:#354964; color:#f8fafc; color-scheme:dark; }
+body.theme-dark .grade-subject-group { border-color:#293c55; }
+body.theme-dark .grade-value { color:#f8fafc; }
+body.theme-dark .grades-clear-button,body.theme-dark .grade-remove { background:#14243a; border-color:#354964; color:#dbeafe; }
+body.theme-dark .gemini-quick-prompts { border-color:#26384e; }
+body.theme-dark .gemini-quick-prompts button { background:#12243d; border-color:#2e4c72; color:#bfdbfe; }
+body.theme-dark .gemini-quick-prompts button:hover { background:#1b3555; }
