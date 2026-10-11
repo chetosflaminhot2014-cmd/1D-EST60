@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1424">
+<meta name="description" content="Modo estudio con temporizador de concentración y lista escolar para 1°D EST60.">
+<title>Modo estudio | 1°D EST60</title>
+<link rel="icon" href="icon-192.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+<style>
+:root{--s-bg:#f3f6fb;--s-card:#fff;--s-text:#142238;--s-muted:#61718a;--s-line:#dce5f0;--s-accent:#2563eb;--s-soft:#eaf2ff}
+body{background:var(--s-bg);color:var(--s-text);min-height:100vh}.study{width:min(1000px,calc(100% - 30px));margin:28px auto 60px}.topline{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}.topline a{color:var(--s-accent);font-weight:800;font-size:12px;text-decoration:none}
+.hero{padding:clamp(24px,5vw,42px);border-radius:24px;background:linear-gradient(125deg,#091729,#16345a 70%,#27548a);color:white;box-shadow:0 20px 50px #142d4b1c}.eyebrow{font-size:10px;letter-spacing:2px;font-weight:900;color:#93c5fd}.hero h1{font-size:clamp(30px,5vw,44px);line-height:1.1;letter-spacing:-1.2px;margin:10px 0}.hero p{font-size:13px;line-height:1.65;color:#d0dff0;max-width:650px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px}.stat{padding:12px;border:1px solid #ffffff24;border-radius:12px;background:#ffffff0d}.stat strong{display:block;font-size:23px}.stat span{font-size:10px;color:#c3d5e9}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}.panel{min-width:0;background:var(--s-card);border:1px solid var(--s-line);border-radius:18px;padding:20px;box-shadow:0 8px 26px #15223808}.panel h2{font-size:17px;margin:0 0 5px}.muted{font-size:12px;line-height:1.6;color:var(--s-muted)}
+.field{display:grid;gap:6px;margin-top:13px}.field label{font-size:11px;font-weight:800}.field input,.field select{box-sizing:border-box;width:100%;min-width:0;padding:11px 12px;border:1px solid var(--s-line);border-radius:10px;background:var(--s-bg);color:var(--s-text);font:inherit;font-size:12px}
+.timer-wrap{text-align:center;padding:22px 10px 10px}.timer-ring{width:min(245px,70vw);aspect-ratio:1;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--s-accent) var(--progress,0%),var(--s-line) 0);padding:8px}.timer-inner{width:100%;height:100%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--s-card);border:1px solid var(--s-line)}.timer-time{font-size:clamp(42px,8vw,58px);font-weight:900;letter-spacing:-2px;font-variant-numeric:tabular-nums}.timer-mode{font-size:10px;letter-spacing:1.5px;font-weight:900;color:var(--s-muted);text-transform:uppercase}.controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:15px 0}.btn{padding:11px 16px;border:1px solid var(--s-line);border-radius:10px;background:var(--s-soft);color:var(--s-accent);font-size:12px;font-weight:850;cursor:pointer}.btn.primary{background:var(--s-accent);color:white;border-color:var(--s-accent)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.goal{display:flex;gap:8px;margin-top:12px}.goal input{flex:1;min-width:0;padding:10px;border:1px solid var(--s-line);border-radius:9px;background:var(--s-bg);color:var(--s-text);font:inherit;font-size:12px}.goal button{border:0;border-radius:9px;padding:10px;background:var(--s-accent);color:white;font-weight:800}
+.progress{height:7px;background:var(--s-line);border-radius:99px;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;width:0;background:var(--s-accent);transition:width .2s}
+.checklist{display:grid;gap:8px;margin-top:14px}.checkrow{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid var(--s-line);border-radius:10px;font-size:12px}.checkrow input{width:17px;height:17px;accent-color:var(--s-accent)}.checkrow.done span{text-decoration:line-through;color:var(--s-muted)}.remove{margin-left:auto;border:0;background:transparent;color:var(--s-muted);font-size:16px;cursor:pointer}
+.add-row{display:flex;gap:8px;margin-top:12px}.add-row input{flex:1;min-width:0;padding:10px;border:1px solid var(--s-line);border-radius:9px;background:var(--s-bg);color:var(--s-text);font:inherit;font-size:12px}.add-row button{border:0;border-radius:9px;padding:10px 13px;background:var(--s-accent);color:white;font-weight:850}
+.note{padding:11px 13px;margin-top:14px;background:var(--s-soft);border-left:3px solid var(--s-accent);border-radius:0 9px 9px 0;font-size:11px;line-height:1.55}
+body.theme-dark{--s-bg:#080f1a;--s-card:#101d30;--s-text:#e5edf7;--s-muted:#a9b8cd;--s-line:#293c55;--s-accent:#93c5fd;--s-soft:#142a46;background:var(--s-bg);color:var(--s-text)}body.theme-dark .hero{background:linear-gradient(125deg,#050b14,#102744 70%,#173a63)}body.theme-dark input,body.theme-dark select{color-scheme:dark}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.panel{padding:16px}.study{margin-top:18px}.timer-wrap{padding-top:14px}}
+</style>
+</head>
+<body>
+<main class="study">
+<div class="topline"><a href="index.html">← Volver a 1°D</a><a href="organizador.html">Abrir organizador de tareas →</a></div>
+<section class="hero"><span class="eyebrow">HERRAMIENTAS DE ESTUDIO · 1°D EST60</span><h1>Enfócate. Avanza. Descansa.</h1><p>Usa sesiones de concentración para estudiar sin distraerte y revisa que llevas lo necesario para la escuela. El progreso se guarda en este dispositivo.</p>
+<div class="stats"><div class="stat"><strong id="sessionsCount">0</strong><span>Sesiones completadas</span></div><div class="stat"><strong id="minutesCount">0</strong><span>Minutos concentrado</span></div><div class="stat"><strong id="checkCount">0/0</strong><span>Lista preparada</span></div></div></section>
+<div class="grid">
+<section class="panel"><h2>Temporizador de concentración</h2><p class="muted">Elige una duración, deja el móvil a un lado y trabaja en una sola actividad.</p>
+<div class="field"><label for="subject">¿Qué vas a estudiar?</label><input id="subject" maxlength="100" placeholder="Ej. Repasar Geografía"></div>
+<div class="field"><label for="duration">Duración de la sesión</label><select id="duration"><option value="25">25 min concentración / 5 min descanso</option><option value="40">40 min concentración / 10 min descanso</option><option value="50">50 min concentración / 10 min descanso</option></select></div>
+<div class="timer-wrap"><div class="timer-ring" id="timerRing"><div class="timer-inner"><div class="timer-mode" id="timerMode">CONCENTRACIÓN</div><div class="timer-time" id="timerTime">25:00</div><div class="muted" id="timerCaption">Listo para comenzar</div></div></div>
+<div class="controls"><button class="btn primary" id="startPause">Iniciar sesión</button><button class="btn" id="resetTimer">Reiniciar</button><button class="btn" id="breakTimer">Tomar descanso</button></div>
+<p class="muted" id="timerStatus" role="status">Cuando termines una sesión completa, se sumará a tu progreso.</p></div>
+<div class="note">Si sales de esta página, el temporizador se reinicia al volver. No sustituye una alarma del dispositivo.</div>
+</section>
+<section class="panel"><h2>Lista para la mochila</h2><p class="muted">Marca los materiales que ya preparaste. Puedes añadir tus propios artículos.</p>
+<div class="checklist" id="checklist"></div>
+<div class="add-row"><input id="newItem" maxlength="70" placeholder="Añadir material..."><button id="addItem" type="button">Añadir</button></div>
+<div class="controls" style="justify-content:flex-start"><button class="btn" id="resetChecklist" type="button">Desmarcar todo</button><button class="btn" id="restoreChecklist" type="button">Restaurar lista inicial</button></div>
+<div class="field"><label for="dailyGoal">Objetivo de hoy</label><div class="goal"><input id="dailyGoal" maxlength="140" placeholder="Ej. Terminar actividad de Español"><button id="saveGoal" type="button">Guardar</button></div><p class="muted" id="goalStatus" role="status"></p></div>
+<div class="note">Revisa el horario de mañana para preparar libros y materiales correctos. Esta lista es personal y no se envía a tus docentes.</div>
+</section>
+</div>
+</main>
+<script>
+(function(){
+const $=id=>document.getElementById(id),KEY="est60_study_tools_v1";
+const defaults=["Mochila y estuche","Cuadernos de las materias","Libros solicitados","Lápices, pluma y borrador","Tarea terminada o materiales pendientes","Agua para el día"];
+let data={sessions:0,minutes:0,items:defaults.map((text,i)=>({id:"d"+i,text,checked:false})),goal:""};
+try{const saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved&&typeof saved==="object")data=Object.assign(data,saved);if(!Array.isArray(data.items))data.items=[]}catch(e){}
+let mode="focus",running=false,remaining=25*60,total=25*60,interval=null;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){$("timerStatus").textContent="No se pudo guardar el progreso local."}};
+const fmt=n=>String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");
+function renderStats(){$("sessionsCount").textContent=data.sessions;$("minutesCount").textContent=data.minutes;const checked=data.items.filter(x=>x.checked).length;$("checkCount").textContent=checked+"/"+data.items.length}
+function renderItems(){$("checklist").innerHTML=data.items.map(x=>'<label class="checkrow '+(x.checked?'done':'')+'"><input type="checkbox" data-check="'+x.id+'" '+(x.checked?'checked':'')+'><span>'+x.text.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))+'</span>'+(x.id.startsWith("d")?'':'<button class="remove" type="button" data-remove="'+x.id+'" aria-label="Eliminar artículo">×</button>')+'</label>').join("");renderStats()}
+function renderTimer(){const pct=total?Math.max(0,Math.min(100,(total-remaining)/total*100)):0;$("timerRing").style.setProperty("--progress",pct+"%");$("timerTime").textContent=fmt(remaining);$("timerMode").textContent=mode==="focus"?"CONCENTRACIÓN":"DESCANSO";$("timerCaption").textContent=running?"Sesión en curso":remaining===0?"Tiempo terminado":mode==="focus"?"Listo para estudiar":"Tiempo para descansar";$("startPause").textContent=running?"Pausar":remaining===0?"Comenzar otra vez":remaining===total?"Iniciar sesión":"Continuar";$("breakTimer").textContent=mode==="break"?"Volver a concentración":"Tomar descanso"}
+function stop(){running=false;if(interval)clearInterval(interval);interval=null}
+function setMode(next){stop();mode=next;const m=Number($("duration").value);total=(mode==="focus"?m: m===25?5:10)*60;remaining=total;renderTimer()}
+function finish(){stop();remaining=0;if(mode==="focus"){data.sessions++;data.minutes+=Number($("duration").value);save();$("timerStatus").textContent="Sesión completada. Levántate, estírate y descansa un poco."}else $("timerStatus").textContent="Descanso terminado. Cuando estés listo, vuelve a concentrarte.";renderStats();renderTimer();try{if(navigator.vibrate)navigator.vibrate([150,80,150])}catch(e){}}
+$("startPause").addEventListener("click",()=>{if(running){stop();renderTimer();return}if(remaining<=0){setMode(mode);renderTimer()}running=true;renderTimer();interval=setInterval(()=>{remaining--;if(remaining<=0){finish();return}renderTimer()},1000)});
+$("resetTimer").addEventListener("click",()=>{stop();const m=Number($("duration").value);total=(mode==="focus"?m:m===25?5:10)*60;remaining=total;$("timerStatus").textContent="Temporizador reiniciado.";renderTimer()});
+$("breakTimer").addEventListener("click",()=>{setMode(mode==="focus"?"break":"focus");$("timerStatus").textContent=mode==="break"?"Descanso preparado.":"Sesión de concentración preparada.";renderTimer()});
+$("duration").addEventListener("change",()=>{if(!running){mode="focus";setMode("focus");renderTimer()}});
+$("checklist").addEventListener("change",e=>{const id=e.target.getAttribute("data-check");if(!id)return;data.items=data.items.map(x=>x.id===id?Object.assign({},x,{checked:e.target.checked}):x);save();renderItems()});
+$("checklist").addEventListener("click",e=>{const id=e.target.getAttribute("data-remove");if(!id)return;e.preventDefault();data.items=data.items.filter(x=>x.id!==id);save();renderItems()});
+function addItem(){const text=$("newItem").value.trim();if(!text)return;data.items.push({id:"c"+Date.now().toString(36),text,checked:false});$("newItem").value="";save();renderItems()}
+$("addItem").addEventListener("click",addItem);$("newItem").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addItem()}});
+$("resetChecklist").addEventListener("click",()=>{data.items=data.items.map(x=>Object.assign({},x,{checked:false}));save();renderItems()});
+$("restoreChecklist").addEventListener("click",()=>{if(!confirm("¿Restaurar la lista inicial? Se quitarán los artículos personalizados."))return;data.items=defaults.map((text,i)=>({id:"d"+i,text,checked:false}));save();renderItems()});
+$("saveGoal").addEventListener("click",()=>{data.goal=$("dailyGoal").value.trim();save();$("goalStatus").textContent=data.goal?"Objetivo guardado en este dispositivo.":"Objetivo borrado.";});
+$("dailyGoal").value=data.goal||"";try{document.body.classList.toggle("theme-dark",localStorage.getItem("est60_tema_web_v1")==="dark")}catch(e){}renderItems();renderTimer();
+})();
+</script>
+</body></html>
