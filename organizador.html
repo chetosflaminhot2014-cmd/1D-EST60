@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1424">
+<meta name="description" content="Organizador personal de tareas escolares para 1°D EST60.">
+<title>Organizador de tareas | 1°D EST60</title>
+<link rel="icon" href="icon-192.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<style>
+:root{--o-bg:#f3f6fb;--o-card:#fff;--o-text:#142238;--o-muted:#61718a;--o-line:#dce5f0;--o-accent:#2563eb;--o-soft:#eaf2ff}
+body{background:var(--o-bg);color:var(--o-text);min-height:100vh}
+.organizer{width:min(1000px,calc(100% - 30px));margin:30px auto 60px}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.topline a{color:var(--o-accent);font-weight:800;font-size:13px;text-decoration:none}
+.eyebrow{font-size:10px;letter-spacing:2px;font-weight:900;color:var(--o-accent)}
+.hero{border-radius:24px;padding:clamp(24px,5vw,44px);color:#fff;background:linear-gradient(125deg,#091729,#16345a 70%,#27548a);box-shadow:0 20px 50px #142d4b1c}
+.hero h1{font-size:clamp(30px,5vw,46px);letter-spacing:-1.3px;line-height:1.08;margin:10px 0}
+.hero p{color:#d0dff0;max-width:640px;font-size:13px;line-height:1.65}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}
+.stat{padding:13px;border:1px solid #ffffff24;border-radius:13px;background:#ffffff0d}
+.stat strong{display:block;font-size:24px}.stat span{font-size:10px;color:#c3d5e9}
+.layout{display:grid;grid-template-columns:minmax(0, .9fr) minmax(0,1.1fr);gap:16px;margin-top:16px;align-items:start}
+.panel{background:var(--o-card);border:1px solid var(--o-line);border-radius:18px;padding:20px;box-shadow:0 8px 26px #15223808;min-width:0}
+.panel h2{font-size:17px;margin:0 0 5px}.muted{color:var(--o-muted);font-size:12px;line-height:1.55}
+.field{display:grid;gap:6px;margin-top:14px}.field label{font-size:11px;font-weight:800}.field input,.field select,.field textarea{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--o-line);border-radius:10px;background:var(--o-bg);color:var(--o-text);font:inherit;font-size:12px;min-width:0}.field textarea{min-height:75px;resize:vertical}
+.btn{border:0;border-radius:10px;padding:11px 14px;background:var(--o-accent);color:white;font-size:12px;font-weight:800;cursor:pointer}.btn.secondary{background:var(--o-soft);color:var(--o-accent);border:1px solid var(--o-line)}.form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.toolbar input,.toolbar select{flex:1;min-width:110px;padding:10px;border:1px solid var(--o-line);border-radius:9px;background:var(--o-bg);color:var(--o-text);font:inherit;font-size:11px}
+.task-list{display:grid;gap:10px}.task{border:1px solid var(--o-line);border-radius:13px;padding:13px;display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;background:var(--o-card)}.task.done{opacity:.68}.task.done .task-title{text-decoration:line-through}.task input[type=checkbox]{width:17px;height:17px;margin-top:3px;accent-color:var(--o-accent)}.task-title{font-size:13px;font-weight:850;overflow-wrap:anywhere}.task-note{font-size:11px;color:var(--o-muted);margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}.task-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.tag{font-size:9px;font-weight:800;padding:5px 7px;border-radius:6px;background:var(--o-soft);color:var(--o-accent)}.tag.high{background:#fee2e2;color:#991b1b}.tag.medium{background:#fef3c7;color:#92400e}.tag.overdue{background:#fee2e2;color:#991b1b}.task-actions{display:flex;gap:6px;margin-top:10px}.task-actions button{font-size:10px;padding:7px 9px;border:1px solid var(--o-line);border-radius:8px;background:transparent;color:var(--o-text);font-weight:800;cursor:pointer}.empty{padding:26px 14px;text-align:center;color:var(--o-muted);border:1px dashed var(--o-line);border-radius:12px;font-size:12px}.notice{margin-top:14px;padding:12px;border-left:3px solid var(--o-accent);border-radius:0 9px 9px 0;background:var(--o-soft);font-size:11px;line-height:1.55}
+body.theme-dark{--o-bg:#080f1a;--o-card:#101d30;--o-text:#e5edf7;--o-muted:#a9b8cd;--o-line:#293c55;--o-accent:#93c5fd;--o-soft:#142a46;background:var(--o-bg);color:var(--o-text)}
+body.theme-dark .hero{background:linear-gradient(125deg,#050b14,#102744 70%,#173a63)}
+body.theme-dark .field input,body.theme-dark .field select,body.theme-dark .field textarea,body.theme-dark .toolbar input,body.theme-dark .toolbar select{color-scheme:dark}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.organizer{margin-top:18px}.panel{padding:16px}.stats{gap:7px}.stat{padding:10px}.stat strong{font-size:21px}}
+</style>
+</head>
+<body>
+<main class="organizer">
+<div class="topline"><a href="index.html">← Volver a 1°D</a><a href="ayuda.html">Ayuda y diagnóstico →</a></div>
+<section class="hero">
+<span class="eyebrow">ESPACIO PERSONAL · 1°D EST60</span>
+<h1>Organiza tus tareas.</h1>
+<p>Registra pendientes, asigna prioridad y fecha de entrega. Tus datos se guardan en este dispositivo; no se publican ni se sincronizan con otros equipos.</p>
+<div class="stats"><div class="stat"><strong id="totalCount">0</strong><span>Tareas registradas</span></div><div class="stat"><strong id="pendingCount">0</strong><span>Pendientes</span></div><div class="stat"><strong id="doneCount">0</strong><span>Terminadas</span></div></div>
+</section>
+<div class="layout">
+<section class="panel">
+<h2 id="formHeading">Añadir tarea</h2><p class="muted">Registra lo que necesitas terminar y cuándo debes entregarlo.</p>
+<form id="taskForm">
+<div class="field"><label for="taskTitle">Nombre de la tarea *</label><input id="taskTitle" maxlength="100" required placeholder="Ej. Actividad de Geografía"></div>
+<div class="field"><label for="taskSubject">Materia</label><select id="taskSubject"><option>Sin especificar</option><option>Español</option><option>Matemáticas</option><option>Inglés</option><option>Ciencias</option><option>Geografía</option><option>Historia</option><option>Tecnología</option><option>Formación Cívica y Ética</option><option>Artes</option><option>Educación Física</option><option>Otra</option></select></div>
+<div class="field"><label for="taskDate">Fecha de entrega</label><input id="taskDate" type="date"></div>
+<div class="field"><label for="taskPriority">Prioridad</label><select id="taskPriority"><option value="medium">Media</option><option value="high">Alta</option><option value="low">Baja</option></select></div>
+<div class="field"><label for="taskNotes">Notas (opcional)</label><textarea id="taskNotes" maxlength="500" placeholder="Páginas, materiales o instrucciones..."></textarea></div>
+<div class="form-actions"><button class="btn" id="saveTask" type="submit">Guardar tarea</button><button class="btn secondary" id="cancelEdit" type="button" hidden>Cancelar edición</button></div>
+<p class="muted" id="formStatus" role="status"></p>
+</form>
+<div class="notice"><strong>Importante:</strong> este organizador es personal. No sustituye las indicaciones del docente ni las tareas publicadas oficialmente en la página del grupo.</div>
+</section>
+<section class="panel">
+<h2>Mis pendientes</h2><p class="muted">Busca por nombre o materia y filtra por estado.</p>
+<div class="toolbar"><input id="searchTasks" type="search" placeholder="Buscar tarea..."><select id="filterTasks" aria-label="Filtrar tareas"><option value="all">Todas</option><option value="pending">Pendientes</option><option value="done">Terminadas</option><option value="overdue">Vencidas</option></select><select id="sortTasks" aria-label="Ordenar tareas"><option value="date">Por entrega</option><option value="priority">Por prioridad</option><option value="newest">Más recientes</option></select></div>
+<div class="task-list" id="taskList"><div class="empty">Cargando tareas guardadas...</div></div>
+<div class="form-actions"><button class="btn secondary" id="exportTasks" type="button">Exportar respaldo (.json)</button><button class="btn secondary" id="clearDone" type="button">Eliminar terminadas</button></div>
+<p class="muted">Consejo: exporta un respaldo antes de borrar datos de la App o cambiar de dispositivo.</p>
+</section>
+</div>
+</main>
+<script>
+(function(){
+const KEY="est60_personal_organizador_v1";
+const $=id=>document.getElementById(id);
+let tasks=[],editing=null;
+const priorities={high:"Alta",medium:"Media",low:"Baja"};
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function load(){try{const parsed=JSON.parse(localStorage.getItem(KEY)||"[]");tasks=Array.isArray(parsed)?parsed.filter(t=>t&&t.id&&typeof t.title==="string"):[]}catch(e){tasks=[]}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(tasks));return true}catch(e){$("formStatus").textContent="No se pudo guardar. Comprueba el espacio disponible del dispositivo.";return false}}
+function dateText(s){if(!s)return "Sin fecha de entrega";const p=s.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:s}
+function render(){
+ const pending=tasks.filter(t=>!t.done).length;
+ $("totalCount").textContent=tasks.length;$("pendingCount").textContent=pending;$("doneCount").textContent=tasks.length-pending;
+ const query=$("searchTasks").value.trim().toLocaleLowerCase("es-MX"),filter=$("filterTasks").value,sort=$("sortTasks").value;
+ let shown=tasks.filter(t=>(!query||(t.title+" "+t.subject+" "+t.notes).toLocaleLowerCase("es-MX").includes(query)));
+ if(filter==="pending")shown=shown.filter(t=>!t.done);
+ if(filter==="done")shown=shown.filter(t=>t.done);
+ if(filter==="overdue")shown=shown.filter(t=>!t.done&&t.date&&t.date<today());
+ shown.sort((a,b)=>sort==="newest"?b.created-a.created:sort==="priority"?({high:0,medium:1,low:2}[a.priority]??1)-({high:0,medium:1,low:2}[b.priority]??1):(a.date||"9999").localeCompare(b.date||"9999"));
+ if(!shown.length){$("taskList").innerHTML='<div class="empty">'+(tasks.length?'No hay tareas que coincidan con ese filtro.':'Todavía no tienes tareas guardadas. Añade tu primer pendiente en el formulario.')+'</div>';return}
+ $("taskList").innerHTML=shown.map(t=>{const overdue=!t.done&&t.date&&t.date<today();return '<article class="task '+(t.done?'done':'')+'"><input type="checkbox" data-done="'+esc(t.id)+'" '+(t.done?'checked':'')+' aria-label="Marcar como terminada"><div><div class="task-title">'+esc(t.title)+'</div><div class="task-note">'+esc(t.subject||"Sin especificar")+(t.notes?' · '+esc(t.notes):'')+'</div><div class="task-meta"><span class="tag '+esc(t.priority)+'">Prioridad '+esc(priorities[t.priority]||"Media")+'</span><span class="tag '+(overdue?'overdue':'')+'">'+(overdue?'Vencida · ':'Entrega: ')+esc(dateText(t.date))+'</span></div><div class="task-actions"><button type="button" data-edit="'+esc(t.id)+'">Editar</button><button type="button" data-delete="'+esc(t.id)+'">Eliminar</button></div></div></article>'}).join("");
+}
+function resetForm(){editing=null;$("taskForm").reset();$("formHeading").textContent="Añadir tarea";$("saveTask").textContent="Guardar tarea";$("cancelEdit").hidden=true;$("formStatus").textContent=""}
+$("taskForm").addEventListener("submit",e=>{e.preventDefault();const title=$("taskTitle").value.trim();if(!title)return;const previous=editing?tasks.find(t=>t.id===editing):null;const item={id:editing||("t"+Date.now()+Math.random().toString(36).slice(2,7)),title,subject:$("taskSubject").value,date:$("taskDate").value,priority:$("taskPriority").value,notes:$("taskNotes").value.trim(),done:previous?previous.done:false,created:previous?previous.created:Date.now()};if(previous)tasks=tasks.map(t=>t.id===editing?item:t);else tasks.push(item);if(persist()){resetForm();render();}});
+$("cancelEdit").addEventListener("click",resetForm);
+$("taskList").addEventListener("change",e=>{const id=e.target.getAttribute("data-done");if(!id)return;tasks=tasks.map(t=>t.id===id?Object.assign({},t,{done:e.target.checked}):t);persist();render()});
+$("taskList").addEventListener("click",e=>{const edit=e.target.getAttribute("data-edit"),del=e.target.getAttribute("data-delete");if(edit){const t=tasks.find(x=>x.id===edit);if(!t)return;editing=t.id;$("taskTitle").value=t.title;$("taskSubject").value=t.subject||"Sin especificar";$("taskDate").value=t.date||"";$("taskPriority").value=t.priority||"medium";$("taskNotes").value=t.notes||"";$("formHeading").textContent="Editar tarea";$("saveTask").textContent="Guardar cambios";$("cancelEdit").hidden=false;$("formStatus").textContent="Editando: "+t.title;window.scrollTo({top:0,behavior:"smooth"})}else if(del){const t=tasks.find(x=>x.id===del);if(!t||!confirm('¿Eliminar la tarea "'+t.title+'"?'))return;tasks=tasks.filter(x=>x.id!==del);persist();render();if(editing===del)resetForm()}});
+["searchTasks","filterTasks","sortTasks"].forEach(id=>$(id).addEventListener(id==="searchTasks"?"input":"change",render));
+$("clearDone").addEventListener("click",()=>{const n=tasks.filter(t=>t.done).length;if(!n){alert("No hay tareas terminadas para eliminar.");return}if(confirm("¿Eliminar "+n+" tarea(s) terminada(s)?")){tasks=tasks.filter(t=>!t.done);persist();render()}});
+$("exportTasks").addEventListener("click",()=>{const blob=new Blob([JSON.stringify({app:"1D-EST60",exportedAt:new Date().toISOString(),tasks},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="respaldo-tareas-1D-EST60.json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)});
+try{document.body.classList.toggle("theme-dark",localStorage.getItem("est60_tema_web_v1")==="dark")}catch(e){}
+load();render();
+})();
+</script>
+</body>
+</html>
