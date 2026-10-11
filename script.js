@@ -1051,7 +1051,7 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
     if (!tareas) return;
     const panel = document.createElement("section");
     panel.id = "geminiPanel"; panel.className = "gemini-panel";
-    panel.innerHTML = '<div class="gemini-panel-header"><div class="gemini-brand-icon">✦</div><div class="gemini-heading"><span>ASISTENTE DE ESTUDIO</span><h3>Gemini para 1°D</h3><p>Resuelve dudas y aprende paso a paso.</p></div><button type="button" class="gemini-close" id="geminiClose" aria-label="Cerrar">×</button></div><div class="gemini-selected-task" id="geminiSelectedTask" hidden></div><div class="gemini-messages" id="geminiMessages"><div class="gemini-message gemini-message-bot">¡Hola! Soy Gemini. Puedo explicarte una tarea, darte ejemplos o ayudarte a estudiar paso a paso. Si no tengo certeza sobre un dato, te lo diré. ¿Qué necesitas entender?</div></div><form class="gemini-form" id="geminiForm"><label class="sr-only" for="geminiInput">Escribe tu pregunta</label><textarea id="geminiInput" maxlength="1200" rows="2" placeholder="Escribe tu duda..." required></textarea><button id="geminiSend" type="submit">Enviar ↑</button></form><p class="gemini-note">La IA puede equivocarse. Verifica las respuestas con tus apuntes o tu profesor. No compartas datos personales.</p>';
+    panel.innerHTML = '<div class="gemini-panel-header"><div class="gemini-brand-icon">✦</div><div class="gemini-heading"><span>ACADEMIA DE REPASO · IA</span><h3>Repasa con Gemini</h3><p>Explicaciones breves, cuestionarios y tarjetas de memoria.</p></div><button type="button" class="gemini-close" id="geminiClose" aria-label="Cerrar">×</button></div><div class="gemini-quick-prompts" aria-label="Atajos de estudio"><button type="button" data-study-prompt="Explícame este tema en palabras sencillas y dame un ejemplo breve: ">Explicación rápida</button><button type="button" data-study-prompt="Hazme un cuestionario de 5 preguntas sobre este tema. Haz una pregunta a la vez y espera mi respuesta: ">Quiz de 5 preguntas</button><button type="button" data-study-prompt="Crea 6 tarjetas de memoria con pregunta y respuesta para repasar este tema: ">Tarjetas de memoria</button></div><div class="gemini-selected-task" id="geminiSelectedTask" hidden></div><div class="gemini-messages" id="geminiMessages"><div class="gemini-message gemini-message-bot">¡Hola! Soy Gemini. Puedo explicarte una tarea, darte ejemplos o ayudarte a estudiar paso a paso. Si no tengo certeza sobre un dato, te lo diré. ¿Qué necesitas entender?</div></div><form class="gemini-form" id="geminiForm"><label class="sr-only" for="geminiInput">Escribe tu pregunta</label><textarea id="geminiInput" maxlength="1200" rows="2" placeholder="Escribe tu duda..." required></textarea><button id="geminiSend" type="submit">Enviar ↑</button></form><p class="gemini-note">La IA puede equivocarse. Verifica las respuestas con tus apuntes o tu profesor. No compartas datos personales.</p>';
     tareas.insertAdjacentElement("afterend", panel);
     const messages = panel.querySelector("#geminiMessages");
     const selectedTask = panel.querySelector("#geminiSelectedTask");
@@ -1072,10 +1072,13 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
         panel.classList.add("gemini-panel-open"); panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
         input.value = "Ayúdame a entender esta tarea y explícame cómo empezar."; input.focus({ preventScroll: true });
     });
+    panel.querySelectorAll("[data-study-prompt]").forEach(button => {
+        button.addEventListener("click", () => { input.value = button.dataset.studyPrompt; input.focus(); panel.classList.add("gemini-panel-open"); });
+    });
     panel.querySelector("#geminiClose").addEventListener("click", () => panel.classList.remove("gemini-panel-open"));
     form.addEventListener("submit", async event => {
         event.preventDefault(); const question = input.value.trim(); if (!question || send.disabled) return;
-        addMessage(question, "user"); input.value = ""; send.disabled = true; send.textContent = "Pensando…";
+        addMessage(question, "user"); input.value = ""; send.disabled = true; send.textContent = "Consultando…";
         const loading = addMessage("Gemini está preparando una respuesta…", "bot");
         try {
             const response = await fetch(API_BASE + "/api/gemini", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: question, taskContext }) });
@@ -1199,4 +1202,26 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
     renderTasks();
     const tasksContainer = document.getElementById("tareasPublicas");
     if (tasksContainer && window.MutationObserver) new MutationObserver(renderTasks).observe(tasksContainer, { childList: true, subtree: true, characterData: true });
+})();
+
+
+/* CENTRO DE CALIFICACIONES: almacenamiento local y cálculo ponderado */
+(function iniciarCentroCalificaciones() {
+    const KEY = "est60_grades_local_v1", form = document.getElementById("gradesForm");
+    if (!form) return;
+    const subject = document.getElementById("gradeSubject"), label = document.getElementById("gradeLabel"), score = document.getElementById("gradeScore"), weight = document.getElementById("gradeWeight"), list = document.getElementById("gradesList"), average = document.getElementById("gradesAverage"), summary = document.getElementById("gradesSummaryText"), bar = document.getElementById("gradesProgressBar"), status = document.getElementById("gradesStatus");
+    let grades = [];
+    try { const saved = JSON.parse(localStorage.getItem(KEY) || "[]"); if (Array.isArray(saved)) grades = saved; } catch (_) {}
+    function persist() { try { localStorage.setItem(KEY, JSON.stringify(grades)); return true; } catch (_) { status.textContent = "No se pudo guardar. Revisa el espacio disponible del dispositivo."; return false; } }
+    function calc(items) { const totalWeight = items.reduce((sum,item)=>sum+(Number(item.weight)||1),0); return totalWeight ? items.reduce((sum,item)=>sum+Number(item.score)*(Number(item.weight)||1),0)/totalWeight : null; }
+    function render() {
+        const avg=calc(grades); average.textContent=avg===null?"—":avg.toFixed(1); summary.textContent=grades.length?grades.length+(grades.length===1?" evaluación registrada":" evaluaciones registradas")+" · promedio aproximado":"Agrega una calificación para comenzar."; bar.style.width=avg===null?"0%":Math.max(0,Math.min(100,avg*10))+"%"; list.replaceChildren();
+        if(!grades.length){const empty=document.createElement("p");empty.className="grades-empty";empty.textContent="Todavía no has registrado calificaciones.";list.appendChild(empty);return;}
+        const groups=new Map(); grades.forEach(item=>{if(!groups.has(item.subject))groups.set(item.subject,[]);groups.get(item.subject).push(item);});
+        groups.forEach((items,name)=>{const section=document.createElement("section");section.className="grade-subject-group";const heading=document.createElement("div");heading.className="grade-subject-heading";const title=document.createElement("h4");title.textContent=name;const avgLabel=document.createElement("strong");avgLabel.textContent="Promedio "+calc(items).toFixed(1);heading.append(title,avgLabel);section.appendChild(heading);
+            items.forEach(item=>{const row=document.createElement("div");row.className="grade-row";const info=document.createElement("div");info.className="grade-row-info";const itemTitle=document.createElement("strong");itemTitle.textContent=item.label||"Evaluación";const meta=document.createElement("small");meta.textContent="Peso "+item.weight+(Number(item.weight)===1?" · normal":" · ponderado");info.append(itemTitle,meta);const value=document.createElement("strong");value.className="grade-value";value.textContent=Number(item.score).toFixed(1);const remove=document.createElement("button");remove.type="button";remove.className="grade-remove";remove.textContent="Quitar";remove.setAttribute("aria-label","Quitar "+(item.label||"evaluación"));remove.addEventListener("click",()=>{grades=grades.filter(g=>g.id!==item.id);persist();render();});row.append(info,value,remove);section.appendChild(row);});list.appendChild(section);});
+    }
+    form.addEventListener("submit",event=>{event.preventDefault();const value=Number(score.value);if(!subject.value||!Number.isFinite(value)||value<0||value>10){status.textContent="Elige una materia e ingresa una calificación entre 0 y 10.";return;}grades.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),subject:subject.value,label:label.value.trim()||"Evaluación",score:value,weight:Number(weight.value)||1,createdAt:new Date().toISOString()});if(!persist()){grades.shift();return;}label.value="";score.value="";weight.value="1";status.textContent="Calificación guardada en este dispositivo.";render();});
+    document.getElementById("clearGrades").addEventListener("click",()=>{if(!grades.length){status.textContent="No hay calificaciones que borrar.";return;}if(!window.confirm("¿Borrar todas las calificaciones guardadas en este dispositivo?"))return;grades=[];persist();render();status.textContent="Se borraron las calificaciones locales.";});
+    render();
 })();
