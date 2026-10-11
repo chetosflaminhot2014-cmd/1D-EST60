@@ -41,6 +41,7 @@
             <a href="#horario">Horario</a>
             <a href="#calendario">Calendario</a>
             <a href="#recursos">Recursos</a>
+            <a href="#calificaciones">Calificaciones</a>
             <a href="#perfil">Mi perfil</a>
             <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Activar modo oscuro">🌙 Modo oscuro</button>
         </nav>
@@ -160,6 +161,25 @@
         </div>
     </section>
 
+
+    <!-- CENTRO DE CALIFICACIONES PERSONALES -->
+    <section id="calificaciones" class="section grades-section">
+        <div class="section-number">07</div>
+        <div class="section-heading"><span>SEGUIMIENTO PERSONAL</span><h2>Centro de calificaciones</h2><p>Registra tus notas y calcula tu promedio estimado en este dispositivo.</p></div>
+        <div class="grades-layout">
+            <div class="grades-summary-card"><span class="grades-eyebrow">PROMEDIO ESTIMADO</span><strong id="gradesAverage">—</strong><p id="gradesSummaryText">Agrega una calificación para comenzar.</p><div class="grades-progress-track"><div id="gradesProgressBar" class="grades-progress-bar" style="width:0%"></div></div><small>Escala de 0 a 10 · promedio ponderado</small></div>
+            <div class="grades-entry-card"><h3>Registrar calificación</h3>
+                <form id="gradesForm" class="grades-form">
+                    <label>Materia<select id="gradeSubject" required><option value="">Selecciona una materia</option><option>Español</option><option>Inglés</option><option>Geografía</option><option>Ciencias</option><option>Tecnología</option><option>Matemáticas</option><option>Historia</option><option>Formación Cívica y Ética</option><option>Educación Física</option><option>Artes</option><option>Otra</option></select></label>
+                    <label>Nombre de la evaluación<input id="gradeLabel" maxlength="60" placeholder="Ej. Examen del tema 2"></label>
+                    <div class="grades-form-row"><label>Calificación (0–10)<input id="gradeScore" type="number" min="0" max="10" step="0.1" required placeholder="8.5"></label><label>Peso<select id="gradeWeight"><option value="1">Normal</option><option value="2">Doble</option><option value="3">Triple</option></select></label></div>
+                    <button type="submit" class="btn btn-primary">Guardar calificación</button><p id="gradesStatus" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+        </div>
+        <div class="grades-list-card"><div class="grades-list-heading"><div><h3>Mis evaluaciones</h3><p>Solo tú puedes ver este registro desde este dispositivo.</p></div><button id="clearGrades" type="button" class="grades-clear-button">Borrar todo</button></div><div id="gradesList" class="grades-list"><p class="grades-empty">Todavía no has registrado calificaciones.</p></div></div>
+        <p class="grades-disclaimer">Este centro es una herramienta personal de cálculo. No consulta el sistema escolar ni muestra calificaciones oficiales; guarda los datos localmente y no los comparte con docentes.</p>
+    </section>
 
     <!-- ==========================================
          AVISOS
