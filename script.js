@@ -824,9 +824,7 @@ async function cargarImagenCalendarioPublica() {
     const roomPanel = document.getElementById("chatRoomPanel");
     if (!authPanel || !roomPanel) return;
     const emailInput = document.getElementById("chatEmail");
-    const codeInput = document.getElementById("chatCode");
     const requestForm = document.getElementById("chatRequestCodeForm");
-    const verifyForm = document.getElementById("chatVerifyCodeForm");
     const authStatus = document.getElementById("chatAuthStatus");
     const messagesBox = document.getElementById("chatMessages");
     const messageForm = document.getElementById("chatMessageForm");
@@ -862,27 +860,13 @@ async function cargarImagenCalendarioPublica() {
         const email = emailInput.value.trim().toLowerCase();
         if (!/^[^\s@]+@chih\.nuevaescuela\.mx$/i.test(email)) return status(authStatus, "Usa tu correo terminado en @chih.nuevaescuela.mx.", true);
         const button = document.getElementById("chatRequestCodeButton");
-        button.disabled = true; button.textContent = "Enviando...";
+        button.disabled = true; button.textContent = "Entrando...";
         try {
-            const data = await api("/api/chat/auth/request-code", { method: "POST", body: JSON.stringify({ email }) });
-            verifyForm.hidden = false; status(authStatus, data.message || "Revisa tu correo institucional.");
-            codeInput.focus();
-        } catch (error) { status(authStatus, error.message, true); }
-        finally { button.disabled = false; button.textContent = "Enviar código"; }
-    });
-    verifyForm.addEventListener("submit", async event => {
-        event.preventDefault();
-        const button = document.getElementById("chatVerifyCodeButton");
-        button.disabled = true; button.textContent = "Verificando...";
-        try {
-            const data = await api("/api/chat/auth/verify-code", { method: "POST", body: JSON.stringify({ email: emailInput.value.trim().toLowerCase(), code: codeInput.value.trim() }) });
+            const data = await api("/api/chat/auth/email", { method: "POST", body: JSON.stringify({ email }) });
             sessionStorage.setItem(tokenKey, data.token); sessionStorage.setItem(emailKey, data.email);
             status(authStatus, ""); enterRoom(data.email);
         } catch (error) { status(authStatus, error.message, true); }
-        finally { button.disabled = false; button.textContent = "Verificar y entrar"; }
-    });
-    document.getElementById("chatChangeEmail").addEventListener("click", () => {
-        verifyForm.hidden = true; codeInput.value = ""; status(authStatus, "Introduce el correo y solicita un código nuevo.");
+        finally { button.disabled = false; button.textContent = "Entrar al chat"; }
     });
     function renderMessage(message) {
         const article = document.createElement("article"); article.className = "chat-message";
