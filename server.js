@@ -270,8 +270,9 @@ app.use(express.static(path.join(__dirname)));
 // ========================================
 const achievementsSchemaReady = (async () => {
     await pool.query("CREATE TABLE IF NOT EXISTS logros (id SERIAL PRIMARY KEY, codigo VARCHAR(100) UNIQUE NOT NULL, icono VARCHAR(24) NOT NULL DEFAULT '🏆', titulo VARCHAR(100) NOT NULL, descripcion VARCHAR(240) NOT NULL DEFAULT '', condicion VARCHAR(30) NOT NULL DEFAULT 'perfil', objetivo INTEGER NOT NULL DEFAULT 1 CHECK (objetivo > 0), activo BOOLEAN NOT NULL DEFAULT TRUE, creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
-    const existing = await pool.query("SELECT COUNT(*)::int AS total FROM logros");
-    if (existing.rows[0].total === 0) {
+    await pool.query("CREATE TABLE IF NOT EXISTS logros_config (id INTEGER PRIMARY KEY CHECK (id = 1), inicializado BOOLEAN NOT NULL DEFAULT TRUE)");
+    const seeded = await pool.query("SELECT id FROM logros_config WHERE id = 1");
+    if (!seeded.rows.length) {
         const defaults = [
             ["perfil-listo", "👤", "Perfil listo", "Guardaste tus preferencias", "perfil", 1],
             ["buena-imagen", "📷", "Buena imagen", "Personalizaste tu avatar", "foto", 1],
@@ -283,6 +284,7 @@ const achievementsSchemaReady = (async () => {
         for (const item of defaults) {
             await pool.query("INSERT INTO logros (codigo, icono, titulo, descripcion, condicion, objetivo) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (codigo) DO NOTHING", item);
         }
+        await pool.query("INSERT INTO logros_config (id, inicializado) VALUES (1, TRUE) ON CONFLICT (id) DO NOTHING");
     }
 })().catch(error => {
     console.error("ERROR AL PREPARAR LOGROS:", error.message);
