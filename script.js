@@ -1,45 +1,5 @@
 const API_BASE = "https://oned-est60-server.onrender.com";
 
-/* OCULTAR CHAT Y CREDENCIAL EN LA WEB PÚBLICA */
-(() => {
-    const ocultarFuncionesPrivadas = () => {
-        const ids = [
-            "chatAuthPanel", "chatRoomPanel", "eaCredentialForm",
-            "ea-id-card", "credentialPanel", "credentialsPanel",
-            "chatPanel", "groupChatPanel"
-        ];
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.hidden = true;
-        });
-
-        document.querySelectorAll("a, button, [role='button']").forEach(el => {
-            const label = (el.innerText || el.getAttribute("aria-label") || "").trim().toLocaleLowerCase("es-MX");
-            if (/^(chat|chat grupal|credencial|mi credencial|solicitar credencial)$/.test(label)) {
-                const container = el.closest("nav, section, article, .card, .feature-card");
-                if (container && container !== document.querySelector("nav")) {
-                    container.hidden = true;
-                } else {
-                    el.hidden = true;
-                }
-            }
-        });
-
-        document.querySelectorAll("h1, h2, h3, h4").forEach(heading => {
-            const label = (heading.innerText || "").trim().toLocaleLowerCase("es-MX");
-            if (!/^(chat|chat grupal|credencial|mi credencial|solicitar credencial)$/.test(label)) return;
-            const container = heading.closest("section, article, .card, .feature-card");
-            if (container) container.hidden = true;
-        });
-    };
-
-    ocultarFuncionesPrivadas();
-    const observer = new MutationObserver(ocultarFuncionesPrivadas);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-})();
-
-
-
 /* ==========================================
    MENÚ MÓVIL
 ========================================== */
@@ -1051,7 +1011,7 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
     if (!tareas) return;
     const panel = document.createElement("section");
     panel.id = "geminiPanel"; panel.className = "gemini-panel";
-    panel.innerHTML = '<div class="gemini-panel-header"><div class="gemini-brand-icon">✦</div><div class="gemini-heading"><span>ACADEMIA DE REPASO · IA</span><h3>Repasa con Gemini</h3><p>Explicaciones breves, cuestionarios y tarjetas de memoria.</p></div><button type="button" class="gemini-close" id="geminiClose" aria-label="Cerrar">×</button></div><div class="gemini-quick-prompts" aria-label="Atajos de estudio"><button type="button" data-study-prompt="Explícame este tema en palabras sencillas y dame un ejemplo breve: ">Explicación rápida</button><button type="button" data-study-prompt="Hazme un cuestionario de 5 preguntas sobre este tema. Haz una pregunta a la vez y espera mi respuesta: ">Quiz de 5 preguntas</button><button type="button" data-study-prompt="Crea 6 tarjetas de memoria con pregunta y respuesta para repasar este tema: ">Tarjetas de memoria</button></div><div class="gemini-selected-task" id="geminiSelectedTask" hidden></div><div class="gemini-messages" id="geminiMessages"><div class="gemini-message gemini-message-bot">¡Hola! Soy Gemini. Puedo explicarte una tarea, darte ejemplos o ayudarte a estudiar paso a paso. Si no tengo certeza sobre un dato, te lo diré. ¿Qué necesitas entender?</div></div><form class="gemini-form" id="geminiForm"><label class="sr-only" for="geminiInput">Escribe tu pregunta</label><textarea id="geminiInput" maxlength="900" rows="2" placeholder="Escribe tu duda..." required></textarea><button id="geminiSend" type="submit">Enviar ↑</button></form><p class="gemini-note">La IA puede equivocarse. Verifica las respuestas con tus apuntes o tu profesor. No compartas datos personales.</p>';
+    panel.innerHTML = '<div class="gemini-panel-header"><div class="gemini-brand-icon">✦</div><div class="gemini-heading"><span>CHAT ABIERTO · IA</span><h3>Conversa con Gemini</h3><p>Habla de cultura, tecnología, videojuegos, tareas y otros temas.</p></div><button type="button" class="gemini-close" id="geminiClose" aria-label="Cerrar">×</button></div><div class="gemini-quick-prompts" aria-label="Atajos de estudio"><button type="button" data-study-prompt="Explícame este tema en palabras sencillas y dame un ejemplo breve: ">Explicación rápida</button><button type="button" data-study-prompt="Hazme un cuestionario de 5 preguntas sobre este tema. Haz una pregunta a la vez y espera mi respuesta: ">Quiz de 5 preguntas</button><button type="button" data-study-prompt="Crea 6 tarjetas de memoria con pregunta y respuesta para repasar este tema: ">Tarjetas de memoria</button></div><div class="gemini-selected-task" id="geminiSelectedTask" hidden></div><div class="gemini-messages" id="geminiMessages"><div class="gemini-message gemini-message-bot">¡Hola! Soy Gemini. Podemos conversar sobre muchos temas, resolver dudas o explorar ideas. ¿De qué quieres hablar?</div></div><form class="gemini-form" id="geminiForm"><label class="sr-only" for="geminiInput">Escribe tu pregunta</label><textarea id="geminiInput" maxlength="4000" rows="2" placeholder="Escribe lo que quieras conversar..." required></textarea><button id="geminiSend" type="submit">Enviar ↑</button></form><p class="gemini-note">La IA puede equivocarse. Verifica las respuestas con tus apuntes o tu profesor. No compartas datos personales.</p>';
     tareas.insertAdjacentElement("afterend", panel);
     const messages = panel.querySelector("#geminiMessages");
     const selectedTask = panel.querySelector("#geminiSelectedTask");
@@ -1079,7 +1039,7 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
     form.addEventListener("submit", async event => {
         event.preventDefault(); const question = input.value.trim(); if (!question || send.disabled) return;
         addMessage(question, "user"); input.value = ""; send.disabled = true; send.textContent = "Consultando…";
-        const loading = addMessage("Gemini está preparando una respuesta…", "bot");
+        const loading = addMessage("Gemini está pensando…", "bot");
         try {
             const response = await fetch(API_BASE + "/api/gemini", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: question, taskContext }) });
             const data = await response.json(); loading.remove();
