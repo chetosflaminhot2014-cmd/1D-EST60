@@ -1082,8 +1082,12 @@ app.put("/api/chat/profile", requireChatSession, async (req, res) => {
 });
 app.get("/api/chat/messages", requireChatSession, async (req, res) => {
     try {
-        const after = Math.max(0, Number.parseInt(req.query.after, 10) || 0);
-        const result = await pool.query("SELECT id, COALESCE(apodo, 'Alumno') AS apodo, mensaje, creado_en FROM chat_mensajes WHERE id > $1 ORDER BY id ASC LIMIT 100", [after]);
+        // Se devuelve la lista reciente completa para que las eliminaciones se reflejen
+        // también en los demás dispositivos durante la siguiente actualización.
+        const result = await pool.query(
+            "SELECT id, COALESCE(apodo, 'Alumno') AS apodo, mensaje, creado_en, (correo = $1 AND apodo <> 'Moderación del chat') AS es_mio FROM (SELECT id, correo, apodo, mensaje, creado_en FROM chat_mensajes ORDER BY id DESC LIMIT 100) AS recientes ORDER BY id ASC",
+            [req.chatEmail]
+        );
         res.json(result.rows);
     } catch (error) {
         console.error("ERROR LEYENDO CHAT:", error.message);
@@ -1138,6 +1142,22 @@ app.post("/api/chat/messages", requireChatSession, async (req, res) => {
     } catch (error) {
         console.error("ERROR PUBLICANDO CHAT:", error.message);
         res.status(500).json({ error: "No se pudo publicar el mensaje." });
+    }
+});
+// Cada estudiante puede borrar únicamente sus propios mensajes.
+app.delete("/api/chat/messages/:id", requireChatSession, async (req, res) => {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: "Identificador de mensaje no válido." });
+    try {
+        const result = await pool.query(
+            "DELETE FROM chat_mensajes WHERE id = $1 AND correo = $2 AND apodo <> 'Moderación del chat' RETURNING id",
+            [id, req.chatEmail]
+        );
+        if (!result.rows.length) return res.status(404).json({ error: "El mensaje no existe o no tienes permiso para borrarlo." });
+        res.json({ success: true, id });
+    } catch (error) {
+        console.error("ERROR BORRANDO MENSAJE PROPIO:", error.message);
+        res.status(500).json({ error: "No se pudo borrar el mensaje." });
     }
 });
 // Moderación del chat: acceso restringido al administrador.
