@@ -2943,3 +2943,10 @@ body.theme-dark .grades-clear-button,body.theme-dark .grade-remove { background:
 body.theme-dark .gemini-quick-prompts { border-color:#26384e; }
 body.theme-dark .gemini-quick-prompts button { background:#12243d; border-color:#2e4c72; color:#bfdbfe; }
 body.theme-dark .gemini-quick-prompts button:hover { background:#1b3555; }
+
+
+/* Acciones de mensajes del chat */
+.chat-message-actions{display:flex;justify-content:flex-end;margin-top:8px}
+.chat-delete-message{border:1px solid #7f3340;background:rgba(127,51,64,.18);color:#fecdd3;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer}
+.chat-delete-message:hover{background:rgba(190,24,93,.28)}
+.chat-delete-message:disabled{opacity:.55;cursor:wait}
