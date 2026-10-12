@@ -892,20 +892,42 @@ async function cargarImagenCalendarioPublica() {
         time.textContent = Number.isNaN(date.getTime()) ? "" : date.toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" });
         meta.append(email, time);
         const body = document.createElement("p"); body.textContent = message.mensaje;
-        article.append(meta, body); messagesBox.appendChild(article);
+        article.append(meta, body);
+        if (message.es_mio) {
+            const actions = document.createElement("div"); actions.className = "chat-message-actions";
+            const deleteButton = document.createElement("button"); deleteButton.type = "button";
+            deleteButton.className = "chat-delete-message"; deleteButton.textContent = "Borrar";
+            deleteButton.setAttribute("aria-label", "Borrar mi mensaje");
+            deleteButton.addEventListener("click", async () => {
+                if (!window.confirm("¿Quieres borrar este mensaje? Esta acción no se puede deshacer.")) return;
+                deleteButton.disabled = true;
+                try {
+                    await api("/api/chat/messages/" + encodeURIComponent(message.id), { method: "DELETE" });
+                    status(roomStatus, "Mensaje borrado.");
+                    await loadMessages();
+                } catch (error) {
+                    status(roomStatus, error.message, true);
+                    deleteButton.disabled = false;
+                }
+            });
+            actions.appendChild(deleteButton); article.appendChild(actions);
+        }
+        messagesBox.appendChild(article);
     }
     async function loadMessages() {
         if (loading || !token()) return;
         loading = true;
         try {
-            const rows = await api("/api/chat/messages?after=" + lastId);
-            if (lastId === 0) messagesBox.replaceChildren();
+            const wasNearBottom = messagesBox.scrollHeight - messagesBox.scrollTop - messagesBox.clientHeight < 80;
+            const rows = await api("/api/chat/messages");
+            messagesBox.replaceChildren();
+            lastId = 0;
             rows.forEach(message => { renderMessage(message); lastId = Math.max(lastId, Number(message.id) || 0); });
-            if (lastId === 0 && !messagesBox.children.length) {
+            if (!rows.length) {
                 const empty = document.createElement("p"); empty.className = "chat-empty";
                 empty.textContent = "Todavía no hay mensajes. Inicia la conversación con respeto."; messagesBox.appendChild(empty);
             }
-            if (rows.length) messagesBox.scrollTop = messagesBox.scrollHeight;
+            if (wasNearBottom) messagesBox.scrollTop = messagesBox.scrollHeight;
             status(roomStatus, "");
         } catch (error) {
             if (error.message.includes("sesión") || error.message.includes("Inicia sesión")) {
