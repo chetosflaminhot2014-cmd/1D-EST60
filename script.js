@@ -1041,6 +1041,19 @@ if ("serviceWorker" in navigator && window.location.protocol.startsWith("http"))
     panel.id = "geminiPanel"; panel.className = "gemini-panel";
     panel.innerHTML = '<div class="gemini-panel-header"><div class="gemini-brand-icon">✦</div><div class="gemini-heading"><span>CHAT ABIERTO · IA</span><h3>Conversa con Gemini</h3><p>Habla de cultura, tecnología, videojuegos, tareas y otros temas.</p></div><button type="button" class="gemini-close" id="geminiClose" aria-label="Cerrar">×</button></div><div class="gemini-quick-prompts" aria-label="Atajos de estudio"><button type="button" data-study-prompt="Explícame este tema en palabras sencillas y dame un ejemplo breve: ">Explicación rápida</button><button type="button" data-study-prompt="Hazme un cuestionario de 5 preguntas sobre este tema. Haz una pregunta a la vez y espera mi respuesta: ">Quiz de 5 preguntas</button><button type="button" data-study-prompt="Crea 6 tarjetas de memoria con pregunta y respuesta para repasar este tema: ">Tarjetas de memoria</button></div><div class="gemini-selected-task" id="geminiSelectedTask" hidden></div><div class="gemini-messages" id="geminiMessages"><div class="gemini-message gemini-message-bot">¡Hola! Soy Gemini. Podemos conversar sobre muchos temas, resolver dudas o explorar ideas. ¿De qué quieres hablar?</div></div><form class="gemini-form" id="geminiForm"><label class="sr-only" for="geminiInput">Escribe tu pregunta</label><textarea id="geminiInput" maxlength="4000" rows="2" placeholder="Escribe lo que quieras conversar..." required></textarea><button id="geminiSend" type="submit">Enviar ↑</button></form><p class="gemini-note">La IA puede equivocarse. Verifica las respuestas con tus apuntes o tu profesor. No compartas datos personales.</p>';
     tareas.insertAdjacentElement("afterend", panel);
+
+    function abrirAcademiaGemini() {
+        panel.classList.add("gemini-panel-open");
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => input.focus({ preventScroll: true }), 250);
+    }
+    document.querySelectorAll("[data-open-gemini]").forEach(link => {
+        link.addEventListener("click", event => {
+            event.preventDefault();
+            abrirAcademiaGemini();
+        });
+    });
+
     const messages = panel.querySelector("#geminiMessages");
     const selectedTask = panel.querySelector("#geminiSelectedTask");
     const form = panel.querySelector("#geminiForm");
