@@ -945,7 +945,7 @@ const chatCodes = new Map();
 const chatLastRequest = new Map();
 const chatDomain = "@chih.nuevaescuela.mx";
 function validInstitutionalEmail(email) {
-    return typeof email === "string" && email.length <= 254 && /^[^\s@]+@chih\.nuevaescuela\.mx$/i.test(email.trim());
+    return typeof email === "string" && email.length <= 254 && /^[a-záéíóúüñ]+\.[a-záéíóúüñ]+\.[a-záéíóúüñ]{3}\d{4}@chih\.nuevaescuela\.mx$/i.test(email.trim());
 }
 function chatHash(value) {
     return crypto.createHash("sha256").update(value).digest("hex");
@@ -966,7 +966,7 @@ app.use((req, res, next) => {
 app.post("/api/chat/auth/request-code", async (req, res) => {
     const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
     if (!credencialesHabilitadas()) return res.status(503).json({ error: "El acceso al chat por credencial todavía no está habilitado por el administrador responsable." });
-    if (!validInstitutionalEmail(email)) return res.status(400).json({ error: "Usa tu correo terminado en @chih.nuevaescuela.mx." });
+    if (!validInstitutionalEmail(email)) return res.status(400).json({ error: "Formato esperado: nombre.apellido.tresletras+4numeros@chih.nuevaescuela.mx." });
     try {
         const access = await pool.query("SELECT estado FROM credenciales_alumnos WHERE correo = $1", [email]);
         if (!access.rows.length || access.rows[0].estado !== "aprobada") return res.status(403).json({ error: "Necesitas una credencial aprobada para acceder al chat." });
