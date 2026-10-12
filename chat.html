@@ -95,8 +95,8 @@ body.theme-dark.chat-page .chat-messages{background:#0b1422}
         <div class="chat-shell">
             <div id="chatAuthPanel" class="chat-auth-panel">
                 <div class="chat-lock-icon" aria-hidden="true">✉</div><h3>Entra al chat de 1°D</h3>
-                <p>Solo necesitas tu correo institucional terminado en <strong>@chih.nuevaescuela.mx</strong>. No se pide código ni autorización.</p>
-                <form id="chatRequestCodeForm" class="chat-auth-form"><label for="chatEmail">Correo institucional</label><input id="chatEmail" type="email" maxlength="254" autocomplete="email" placeholder="tu.correo@chih.nuevaescuela.mx" required><button id="chatRequestCodeButton" class="btn btn-primary" type="submit">Entrar al chat</button></form>
+                <p>El chat es exclusivo para alumnos autorizados de <strong>1°D</strong>. Debes usar un correo escolar aprobado y confirmar que puedes recibir el código de verificación.</p>
+                <form id="chatRequestCodeForm" class="chat-auth-form"><label for="chatEmail">Correo institucional autorizado</label><input id="chatEmail" type="email" maxlength="254" autocomplete="email" placeholder="tu.correo@chih.nuevaescuela.mx" required><div id="chatCodeGroup" hidden><label for="chatVerificationCode">Código de 6 dígitos</label><input id="chatVerificationCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="123456" disabled></div><button id="chatRequestCodeButton" class="btn btn-primary" type="submit">Enviar código</button></form>
                 <p id="chatAuthStatus" class="chat-status" role="status" aria-live="polite"></p>
             </div>
             <div id="chatRoomPanel" class="chat-room-panel" hidden>
