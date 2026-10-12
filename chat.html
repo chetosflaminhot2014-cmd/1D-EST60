@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d1a2a">
+<meta name="description" content="Chat grupal de estudiantes de 1°D, Escuela Secundaria Técnica No. 60.">
+<title>Chat | 1°D EST No. 60</title>
+<link rel="icon" href="icon-192.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-content">
+    <a href="index.html#inicio" class="brand">
+      <img src="logo.png" alt="Logo de la Escuela Secundaria Técnica 60">
+      <div><strong>1°D</strong><span>EST No. 60</span></div>
+    </a>
+    <nav class="nav" id="nav">
+      <a href="index.html#inicio">Inicio</a>
+      <a href="index.html#avisos">Avisos</a>
+      <a href="index.html#tareas">Tareas</a>
+      <a href="index.html#geminiPanel">Chat IA</a>
+      <a href="chat.html" aria-current="page">Chat</a>
+      <a href="index.html#horario">Horario</a>
+      <a href="index.html#calendario">Calendario</a>
+      <a href="index.html#recursos">Recursos</a>
+      <a href="index.html#calificaciones">Calificaciones</a>
+      <a href="index.html#perfil">Mi perfil</a>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Activar modo oscuro">🌙 Modo oscuro</button>
+    </nav>
+    <button class="menu-button" id="menuButton" type="button" aria-label="Abrir menú">☰</button>
+  </div>
+</header>
+<main>
+  <section class="hero" style="min-height:300px">
+    <div class="hero-content">
+      <span class="hero-label">COMUNIDAD 1°D</span>
+      <h1>Chat <span>grupal</span></h1>
+      <p>Un espacio separado para conversar con tus compañeros. Respeta a los demás y no compartas información privada.</p>
+      <div class="hero-buttons"><a href="index.html" class="btn btn-secondary">← Volver al inicio</a></div>
+    </div>
+  </section>
+    <!-- CHAT ENTRE ESTUDIANTES -->
+    <section id="chat" class="section dark-section">
+        <div class="section-number">06</div>
+        <div class="section-heading light"><span>COMUNIDAD 1°D</span><h2>Chat grupal</h2><p>Introduce tu correo institucional para entrar al chat.</p></div>
+        <div class="chat-shell">
+            <div id="chatAuthPanel" class="chat-auth-panel">
+                <div class="chat-lock-icon" aria-hidden="true">✉</div><h3>Entra al chat de 1°D</h3>
+                <p>Solo necesitas tu correo institucional terminado en <strong>@chih.nuevaescuela.mx</strong>. No se pide código ni autorización.</p>
+                <form id="chatRequestCodeForm" class="chat-auth-form"><label for="chatEmail">Correo institucional</label><input id="chatEmail" type="email" maxlength="254" autocomplete="email" placeholder="tu.correo@chih.nuevaescuela.mx" required><button id="chatRequestCodeButton" class="btn btn-primary" type="submit">Entrar al chat</button></form>
+                <p id="chatAuthStatus" class="chat-status" role="status" aria-live="polite"></p>
+            </div>
+            <div id="chatRoomPanel" class="chat-room-panel" hidden>
+                <div class="chat-room-header"><div><span class="chat-online-dot" aria-hidden="true"></span><strong>Chat de estudiantes</strong><small id="chatSignedEmail"></small></div><button id="chatLogoutButton" class="btn btn-secondary" type="button">Cerrar sesión</button></div>
+                <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="Mensajes del chat"></div>
+                <form id="chatMessageForm" class="chat-message-form"><label class="sr-only" for="chatMessageInput">Escribe un mensaje</label><textarea id="chatMessageInput" maxlength="1200" rows="2" placeholder="Escribe un mensaje..." required></textarea><button id="chatSendButton" type="submit">Enviar</button></form>
+                <p class="chat-guideline">No compartas contraseñas, direcciones, teléfonos ni información privada. Evita el spam y respeta a los demás.</p><p id="chatRoomStatus" class="chat-status" role="status" aria-live="polite"></p>
+            </div>
+        </div>
+    </section>
+
+
+</main>
+<footer class="footer">
+  <div class="footer-content">
+    <div><strong>1°D</strong><span>Escuela Secundaria Técnica No. 60</span></div>
+    <p>Chat grupal de la comunidad escolar.</p>
+  </div>
+  <div class="copyright">© 2026 1°D | EST No. 60</div>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
