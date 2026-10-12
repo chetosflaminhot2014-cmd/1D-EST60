@@ -878,7 +878,7 @@ async function cargarImagenCalendarioPublica() {
     requestForm.addEventListener("submit", async event => {
         event.preventDefault();
         const email = emailInput.value.trim().toLowerCase();
-        if (!/^[^\s@]+@chih\.nuevaescuela\.mx$/i.test(email)) return status(authStatus, "Usa tu correo escolar terminado en @chih.nuevaescuela.mx.", true);
+        if (!/^[a-záéíóúüñ]+\.[a-záéíóúüñ]+\.[a-záéíóúüñ]{3}\d{4}@chih\.nuevaescuela\.mx$/i.test(email)) return status(authStatus, "Formato esperado: nombre.apellido.tresletras+4numeros@chih.nuevaescuela.mx.", true);
         const button = document.getElementById("chatRequestCodeButton");
         button.disabled = true;
         button.textContent = codeRequested ? "Verificando..." : "Enviando código...";
