@@ -6,7 +6,6 @@ on:
     paths:
       - "android/**"
       - "index.html"
-      - "chat.html"
       - "acceso.html"
       - "programador.html"
       - "ayuda.html"
@@ -55,7 +54,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p android/app/src/main/assets/www
-          cp index.html chat.html ayuda.html organizador.html estudio.html acceso.html programador.html style.css script.js logo.png manifest.json icon-192.svg icon-512.svg android/app-extras.js android/app-extras.css android/app/src/main/assets/www/
+          cp index.html ayuda.html organizador.html estudio.html acceso.html programador.html style.css script.js logo.png manifest.json icon-192.svg icon-512.svg android/app-extras.js android/app-extras.css android/app/src/main/assets/www/
           python3 - <<'PY'
           from pathlib import Path
           p = Path("android/app/src/main/assets/www/index.html")
