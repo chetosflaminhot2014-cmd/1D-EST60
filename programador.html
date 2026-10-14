@@ -2179,7 +2179,7 @@ async function cargarEncuestasAdmin() {
             const title = document.createElement("h3"); title.textContent = poll.question || "Encuesta";
             const state = document.createElement("p"); state.textContent = poll.active ? "Estado: activa" : "Estado: cerrada";
             const options = document.createElement("ul");
-            (Array.isArray(poll.options) ? poll.options : []).forEach(option => { const li = document.createElement("li"); li.textContent = option; options.append(li); });
+            (Array.isArray(poll.options) ? poll.options : []).forEach((option, index) => { const li = document.createElement("li"); const votes = Number((poll.resultados || [])[index]) || 0; const total = Number(poll.total_votos) || 0; li.textContent = option + " · " + votes + " voto(s) · " + (total ? Math.round(votes / total * 100) : 0) + "%"; options.append(li); });\n            const totalVotes = document.createElement("p"); totalVotes.textContent = "Total de votos: " + (Number(poll.total_votos) || 0);
             const close = document.createElement("button"); close.type = "button"; close.className = "secondary-button"; close.textContent = poll.active ? "Cerrar encuesta" : "Encuesta cerrada"; close.disabled = !poll.active;
             close.addEventListener("click", async () => {
                 if (!confirm("¿Cerrar esta encuesta? Ya no aceptará nuevos votos.")) return;
@@ -2191,7 +2191,7 @@ async function cargarEncuestasAdmin() {
                     await cargarEncuestasAdmin();
                 } catch (error) { if (status) status.textContent = error.message; close.disabled = false; }
             });
-            card.append(title, state, options, close); list.append(card);
+            card.append(title, state, totalVotes, options, close); list.append(card);
         });
     } catch (error) { list.textContent = error.message || "Error al cargar las encuestas."; }
 }
