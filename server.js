@@ -246,6 +246,9 @@ function requireAdmin(req, res, next) {
     next();
 }
 
+// Registrar las rutas de encuestas que ya están definidas en polls-api.js.
+require("./polls-api")(app, pool, requireAdmin);
+
 app.post("/api/admin/login", (req, res) => {
     const configuredKey = process.env.ADMIN_KEY;
     const providedKey = req.body && req.body.password;
