@@ -910,16 +910,19 @@
             document.querySelectorAll(".admin-section");
 
 
-        document.querySelector(".admin-menu")?.addEventListener("click", event => {
-            const button = event.target.closest(".menu-button");
-            if (!button) return;
+        function abrirSeccionAdmin(button) {
+            if (!button || !button.matches(".admin-menu .menu-button")) return;
             const sectionId = button.dataset.section;
             const section = document.getElementById(sectionId);
-            if (!section) { console.error("No existe la sección administrativa:", sectionId); return; }
+            if (!section || !section.classList.contains("admin-section")) {
+                console.error("No existe la sección administrativa:", sectionId);
+                return;
+            }
             menuButtons.forEach(item => {
                 const selected = item === button;
                 item.classList.toggle("active", selected);
-                item.setAttribute("aria-current", selected ? "page" : "false");
+                if (selected) item.setAttribute("aria-current", "page");
+                else item.removeAttribute("aria-current");
             });
             sections.forEach(item => item.classList.toggle("active", item === section));
             if (sectionId === "avisos") cargarAvisos();
@@ -930,7 +933,14 @@
             else if (sectionId === "historial") cargarHistorial();
             else if (sectionId === "moderacionChat") cargarMensajesChatAdmin();
             else if (sectionId === "credenciales") { cargarCredenciales(); cargarCredencialesAprobadas(); }
+            else if (sectionId === "recursos") { /* Sección estática */ }
             section.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        // Un listener por botón evita que otros botones o elementos del panel bloqueen la navegación.
+        menuButtons.forEach(button => {
+            button.setAttribute("aria-controls", button.dataset.section || "");
+            button.setAttribute("aria-pressed", String(button.classList.contains("active")));
+            button.addEventListener("click", () => abrirSeccionAdmin(button));
         });
 
 
