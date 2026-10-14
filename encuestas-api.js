@@ -1,0 +1,1 @@
+module.exports = function installEncuestas(app) { return app; };
