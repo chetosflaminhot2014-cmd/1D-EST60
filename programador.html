@@ -869,31 +869,45 @@
         const biometricNotice = document.getElementById("biometricPlatformNotice");
         const biometricButton = document.getElementById("configureAdminBiometricsButton");
         const biometricStatus = document.getElementById("biometricConfigStatus");
-        const isAndroidApp = Boolean(window.AndroidAdminBiometrics);
+        const biometricBridge = window.AndroidAdminBiometrics;
 
-        if (!isAndroidApp) {
-            biometricNotice.textContent = "Esta opción solo está disponible en la aplicación Android. En la web se sigue usando la contraseña.";
-            biometricButton.disabled = true;
-        } else if (!ADMIN_KEY) {
-            biometricNotice.textContent = "No se encontró una sesión de administrador. Inicia sesión nuevamente.";
-            biometricButton.disabled = true;
-        } else if (!window.AndroidAdminBiometrics.isBiometricAvailable()) {
-            biometricNotice.textContent = "Registra una huella en los ajustes de seguridad de Android y vuelve aquí.";
-            biometricButton.disabled = true;
-        } else {
-            biometricNotice.textContent = "Dispositivo compatible. Pulsa el botón y confirma tu identidad con la huella.";
-            window.onAdminBiometricConfigured = (status, message) => {
-                biometricButton.disabled = false;
-                biometricButton.textContent = "Configurar huella digital";
-                biometricStatus.textContent = message || "";
-                if (status === "success") biometricNotice.textContent = "Huella configurada en este dispositivo.";
-            };
-            biometricButton.addEventListener("click", () => {
+        // La navegación administrativa no debe depender de que exista la API biométrica.
+        if (biometricNotice && biometricButton && biometricStatus) {
+            try {
+                if (!biometricBridge || typeof biometricBridge.isBiometricAvailable !== "function") {
+                    biometricNotice.textContent = "La huella digital no está disponible en este entorno. Usa el acceso normal de administrador.";
+                    biometricButton.disabled = true;
+                } else if (!ADMIN_KEY) {
+                    biometricNotice.textContent = "No se encontró una sesión de administrador. Inicia sesión nuevamente.";
+                    biometricButton.disabled = true;
+                } else if (!biometricBridge.isBiometricAvailable()) {
+                    biometricNotice.textContent = "Registra una huella en los ajustes de seguridad de Android y vuelve aquí.";
+                    biometricButton.disabled = true;
+                } else {
+                    biometricNotice.textContent = "Dispositivo compatible. Pulsa el botón y confirma tu identidad con la huella.";
+                    window.onAdminBiometricConfigured = (status, message) => {
+                        biometricButton.disabled = false;
+                        biometricButton.textContent = "Configurar huella digital";
+                        biometricStatus.textContent = message || "";
+                        if (status === "success") biometricNotice.textContent = "Huella configurada en este dispositivo.";
+                    };
+                    biometricButton.addEventListener("click", () => {
+                        biometricButton.disabled = true;
+                        biometricButton.textContent = "Esperando verificación…";
+                        biometricStatus.textContent = "";
+                        try {
+                            biometricBridge.configureAdminBiometrics(ADMIN_KEY);
+                        } catch (error) {
+                            biometricButton.disabled = false;
+                            biometricButton.textContent = "Configurar huella digital";
+                            biometricStatus.textContent = "No se pudo iniciar la verificación biométrica.";
+                        }
+                    });
+                }
+            } catch (error) {
+                biometricNotice.textContent = "La huella digital no está disponible. Usa el acceso normal de administrador.";
                 biometricButton.disabled = true;
-                biometricButton.textContent = "Esperando verificación…";
-                biometricStatus.textContent = "";
-                window.AndroidAdminBiometrics.configureAdminBiometrics(ADMIN_KEY);
-            });
+            }
         }
         let avisosActuales = [];
         let tareasActuales = [];
@@ -936,11 +950,28 @@
             else if (sectionId === "recursos") { /* Sección estática */ }
             section.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-        // Un listener por botón evita que otros botones o elementos del panel bloqueen la navegación.
+        // Navegación aislada: la sección cambia incluso si falla la carga de sus datos.
         menuButtons.forEach(button => {
             button.setAttribute("aria-controls", button.dataset.section || "");
             button.setAttribute("aria-pressed", String(button.classList.contains("active")));
-            button.addEventListener("click", () => abrirSeccionAdmin(button));
+            button.addEventListener("click", () => {
+                try {
+                    abrirSeccionAdmin(button);
+                } catch (error) {
+                    console.error("Error al abrir la sección administrativa:", error);
+                    const target = document.getElementById(button.dataset.section);
+                    if (target && target.classList.contains("admin-section")) {
+                        menuButtons.forEach(item => {
+                            const selected = item === button;
+                            item.classList.toggle("active", selected);
+                            item.setAttribute("aria-pressed", String(selected));
+                            if (selected) item.setAttribute("aria-current", "page");
+                            else item.removeAttribute("aria-current");
+                        });
+                        sections.forEach(item => item.classList.toggle("active", item === target));
+                    }
+                }
+            });
         });
 
 
