@@ -1,0 +1,1 @@
+Propuesta de funciones: racha de estudio, encuestas y administración ampliada.
