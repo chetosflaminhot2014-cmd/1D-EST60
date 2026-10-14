@@ -945,7 +945,7 @@
         // ==========================================
 
         const menuButtons =
-            document.querySelectorAll(".menu-button");
+            document.querySelectorAll(".admin-menu .menu-button");
 
         const sections =
             document.querySelectorAll(".admin-section");
@@ -2205,7 +2205,7 @@ async function cargarEncuestasAdmin() {
         event.preventDefault();
         if (!ADMIN_KEY) { status.textContent = "Inicia sesión como administrador."; return; }
         const question = document.getElementById("adminPollQuestion").value.trim();
-        const options = document.getElementById("adminPollOptions").value.split("\\n").map(x => x.trim()).filter(Boolean);
+        const options = document.getElementById("adminPollOptions").value.split(/\\r?\\n/).map(x => x.trim()).filter(Boolean);
         if (options.length < 2 || options.length > 6) { status.textContent = "Escribe entre 2 y 6 opciones, una por línea."; return; }
         const button = document.getElementById("adminPollCreateButton"); button.disabled = true; status.textContent = "Publicando encuesta…";
         try {
