@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "server.js"
+      - "polls-api.js"
       - "package.json"
       - ".github/workflows/check-backend.yml"
 
@@ -26,8 +27,8 @@ jobs:
       - name: Instalar dependencias
         run: npm install
 
-      - name: Verificar sintaxis del servidor
-        run: node --check server.js
+      - name: Verificar sintaxis del servidor y las rutas de encuestas
+        run: node --check server.js && node --check polls-api.js
 
       - name: Comprobar Firebase Admin
         run: npm ls firebase-admin --depth=0
