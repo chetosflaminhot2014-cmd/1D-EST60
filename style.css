@@ -3027,3 +3027,104 @@ body.theme-dark .back-to-top { background:#111c2d; color:#e5edf7; border-color:#
 body.theme-dark .admin-menu .menu-button { color:#cbd5e1; }
 body.theme-dark .admin-menu .menu-button.active { background:#3b82f6; color:#fff; }
 body.theme-dark .admin-menu .menu-button:hover { background:#22334a; color:#fff; }
+
+
+/* =========================================================
+   EST60 · SISTEMA VISUAL INSTITUCIONAL
+   Ajustes incrementales: conserva componentes y funciones existentes.
+========================================================= */
+:root {
+    --est60-navy: #102b4e;
+    --est60-blue: #1d4ed8;
+    --est60-blue-hover: #1e40af;
+    --est60-border: #d8e1ed;
+    --est60-surface: #ffffff;
+    --est60-muted: #5b6b80;
+    --est60-radius: 14px;
+    --est60-shadow: 0 8px 24px rgba(15, 35, 60, .07);
+}
+html { scroll-padding-top: 84px; }
+body { font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif; letter-spacing: .005em; }
+button, input, select, textarea { font: inherit; }
+button, .btn, .back-button, .primary-button, .secondary-button, .danger-button { transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+:where(button, a, input, select, textarea):focus-visible { outline: 3px solid #60a5fa; outline-offset: 3px; }
+.header { box-shadow: 0 4px 18px rgba(8, 24, 44, .10); }
+.header-content { gap: 18px; }
+.header h1 { letter-spacing: -.035em; }
+.nav a { border-radius: 8px; transition: background-color .18s ease, color .18s ease; }
+.nav a:hover { background: rgba(59, 130, 246, .12); }
+.section { scroll-margin-top: 24px; }
+.section-heading h2 { letter-spacing: -.03em; }
+.notice-card, .task-card, .calendar-card, .resource-card, .student-profile-card,
+.grades-summary-card, .grades-entry-card, .grades-list-card, .admin-card, .info-box {
+    border-radius: var(--est60-radius);
+    box-shadow: var(--est60-shadow);
+}
+.notice-card, .task-card, .calendar-card, .resource-card, .admin-card {
+    border: 1px solid var(--est60-border);
+}
+.btn, .primary-button, .secondary-button, .danger-button {
+    min-height: 40px;
+    border-radius: 9px;
+    font-weight: 700;
+}
+.btn:hover, .primary-button:hover, .secondary-button:hover { transform: translateY(-1px); }
+input, select, textarea { border-radius: 9px; }
+.admin-menu { border: 1px solid var(--est60-border); border-radius: 16px; background: #f8fafc; box-shadow: var(--est60-shadow); }
+.admin-menu .menu-button {
+    border: 1px solid #dce5f0;
+    border-radius: 11px;
+    background: #fff;
+    color: #23364d;
+    box-shadow: none;
+}
+.admin-menu .menu-button:hover { border-color: #93b4e8; background: #f0f6ff; }
+.admin-menu .menu-button.active { border-color: var(--est60-blue); background: var(--est60-blue); color: #fff; box-shadow: 0 5px 14px rgba(29, 78, 216, .20); }
+.admin-section { scroll-margin-top: 20px; }
+.admin-section .section-header { margin-bottom: 18px; }
+.admin-card { background: var(--est60-surface); }
+.admin-card h3 { letter-spacing: -.015em; }
+.admin-card input, .admin-card select, .admin-card textarea { border: 1px solid #cbd5e1; }
+.theme-toggle { font-weight: 750; }
+@media (hover: hover) {
+    .notice-card:hover, .task-card:hover, .calendar-card:hover, .resource-card:hover, .admin-card:hover {
+        border-color: #c1d4ed;
+    }
+}
+@media (max-width: 700px) {
+    .header-content { align-items: center; }
+    .section { padding-left: 18px; padding-right: 18px; }
+    .admin-menu { border-radius: 13px; }
+    .admin-menu .menu-button { min-height: 62px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Modo oscuro consistente también en el panel de administración. */
+body.theme-dark { background: #0b1422; color: #e5edf7; color-scheme: dark; }
+body.theme-dark .header { background: #0e1c2e; color: #f1f5f9; border-bottom: 1px solid #26384e; }
+body.theme-dark .header p, body.theme-dark .admin-section p, body.theme-dark .admin-card small { color: #a9b8cd; }
+body.theme-dark .admin-menu { background: #0e1a2b; border-color: #2a3c54; }
+body.theme-dark .admin-menu .menu-button { background: #142238; border-color: #2b3f59; color: #d6e2f1; }
+body.theme-dark .admin-menu .menu-button:hover { background: #1b304b; border-color: #45658c; color: #fff; }
+body.theme-dark .admin-menu .menu-button.active { background: #1d4ed8; border-color: #60a5fa; color: #fff; }
+body.theme-dark .admin-card, body.theme-dark .admin-section .empty-state, body.theme-dark .admin-section .status-card {
+    background: #111f32; color: #e5edf7; border-color: #2a3c54;
+}
+body.theme-dark .admin-card h2, body.theme-dark .admin-card h3, body.theme-dark .admin-card label,
+body.theme-dark .admin-section h2, body.theme-dark .admin-section h3 { color: #f1f5f9; }
+body.theme-dark .admin-card input, body.theme-dark .admin-card select, body.theme-dark .admin-card textarea,
+body.theme-dark input, body.theme-dark select, body.theme-dark textarea {
+    background: #0b1422; color: #e5edf7; border-color: #354964; color-scheme: dark;
+}
+body.theme-dark .admin-card input::placeholder, body.theme-dark .admin-card textarea::placeholder { color: #8294ab; }
+body.theme-dark .back-button { background: #14243a; color: #dbeafe; border-color: #354964; }
+body.theme-dark .admin-card .secondary-button { background: #1a2b43; color: #dbeafe; border-color: #405773; }
+body.theme-dark .admin-card .danger-button { border-color: #9f4251; }
+body.theme-dark .admin-card, body.theme-dark .notice-card, body.theme-dark .task-card,
+body.theme-dark .calendar-card, body.theme-dark .resource-card { box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+body.theme-dark .admin-menu .menu-button small { color: inherit; }
+@media (max-width: 700px) {
+    .admin-theme-toggle { order: 3; }
+}
