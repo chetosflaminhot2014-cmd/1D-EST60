@@ -3128,3 +3128,117 @@ body.theme-dark .admin-menu .menu-button small { color: inherit; }
 @media (max-width: 700px) {
     .admin-theme-toggle { order: 3; }
 }
+
+
+/* =========================================================
+   1D EST60 · PULIDO VISUAL RESPONSIVE
+   Mejora incremental: jerarquía, espacios y controles coherentes.
+========================================================= */
+:root {
+    --est60-accent: #3b82f6;
+    --est60-accent-soft: #eaf2ff;
+    --est60-page: #f3f6fb;
+    --est60-text: #172437;
+    --est60-card-border: #dce5f0;
+}
+body {
+    background-color: var(--est60-page);
+    color: var(--est60-text);
+}
+main { overflow: clip; }
+.section {
+    padding-top: clamp(52px, 6vw, 84px);
+    padding-bottom: clamp(52px, 6vw, 84px);
+}
+.section-heading {
+    max-width: 760px;
+    margin-bottom: 30px;
+}
+.section-heading > span,
+.profile-eyebrow,
+.grades-eyebrow {
+    letter-spacing: .12em;
+}
+.section-heading h2 {
+    text-wrap: balance;
+    line-height: 1.15;
+    margin-top: 8px;
+}
+.section-heading p {
+    max-width: 65ch;
+    line-height: 1.75;
+}
+:where(.notice-card, .task-card, .calendar-card, .resource-card,
+.student-profile-card, .grades-summary-card, .grades-entry-card,
+.grades-list-card, .community-card, .poll-card, .achievement-card) {
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+:where(.notice-card, .task-card, .calendar-card, .resource-card,
+.student-profile-card, .grades-summary-card, .grades-entry-card,
+.grades-list-card, .community-card, .poll-card, .achievement-card) > :last-child {
+    min-width: 0;
+}
+.hero h1 { text-wrap: balance; letter-spacing: -.045em; }
+.hero-content > p { max-width: 62ch; line-height: 1.8; }
+.hero-buttons { align-items: stretch; gap: 12px; }
+.hero-buttons .btn { display: inline-flex; align-items: center; justify-content: center; }
+.btn-primary { box-shadow: 0 6px 16px rgba(29, 78, 216, .16); }
+.theme-toggle { min-height: 40px; border-radius: 10px; }
+input, select, textarea {
+    max-width: 100%;
+    min-height: 42px;
+}
+textarea { min-height: 100px; }
+label { line-height: 1.45; }
+button:disabled, .btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: .58;
+    transform: none !important;
+}
+.footer { line-height: 1.75; }
+body.theme-dark {
+    --est60-page: #0b1422;
+    --est60-text: #e5edf7;
+    --est60-card-border: #2a3c54;
+    --est60-accent-soft: #142844;
+    background-color: #0b1422;
+    color: #e5edf7;
+}
+body.theme-dark .section:not(.dark-section) { background-color: transparent; }
+body.theme-dark .student-profile-card,
+body.theme-dark .grades-summary-card,
+body.theme-dark .grades-entry-card,
+body.theme-dark .grades-list-card,
+body.theme-dark .community-card,
+body.theme-dark .poll-card,
+body.theme-dark .achievement-card {
+    border-color: #2a3c54;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    :where(.notice-card, .task-card, .calendar-card, .resource-card,
+    .admin-card, .community-card, .poll-card, .achievement-card):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(15, 35, 60, .10);
+    }
+    body.theme-dark :where(.notice-card, .task-card, .calendar-card,
+    .resource-card, .admin-card, .community-card, .poll-card,
+    .achievement-card):hover {
+        box-shadow: 0 12px 28px rgba(0, 0, 0, .24);
+    }
+}
+@media (max-width: 700px) {
+    .header-content { min-height: 68px; height: auto; padding-top: 10px; padding-bottom: 10px; }
+    .brand img { width: 40px; height: 40px; }
+    .hero { min-height: 540px; }
+    .hero-buttons { flex-direction: column; align-items: stretch; }
+    .hero-buttons .btn { width: 100%; }
+    .section-heading { margin-bottom: 22px; }
+    .section-heading h2 { font-size: clamp(1.7rem, 7vw, 2.25rem); }
+    .student-profile-card, .grades-layout { gap: 16px; }
+    .admin-menu .menu-button { min-height: 54px; }
+}
+@media (max-width: 380px) {
+    .brand { gap: 8px; }
+    .brand strong { font-size: 17px; }
+    .theme-toggle { padding: 8px 10px; font-size: 12px; }
+}
