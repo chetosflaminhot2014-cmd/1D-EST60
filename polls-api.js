@@ -19,8 +19,18 @@ module.exports = function registerPollRoutes(app, pool, requireAdmin) {
     catch(e) { res.status(500).json({error:"No se pudo crear la encuesta."}); }
   });
   app.get("/api/admin/encuestas", requireAdmin, async (_req,res) => {
-    try { await init(); const q=await pool.query("SELECT * FROM group_polls ORDER BY id DESC"); res.json(q.rows); }
-    catch(e) { res.status(500).json({error:"No se pudieron cargar las encuestas."}); }
+    try {
+      await init();
+      const q = await pool.query("SELECT * FROM group_polls ORDER BY id DESC");
+      const out = [];
+      for (const p of q.rows) {
+        const votes = await pool.query("SELECT choice,COUNT(*)::int n FROM group_poll_votes WHERE poll_id=$1 GROUP BY choice", [p.id]);
+        const options = Array.isArray(p.options) ? p.options : [];
+        const resultados = options.map((_, i) => Number((votes.rows.find(x => x.choice === i) || {}).n || 0));
+        out.push({ ...p, resultados, total_votos: resultados.reduce((a, b) => a + b, 0) });
+      }
+      res.json(out);
+    } catch (e) { res.status(500).json({ error: "No se pudieron cargar las encuestas." }); }
   });
   app.post("/api/admin/encuestas/:id/cerrar", requireAdmin, async (req,res) => {
     try { await init(); await pool.query("UPDATE group_polls SET active=FALSE WHERE id=$1",[req.params.id]); res.json({success:true}); }
