@@ -7,6 +7,11 @@
     <title>Programador | 1°D Escuela Secundaria Técnica 60</title>
 
     <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-header-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+        .admin-theme-toggle { min-height:40px; padding:8px 12px; }
+        @media(max-width:600px) { .admin-header-actions { width:100%; justify-content:flex-start; } }
+    </style>
 </head>
 
 <body>
@@ -30,9 +35,10 @@
                 </p>
             </div>
 
-            <a href="index.html" class="back-button">
-                ← Volver al inicio
-            </a>
+            <div class="admin-header-actions">
+                <button type="button" class="theme-toggle admin-theme-toggle" id="adminThemeToggle" aria-pressed="false" aria-label="Activar modo oscuro">🌙 Modo oscuro</button>
+                <a href="index.html" class="back-button">← Volver al inicio</a>
+            </div>
 
         </div>
     </header>
