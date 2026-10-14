@@ -3242,3 +3242,47 @@ body.theme-dark .achievement-card {
     .brand strong { font-size: 17px; }
     .theme-toggle { padding: 8px 10px; font-size: 12px; }
 }
+
+
+/* Refinamiento integral de la plataforma y del panel administrativo */
+:root { --est60-page:#f3f6fb; --est60-text:#172437; --est60-line:#dce5f0; --est60-accent:#2563eb; }
+body { background:var(--est60-page); color:var(--est60-text); }
+.admin-menu { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:10px; padding:14px; margin:20px 0 28px; }
+.admin-menu .menu-button { display:flex; align-items:center; gap:12px; min-height:76px; padding:13px; text-align:left; cursor:pointer; }
+.admin-menu .menu-button > span { display:grid; gap:4px; }
+.admin-menu .menu-button strong { font-size:13px; }
+.admin-menu .menu-button small { font-size:11px; line-height:1.4; opacity:.78; }
+.admin-section { display:none; }
+.admin-section.active { display:block; animation:est60-section-in .18s ease-out; }
+@keyframes est60-section-in { from { opacity:.5; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+.admin-section .section-header { margin-bottom:20px; }
+.admin-section .admin-card { padding:clamp(16px,2.5vw,24px); }
+.admin-header-actions { flex-wrap:wrap; }
+.community-grid { align-items:stretch; }
+.community-card { min-width:0; }
+#groupPolls { display:grid; gap:12px; margin-top:14px; }
+.group-poll { padding:15px; border:1px solid var(--est60-border,#d8e1ed); border-radius:13px; background:var(--est60-surface,#fff); }
+.group-poll h4 { margin:0 0 12px; font-size:15px; line-height:1.45; }
+.group-poll-options { display:grid; gap:8px; }
+.group-poll-option { display:flex; align-items:flex-start; gap:9px; padding:10px; border:1px solid var(--est60-border,#d8e1ed); border-radius:9px; cursor:pointer; }
+.group-poll-option input { margin-top:4px; accent-color:#2563eb; }
+.group-poll-option span { overflow-wrap:anywhere; }
+.group-poll-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:12px; }
+.group-poll button { border:0; border-radius:9px; padding:9px 12px; background:#1d4ed8; color:#fff; font-weight:750; cursor:pointer; }
+.group-poll button:disabled { opacity:.55; cursor:not-allowed; }
+.group-poll-status { color:var(--est60-muted,#5b6b80); font-size:12px; }
+.group-poll-result { display:grid; gap:5px; margin-top:9px; font-size:12px; }
+.group-poll-bar { height:7px; border-radius:999px; overflow:hidden; background:#e2e8f0; }
+.group-poll-bar span { display:block; height:100%; background:#3b82f6; }
+body.theme-dark .group-poll { background:#101f32; border-color:#2a3c54; color:#e5edf7; }
+body.theme-dark .group-poll-option { border-color:#354964; background:#0d1b2d; }
+body.theme-dark .group-poll-status { color:#a9b8cd; }
+body.theme-dark .group-poll-bar { background:#26364b; }
+body.theme-dark .admin-menu .menu-button.active { background:#1d4ed8; border-color:#60a5fa; }
+@media(max-width:700px) {
+  .admin-menu { grid-template-columns:repeat(2,minmax(0,1fr)); padding:10px; gap:8px; }
+  .admin-menu .menu-button { min-width:0; min-height:68px; padding:10px; }
+  .admin-menu .menu-button > span { min-width:0; }
+  .admin-menu .menu-button strong { font-size:12px; }
+}
+@media(max-width:390px) { .admin-menu { grid-template-columns:1fr; } }
