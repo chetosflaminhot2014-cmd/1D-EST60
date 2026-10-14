@@ -2950,3 +2950,80 @@ body.theme-dark .gemini-quick-prompts button:hover { background:#1b3555; }
 .chat-delete-message{border:1px solid #7f3340;background:rgba(127,51,64,.18);color:#fecdd3;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer}
 .chat-delete-message:hover{background:rgba(190,24,93,.28)}
 .chat-delete-message:disabled{opacity:.55;cursor:wait}
+
+
+/* FIX: selector de tema siempre visible también en la app Android */
+.app-theme-toggle {
+    flex: 0 0 auto;
+    margin-left: auto;
+    margin-right: 12px;
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #172437;
+    color: #f8fafc;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.app-theme-toggle:hover { background: #24364d; }
+@media (min-width: 801px) {
+    .app-theme-toggle { margin-left: 0; }
+}
+@media (max-width: 800px) {
+    .header-content { gap: 8px; }
+    .app-theme-toggle { margin-left: auto; margin-right: 4px; padding: 8px 10px; }
+}
+
+/* Tema oscuro completo para la página principal, tarjetas y controles */
+body.theme-dark { background:#0b1220; color:#e5edf7; }
+body.theme-dark .section:not(.dark-section),
+body.theme-dark .info-section { background:#0b1220; color:#e5edf7; }
+body.theme-dark .section-heading p,
+body.theme-dark .student-profile-section p,
+body.theme-dark .grades-section p { color:#a9b7ca; }
+body.theme-dark .notice-card,
+body.theme-dark .schedule-info,
+body.theme-dark .schedule-table,
+body.theme-dark .resource-card,
+body.theme-dark .info-box,
+body.theme-dark .student-profile-card,
+body.theme-dark .grades-summary-card,
+body.theme-dark .grades-entry-card,
+body.theme-dark .grades-list-card,
+body.theme-dark .admin-card,
+body.theme-dark .admin-menu,
+body.theme-dark .status-card,
+body.theme-dark .info-grid > div,
+body.theme-dark .tech-item {
+    background:#111c2d; color:#e5edf7; border-color:#2a3a50;
+}
+body.theme-dark .notice-content p,
+body.theme-dark .resource-card p,
+body.theme-dark .info-box span,
+body.theme-dark .schedule-info span,
+body.theme-dark .schedule-table td,
+body.theme-dark .student-profile-card small,
+body.theme-dark .grades-disclaimer,
+body.theme-dark .admin-card p,
+body.theme-dark .tech-item span { color:#a9b7ca; }
+body.theme-dark .schedule-table td { background:#111c2d; border-color:#2a3a50; color:#dbe6f4; }
+body.theme-dark .schedule-table td:first-child { background:#0d1726; color:#a9b7ca; }
+body.theme-dark .schedule-table tbody tr:hover td { background:#1b2a40; }
+body.theme-dark input,
+body.theme-dark textarea,
+body.theme-dark select {
+    background:#0b1422; color:#e5edf7; border-color:#34465e;
+}
+body.theme-dark .student-profile-card h3,
+body.theme-dark .grades-entry-card h3,
+body.theme-dark .grades-list-card h3,
+body.theme-dark .info-box strong,
+body.theme-dark .info-grid strong,
+body.theme-dark .tech-item strong { color:#f1f5f9; }
+body.theme-dark .back-to-top { background:#111c2d; color:#e5edf7; border-color:#334155; }
+body.theme-dark .admin-menu .menu-button { color:#cbd5e1; }
+body.theme-dark .admin-menu .menu-button.active { background:#3b82f6; color:#fff; }
+body.theme-dark .admin-menu .menu-button:hover { background:#22334a; color:#fff; }
