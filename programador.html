@@ -2114,5 +2114,32 @@
 
     </script>
 
+
+<script>
+/* EST60_ADMIN_THEME_CONTROL */
+(() => {
+    const button = document.getElementById("adminThemeToggle");
+    const storageKey = "est60_tema_web_v1";
+    if (!button) return;
+    function applyTheme(theme) {
+        const dark = theme === "dark";
+        document.body.classList.toggle("theme-dark", dark);
+        button.setAttribute("aria-pressed", String(dark));
+        button.setAttribute("aria-label", dark ? "Activar modo claro" : "Activar modo oscuro");
+        button.textContent = dark ? "☀️ Modo claro" : "🌙 Modo oscuro";
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", dark ? "#080f1a" : "#0d1a2a");
+    }
+    let saved = "light";
+    try { saved = localStorage.getItem(storageKey) || "light"; } catch (_) {}
+    applyTheme(saved === "dark" ? "dark" : "light");
+    button.addEventListener("click", () => {
+        const next = document.body.classList.contains("theme-dark") ? "light" : "dark";
+        applyTheme(next);
+        try { localStorage.setItem(storageKey, next); } catch (_) {}
+    });
+})();
+</script>
+
 </body>
 </html>
