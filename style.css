@@ -3310,3 +3310,9 @@ body.theme-dark .community-card>p, body.theme-dark .community-card>small, body.t
 body.theme-dark .streak-number strong { color:#f1f5f9; }
 body.theme-dark .streak-stats { border-color:#2a3c54; }
 @media(max-width:700px) { .community-grid { grid-template-columns:1fr; gap:14px; } }
+
+
+/* Botón de acceso al panel administrativo desde Inicio */
+.admin-entry-button { background:#eaf2ff; color:#163a70; border:1px solid #9dbce8; }
+.admin-entry-button:hover { background:#d7e7ff; }
+body.theme-dark .admin-entry-button { background:#142844; color:#dbeafe; border-color:#315a8b; }
