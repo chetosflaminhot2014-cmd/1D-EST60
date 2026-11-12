@@ -1,10 +1,9 @@
-const CACHE_NAME = "est60-pwa-v4";
+const CACHE_NAME = "est60-pwa-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
-  "./comunidad.js",
   "./manifest.json",
   "./icon-192.svg",
   "./icon-512.svg",
